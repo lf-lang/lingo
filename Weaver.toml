@@ -1,0 +1,7 @@
+[package]
+name = "weaver"
+version = "0.1.0"
+language = "cpp"
+main_reactor = "Main"
+
+[dependencies]

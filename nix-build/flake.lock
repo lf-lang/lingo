@@ -1,0 +1,93 @@
+{
+  "nodes": {
+    "lf-pkgs": {
+      "inputs": {
+        "nipkgs": "nipkgs",
+        "nixpkgs": "nixpkgs",
+        "utils": "utils"
+      },
+      "locked": {
+        "lastModified": 1655362440,
+        "narHash": "sha256-HeOSDuIuBoXwh0r2/fr9YUF2aVeeKI57XjNHXDLJon4=",
+        "ref": "refs/heads/master",
+        "rev": "7c30bcd9ade4524af7020ab3833c695e88179bcf",
+        "revCount": 3,
+        "type": "git",
+        "url": "https://gitea.tassilo-tanneberger.de/revol-xut/lf-pkgs.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://gitea.tassilo-tanneberger.de/revol-xut/lf-pkgs.git"
+      }
+    },
+    "nipkgs": {
+      "locked": {
+        "lastModified": 1654994491,
+        "narHash": "sha256-HFu3HTFFFcZSKImuiki3q+MLvcc85hRgYvW+sXmH8LE=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "1f8d88087a3753e55a29b5207f7f0997f7c813fa",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-22.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1655034456,
+        "narHash": "sha256-HXXyvGqZLa+2u8IPIRm/uNQiw+gBtTNu58YaXMJtKRc=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "72b1ec0a79b1fc50f6cc0694c2f0b1eb384a932e",
+        "type": "github"
+      },
+      "original": {
+        "id": "nixpkgs",
+        "type": "indirect"
+      }
+    },
+    "nixpkgs_2": {
+      "locked": {
+        "lastModified": 1655456688,
+        "narHash": "sha256-j2trI5gv2fnHdfUQFBy957avCPxxzCqE8R+TOYHPSRE=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "d17a56d90ecbd1b8fc908d49598fb854ef188461",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-22.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "lf-pkgs": "lf-pkgs",
+        "nixpkgs": "nixpkgs_2"
+      }
+    },
+    "utils": {
+      "locked": {
+        "lastModified": 1653893745,
+        "narHash": "sha256-0jntwV3Z8//YwuOjzhV2sgJJPt+HY6KhU7VZUL0fKZQ=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "1ed9fb1935d260de5fe1c2f7ee0ebaae17ed2fa1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
