@@ -2,7 +2,7 @@
   description = "example package which says hello";
 
   inputs = {
-    lf-pkgs.url = "git+https://gitea.tassilo-tanneberger.de/revol-xut/lf-pkgs.git";
+    lf-pkgs.url = "github:revol-xut/lf-pkgs";
     nixpkgs.url = "github:nixos/nixpkgs/nixos-22.05";
   };
 
