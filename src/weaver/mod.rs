@@ -173,7 +173,7 @@ buildLinguaFranca {{
         let comma = if dependency_string.len() == 0 {String::from("")} else {String::from(", ")};
 
         format!("
-{{ pkgs, stdenv, lib, buildLinguaFranca{comma}{dependencies}}}: 
+{{ pkgs, stdenv, lib, fetchgit, buildLinguaFranca{comma}{dependencies}}}: 
 buildLinguaFranca {{
     name = \"{name}\";
     version = \"{version}\";
