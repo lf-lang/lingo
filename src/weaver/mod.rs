@@ -209,7 +209,8 @@ buildLinguaFranca {{
 
         format!("
 {} = pkgs.callPackage ./{}/{}.nix {{
-    {};
+    buildLinguaFranca = buildLinguaFranca;
+    {}
 }}
             ", 
             self.package.name,
