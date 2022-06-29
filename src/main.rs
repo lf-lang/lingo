@@ -54,7 +54,7 @@ fn main() {
     match args.command {
         CliCommand::Init { } => {
 
-            let repo = match Repository::init("/path/to/a/repo") {
+            let repo = match Repository::init("./") {
                 Ok(repo) => repo,
                 Err(e) => panic!("failed to init: {}", e),
             };
