@@ -1,22 +1,25 @@
+use super::search;
 
 use serde_derive::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::env;
 use std::path::Path;
 use std::fs::{read_to_string, write};
+use termion::{color, style};
+use git2::Repository;
 
 #[derive(Deserialize, Serialize)]
 pub struct Config {
-    package: Package,
+    pub package: Package,
     dependencies: HashMap<String, String>
 
 }
 
 #[derive(Deserialize, Serialize)]
 pub struct Package  {
-    name: String,
+    pub name: String,
     version: String,
-    language: String,
+    pub language: String,
     main_reactor: String,
     authors: Option<Vec<String>>,
     website: Option<String>,
@@ -28,6 +31,16 @@ pub struct Package  {
 
 impl Config {
     pub fn new() -> Config {
+        let main_reactor;
+        if !std::path::Path::new("./src").exists() {
+            main_reactor = String::from("Main");
+        } else {
+            main_reactor = match search(Path::new("./src")) {
+                Some(reactor) => reactor,
+                _ => String::from("Main")
+            };
+        }
+
         Config {
             package: Package {
                 name: std::env::current_dir()
@@ -40,7 +53,7 @@ impl Config {
                 version: "0.1.0".to_string(),
                 authors: None,
                 language: "".to_string(),
-                main_reactor: String::from("Main"),
+                main_reactor: main_reactor,
                 website: None,
                 license: None,
                 description: None,
@@ -60,40 +73,57 @@ impl Config {
         toml::from_str(&content).expect("Cannot parse config")
     }
 
+    pub fn setup_example() {
+        if !std::path::Path::new("./src").exists() {
+            std::fs::create_dir_all("./src").expect("Cannot create target directory");
+            let hello_world_code: &'static str = include_str!("../../defaults/Main.lf");
+            write(Path::new("./src/Main.lf"), hello_world_code);
+        }
+    }
+
     pub fn write_nix_code(&self) {
+        if ![ "cpp", "c", "rust", "ts", "python"].contains(&self.package.language.as_str()) {
+                println!("{}Specified Language is not supported! Please specify the language in your Weaver.toml{}",
+                color::Fg(color::Red), color::Fg(color::White));
+            return;
+        }
+
         let derivation_code = self.to_nix();
-        let flake_code: &'static str = include_str!("../../nix/flake.nix");
+        let flake_code: &'static str = include_str!("../../defaults/flake.nix");
 
         std::fs::create_dir_all("./nix-build").expect("Cannot create target directory");
 
         write(Path::new("./nix-build/derivation.nix"), derivation_code);
         write(Path::new("./nix-build/flake.nix"), flake_code);
     }
-
-    pub fn to_nix(&self) -> String {
+    pub fn generate_meta_string(&self) -> String {
         let mut meta_string = String::new();
-
         //TODO: check if language is one of cpp, c, rust, ts, python
 
         if self.package.description.is_some() {
-            meta_string += &format!("description = \"{}\"", 
+            meta_string += &format!("description = \"{}\";\n", 
                                     self.package.description.as_ref().unwrap()).to_string(); 
         }
 
         if self.package.homepage.is_some() {
-            meta_string += &format!("homepage = \"{}\"", 
+            meta_string += &format!("homepage = \"{}\";\n", 
                                     self.package.homepage.as_ref().unwrap()).to_string();
         }
 
         if self.package.license.is_some() {
-            meta_string += &format!("license = \"{}\"", 
+            meta_string += &format!("license = \"{}\";\n", 
                                     self.package.license.as_ref().unwrap()).to_string();
         }
 
         if self.package.authors.is_some() {
-            meta_string += &format!("maintainers = \"{:?}\"", 
+            meta_string += &format!("maintainers = {:?};\n", 
                                     self.package.authors.as_ref().unwrap()).to_string();
         }
+
+        meta_string
+    }
+    pub fn to_nix(&self) -> String {
+        let meta_string = self.generate_meta_string();
 
         let mut dependency_string = String::new();
         for (key, value) in &self.dependencies {
@@ -101,18 +131,18 @@ impl Config {
         }
 
         format!("
-            {{ pkgs, stdenv, lib, buildLinguaFranca, lfPackages}}: 
-            buildLinguaFranca {{
-                name = \"{name}\";
-                version = \"{version}\";
-                src = ../.;
-                language = \"{language}\";
-                mainReactor = \"{mainreactor}\";
-                buildInputs = with lfPackages; [ {dependencies} ];
-                meta = with lib; {{
-                    {meta}
-                }};
-            }}
+{{ pkgs, stdenv, lib, buildLinguaFranca, lfPackages}}: 
+buildLinguaFranca {{
+    name = \"{name}\";
+    version = \"{version}\";
+    src = ../.;
+    language = \"{language}\";
+    mainReactor = \"{mainreactor}\";
+    buildInputs = with lfPackages; [ {dependencies} ];
+    meta = with lib; {{
+        {meta}
+    }};
+}}
             ", 
             dependencies = dependency_string, 
             name = self.package.name, 
@@ -122,6 +152,74 @@ impl Config {
             meta = meta_string
         )
     }
+
+    pub fn publish_nix(&self) -> String {
+        let meta_string = self.generate_meta_string();
+
+        let mut dependency_string = String::new();
+        for (key, value) in &self.dependencies {
+            dependency_string += &key;
+        }
+
+        let repo = match Repository::open("./") {
+            Ok(repo) => repo,
+            Err(e) => panic!("failed to open git repo: {}", e),
+        };
+
+        let origin = repo.find_remote("origin").expect("Cannot find remote Repository");
+        let remote_name = origin.url().expect("Remote Url of origin is None");
+        let head = repo.head().expect("There is not git HEAD");
+        let revision = head.peel_to_commit().unwrap(); //head.target().unwrap();
+        let comma = if dependency_string.len() == 0 {String::from("")} else {String::from(", ")};
+
+        format!("
+{{ pkgs, stdenv, lib, buildLinguaFranca{comma}{dependencies}}}: 
+buildLinguaFranca {{
+    name = \"{name}\";
+    version = \"{version}\";
+    src = fetchgit {{
+        url = \"{remote_name}\";
+        rev = \"{revision}\";
+        sha256 = \"\";
+    }};
+    language = \"{language}\";
+    mainReactor = \"{mainreactor}\";
+    buildInputs = [ {dependencies} ];
+    meta = with lib; {{
+        {meta}
+    }};
+}}
+            ", 
+            comma = comma,
+            remote_name = remote_name,
+            revision = revision.id(),
+            dependencies = dependency_string, 
+            name = self.package.name, 
+            version = self.package.version,
+            language = self.package.language, 
+            mainreactor = self.package.main_reactor, 
+            meta = meta_string
+        )
+    }
+    pub fn root_nix_publish(&self) -> String {
+        let mut dependency_string = String::new();
+        for (key, value) in &self.dependencies {
+            dependency_string += &("  ".to_string() + key + " = " + key + ";\n");
+        }
+
+        format!("
+{} = pkgs.callPackage ./{}/{}.nix {{
+    {};
+}}
+            ", 
+            self.package.name,
+            self.package.language,
+            self.package.name,
+            dependency_string
+        )
+    }
+
+
 
 }
 

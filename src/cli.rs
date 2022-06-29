@@ -31,6 +31,9 @@ pub enum Command {
     CollectGarbage {
 
     },
+    Publish {
+
+    },
 }
 
 #[derive(Parser, Debug)]

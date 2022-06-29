@@ -1,19 +1,23 @@
 mod cli;
 mod weaver;
 mod wrapper;
+mod analyzer;
 
 use cli::{Args, Command as CliCommand};
 use weaver::{Config};
 use wrapper::run_and_capture;
+pub use analyzer::search;
 
 use clap::Parser;
+use git2::Repository;
+use termion::{color, style};
+
 extern crate termion;
 
 use std::path::Path;
 use std::fs::{read_to_string, write};
 use std::process::Command;
 use std::io::Read;
-use termion::{color, style};
 
 
 fn generate_code() {
@@ -32,6 +36,7 @@ fn build() {
     command.arg("build");
     command.arg("./nix-build");
     command.arg("-L");
+    command.arg("--impure");
     run_and_capture(&mut command);
 }
 
@@ -48,8 +53,15 @@ fn main() {
     let args = Args::parse();
     match args.command {
         CliCommand::Init { } => {
+
+            let repo = match Repository::init("/path/to/a/repo") {
+                Ok(repo) => repo,
+                Err(e) => panic!("failed to init: {}", e),
+            };
+
             let initial_config = Config::new();
             initial_config.write(Path::new("./Weaver.toml"));
+            Config::setup_example();
         }
         CliCommand::Generate {} => {
             generate_code();
@@ -102,6 +114,26 @@ fn main() {
             let mut command = Command::new("nix-collect-garbage");
             command.arg("-d");
             run_and_capture(&mut command);
+
+        }
+        CliCommand::Publish {} => {
+            let config = Config::from(Path::new("./Weaver.toml"));
+            let mut command = Command::new("git");
+            command.arg("add");
+            command.arg("./nix-build/*");
+            run_and_capture(&mut command);
+            //color::Fg(color::Red), color::Fg(color::White));
+
+            println!("{} pkgs/{}/{}.nix\n{}\n{}\n{} pkgs/root.nix{}\n{}", 
+                    color::Fg(color::Green), 
+                    &config.package.language, 
+                    &config.package.name,
+                    color::Fg(color::White), 
+                    config.publish_nix(),
+                    color::Fg(color::Green),
+                    color::Fg(color::White), 
+                    config.root_nix_publish()
+            );
 
         }
     };
