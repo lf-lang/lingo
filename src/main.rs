@@ -2,15 +2,18 @@ mod cli;
 mod weaver;
 mod wrapper;
 mod analyzer;
+mod install;
 
 use cli::{Args, Command as CliCommand};
 use weaver::{Config};
 use wrapper::run_and_capture;
 pub use analyzer::search;
+use install::{debian_install, arch_install, edit_config};
 
 use clap::Parser;
 use git2::Repository;
 use termion::{color, style};
+use os_version::{detect, OsVersion};
 
 extern crate termion;
 
@@ -18,6 +21,7 @@ use std::path::Path;
 use std::fs::{read_to_string, write};
 use std::process::Command;
 use std::io::Read;
+
 
 
 fn generate_code() {
@@ -134,6 +138,51 @@ fn main() {
                     color::Fg(color::White), 
                     config.root_nix_publish()
             );
+
+        }
+        CliCommand::Install {} => {
+            let distro = os_version::detect();
+
+            match distro.unwrap() {
+                OsVersion::Linux(linux) => {
+                    println!("Detected Linux: {} Version: {}, Version Name: {}", 
+                             &linux.distro, 
+                             &linux.version.unwrap(), 
+                             &linux.version_name.unwrap()
+                    );
+
+                    match linux.distro.as_str() {
+                        "nixos" => {
+
+                        }
+                        "ubuntu" => {
+                            debian_install();
+                            edit_config();
+                        }
+                        "debian" => {
+                            debian_install();
+                            edit_config();
+                        }
+                        "arch" => {
+                            arch_install();
+                            edit_config();
+                        }
+                        "manjaro" => {
+                            arch_install();
+                            edit_config();
+                        }
+                        &_ => todo!()
+                    }
+                }
+                OsVersion::MacOS(macos) => {
+                    println!("Detected MacOs Version: {}", &macos.version);
+
+                }
+                _ => {
+                    println!("Unsupported Version");
+                }
+
+            }
 
         }
     };

@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 
 clap = { version = "3.1", features = ["derive"] }
+os-version = "0.2"
 
 regex = "1"
 derive_builder = "*"

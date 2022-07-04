@@ -34,6 +34,9 @@ pub enum Command {
     Publish {
 
     },
+    Install {
+
+    }
 }
 
 #[derive(Parser, Debug)]
