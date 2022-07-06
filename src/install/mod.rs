@@ -33,8 +33,6 @@ pub fn edit_config() {
     fh.read_to_string(&mut data);
 
     if data.contains(&features) {
-        data += &("\n".to_owned() + features);
+        fh.write_all(features.as_bytes()).expect("could not write nix.conf");
     }
-
-    fh.write_all(data.into_bytes().as_slice()).expect("could not write nix.conf");
 }
