@@ -2,10 +2,9 @@ use super::search;
 
 use serde_derive::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::env;
 use std::path::Path;
 use std::fs::{read_to_string, write};
-use termion::{color, style};
+use termion::color;
 use git2::Repository;
 
 #[derive(Deserialize, Serialize)]
@@ -65,7 +64,7 @@ impl Config {
 
     pub fn write(&self, path: &Path) {
         let toml_string = toml::to_string(&self).unwrap();
-        write(path, &toml_string);
+        write(path, &toml_string).expect("cannot write toml file");
     } 
 
     pub fn from(path: &Path) -> Config {
@@ -77,7 +76,7 @@ impl Config {
         if !std::path::Path::new("./src").exists() {
             std::fs::create_dir_all("./src").expect("Cannot create target directory");
             let hello_world_code: &'static str = include_str!("../../defaults/Main.lf");
-            write(Path::new("./src/Main.lf"), hello_world_code);
+            write(Path::new("./src/Main.lf"), hello_world_code).expect("cannot write Main.lf file!");
         }
     }
 
@@ -93,8 +92,8 @@ impl Config {
 
         std::fs::create_dir_all("./nix-build").expect("Cannot create target directory");
 
-        write(Path::new("./nix-build/derivation.nix"), derivation_code);
-        write(Path::new("./nix-build/flake.nix"), flake_code);
+        write(Path::new("./nix-build/derivation.nix"), derivation_code).expect("Unable to write build files !");
+        write(Path::new("./nix-build/flake.nix"), flake_code).expect("Unable to write build files !");
     }
     pub fn generate_meta_string(&self) -> String {
         let mut meta_string = String::new();
@@ -126,7 +125,7 @@ impl Config {
         let meta_string = self.generate_meta_string();
 
         let mut dependency_string = String::new();
-        for (key, value) in &self.dependencies {
+        for (key, _value) in &self.dependencies {
             dependency_string += &key;
         }
 
@@ -157,7 +156,7 @@ buildLinguaFranca {{
         let meta_string = self.generate_meta_string();
 
         let mut dependency_string = String::new();
-        for (key, value) in &self.dependencies {
+        for (key, _value) in &self.dependencies {
             dependency_string += &key;
         }
 
@@ -166,10 +165,16 @@ buildLinguaFranca {{
             Err(e) => panic!("failed to open git repo: {}", e),
         };
 
-        let origin = repo.find_remote("origin").expect("Cannot find remote Repository");
-        let remote_name = origin.url().expect("Remote Url of origin is None");
-        let head = repo.head().expect("There is not git HEAD");
-        let revision = head.peel_to_commit().unwrap(); //head.target().unwrap();
+        let remote_name = match repo.find_remote("origin") {
+            Ok(origin) => {
+                origin.url().expect("Remote Url of origin is None").to_string().clone()
+            }
+            Err(_) => "".to_string()
+        };
+        let revision = match repo.head() {
+            Ok(head) => format!("{}", head.peel_to_commit().unwrap().id()),
+            Err(_) => "".to_string()
+        };
         let comma = if dependency_string.len() == 0 {String::from("")} else {String::from(", ")};
 
         format!("
@@ -192,7 +197,7 @@ buildLinguaFranca {{
             ", 
             comma = comma,
             remote_name = remote_name,
-            revision = revision.id(),
+            revision = revision,
             dependencies = dependency_string, 
             name = self.package.name, 
             version = self.package.version,
@@ -203,7 +208,7 @@ buildLinguaFranca {{
     }
     pub fn root_nix_publish(&self) -> String {
         let mut dependency_string = String::new();
-        for (key, value) in &self.dependencies {
+        for (key, _value) in &self.dependencies {
             dependency_string += &("  ".to_string() + key + " = " + key + ";\n");
         }
 

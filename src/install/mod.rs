@@ -9,7 +9,7 @@ pub fn debian_install() {
     command.arg("apt");
     command.arg("install");
     command.arg("nix");
-    run_and_capture(&mut command);
+    run_and_capture(&mut command).ok();
 }
 
 pub fn arch_install() {
@@ -17,7 +17,7 @@ pub fn arch_install() {
     command.arg("pacman");
     command.arg("-S");
     command.arg("nix");
-    run_and_capture(&mut command);
+    run_and_capture(&mut command).ok();
 }
 
 pub fn edit_config() {
@@ -30,7 +30,7 @@ pub fn edit_config() {
         .expect("could not open nix.conf");
 
     let mut data: String = String::new();
-    fh.read_to_string(&mut data);
+    fh.read_to_string(&mut data).ok();
 
     if data.contains(&features) {
         fh.write_all(features.as_bytes()).expect("could not write nix.conf");

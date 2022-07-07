@@ -12,13 +12,12 @@ use install::{debian_install, arch_install, edit_config};
 
 use clap::Parser;
 use git2::Repository;
-use termion::{color, style};
-use os_version::{detect, OsVersion};
+use termion::color;
+use os_version::OsVersion;
 
 extern crate termion;
 
 use std::path::Path;
-use std::fs::{read_to_string, write};
 use std::process::Command;
 use std::io::Read;
 
@@ -29,7 +28,7 @@ fn generate_code() {
     let mut command = Command::new("git");
     command.arg("add");
     command.arg("./nix-build/*");
-    run_and_capture(&mut command);
+    run_and_capture(&mut command).ok();
 
     config.write_nix_code();
 }
@@ -41,7 +40,7 @@ fn build() {
     command.arg("./nix-build");
     command.arg("-L");
     command.arg("--impure");
-    run_and_capture(&mut command);
+    run_and_capture(&mut command).ok();
 }
 
 fn run() {
@@ -50,7 +49,7 @@ fn run() {
     command.arg("run");
     command.arg("./nix-build");
     command.arg("-L");
-    run_and_capture(&mut command);
+    run_and_capture(&mut command).ok();
 }
 
 fn main() {
@@ -58,7 +57,7 @@ fn main() {
     match args.command {
         CliCommand::Init { } => {
 
-            let repo = match Repository::init("./") {
+            let _ = match Repository::init("./") {
                 Ok(repo) => repo,
                 Err(e) => panic!("failed to init: {}", e),
             };
@@ -76,7 +75,7 @@ fn main() {
             command.arg("check");
             command.arg("./nix-build");
             command.arg("-L");
-            run_and_capture(&mut command);
+            run_and_capture(&mut command).ok();
         }
         CliCommand::Build {} => {
             build()
@@ -87,7 +86,7 @@ fn main() {
             command.arg("update");
             command.arg("./nix-build");
             command.arg("-L");
-            run_and_capture(&mut command);
+            run_and_capture(&mut command).ok();
         }
         CliCommand::Run {} => {
             run();
@@ -97,10 +96,10 @@ fn main() {
             command.arg("search");
             command.arg("./nix-build");
             command.arg(package);
-            run_and_capture(&mut command);
+            run_and_capture(&mut command).ok();
         }
         CliCommand::Clean {} => {
-            std::fs::remove_dir_all(Path::new("./result"));
+            std::fs::remove_dir_all(Path::new("./result")).ok();
         }
         CliCommand::CollectGarbage {} => {
             println!("{}Warning this will collect the garbage from the entire nix store. Do you want to continue ? [Y/n]{}",
@@ -117,7 +116,7 @@ fn main() {
 
             let mut command = Command::new("nix-collect-garbage");
             command.arg("-d");
-            run_and_capture(&mut command);
+            run_and_capture(&mut command).ok();
 
         }
         CliCommand::Publish {} => {
@@ -125,7 +124,7 @@ fn main() {
             let mut command = Command::new("git");
             command.arg("add");
             command.arg("./nix-build/*");
-            run_and_capture(&mut command);
+            run_and_capture(&mut command).ok();
             //color::Fg(color::Red), color::Fg(color::White));
 
             println!("{} pkgs/{}/{}.nix\n{}\n{}\n{} pkgs/root.nix{}\n{}", 
