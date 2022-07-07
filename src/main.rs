@@ -52,6 +52,18 @@ fn run() {
     run_and_capture(&mut command).ok();
 }
 
+fn user_conset() -> bool {
+    println!("{} Do you want to continue ? [Y/n] {}", 
+        color::Fg(color::Red), color::Fg(color::White));
+
+    let mut stdin = std::io::stdin();
+    let mut buffer = [0;1];
+
+    stdin.read_exact(&mut buffer).unwrap();
+
+    buffer[0] as char == 'n' || buffer[0] as char == 'N'
+}
+
 fn main() {
     let args = Args::parse();
     match args.command {
@@ -102,15 +114,9 @@ fn main() {
             std::fs::remove_dir_all(Path::new("./result")).ok();
         }
         CliCommand::CollectGarbage {} => {
-            println!("{}Warning this will collect the garbage from the entire nix store. Do you want to continue ? [Y/n]{}",
-                color::Fg(color::Red), color::Fg(color::White));
-
-            let mut stdin = std::io::stdin();
-            let mut buffer = [0;1];
-
-            stdin.read_exact(&mut buffer).unwrap();
-
-            if buffer[0] as char == 'n' || buffer[0] as char == 'N' {
+            println!("Warning this will collect the garbage from the entire nix store.");
+            
+            if !user_conset() {
                 return;
             }
 
@@ -149,10 +155,15 @@ fn main() {
                              &linux.version.unwrap(), 
                              &linux.version_name.unwrap()
                     );
+                    
+                    println!("Do you want to install nix and weaver into your system ?");
+                    if !user_conset() {
+                        return;
+                    }
 
                     match linux.distro.as_str() {
                         "nixos" => {
-
+                            println!("it's your system package manager lol! just enable flakes");
                         }
                         "ubuntu" => {
                             debian_install();
