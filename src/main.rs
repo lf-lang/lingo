@@ -8,7 +8,7 @@ use cli::{Args, Command as CliCommand};
 use weaver::{Config};
 use wrapper::run_and_capture;
 pub use analyzer::search;
-use install::{debian_install, arch_install, edit_config};
+use install::{debian_install, arch_install, default_install, edit_config};
 
 use clap::Parser;
 use git2::Repository;
@@ -164,36 +164,34 @@ fn main() {
                     match linux.distro.as_str() {
                         "nixos" => {
                             println!("it's your system package manager lol! just enable flakes");
+                            return;
                         }
                         "ubuntu" => {
                             debian_install();
-                            edit_config();
                         }
                         "debian" => {
                             debian_install();
-                            edit_config();
                         }
                         "arch" => {
                             arch_install();
-                            edit_config();
                         }
                         "manjaro" => {
                             arch_install();
-                            edit_config();
                         }
-                        &_ => todo!()
+                        &_ => {
+                            default_install();
+                        }
                     }
                 }
                 OsVersion::MacOS(macos) => {
                     println!("Detected MacOs Version: {}", &macos.version);
-
+                    default_install();
                 }
                 _ => {
                     println!("Unsupported Version");
                 }
-
             }
-
+            edit_config();
         }
     };
 

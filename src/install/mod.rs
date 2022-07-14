@@ -20,6 +20,15 @@ pub fn arch_install() {
     run_and_capture(&mut command).ok();
 }
 
+pub fn default_install() {
+    let mut command = Command::new("sudo");
+    command.arg("sh");
+    command.arg("<(curl -L https://nixos.org/nix/install)");
+    command.arg("--daemon");
+
+    run_and_capture(&mut command).ok();
+}
+
 pub fn edit_config() {
     let filepath = "/etc/nix/nix.conf";
     let features = "experimental-features = nix-command flakes";
