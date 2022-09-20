@@ -24,10 +24,10 @@
         in
         rec {
           checks = packages;
-          packages.weaver = package;
+          packages.barrel = package;
           defaultPackage = package;
           overlay = (final: prev: {
-            weaver = package;
+            barrel = package;
           });
         }
       ) // {

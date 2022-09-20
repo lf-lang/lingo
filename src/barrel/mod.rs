@@ -82,7 +82,7 @@ impl Config {
 
     pub fn write_nix_code(&self) {
         if ![ "cpp", "c", "rust", "ts", "python"].contains(&self.package.language.as_str()) {
-                println!("{}Specified Language is not supported! Please specify the language in your Weaver.toml{}",
+                println!("{}Specified Language is not supported! Please specify the language in your Barrel.toml{}",
                 color::Fg(color::Red), color::Fg(color::White));
             return;
         }

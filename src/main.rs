@@ -1,11 +1,11 @@
 mod cli;
-mod weaver;
+mod barrel;
 mod wrapper;
 mod analyzer;
 mod install;
 
 use cli::{Args, Command as CliCommand};
-use weaver::{Config};
+use barrel::{Config};
 use wrapper::run_and_capture;
 pub use analyzer::search;
 use install::{debian_install, arch_install, default_install, edit_config};
@@ -24,7 +24,7 @@ use std::io::Read;
 
 
 fn generate_code() {
-    let config = Config::from(Path::new("./Weaver.toml"));
+    let config = Config::from(Path::new("./Barrel.toml"));
     let mut command = Command::new("git");
     command.arg("add");
     command.arg("./nix-build/*");
@@ -75,7 +75,7 @@ fn main() {
             };
 
             let initial_config = Config::new();
-            initial_config.write(Path::new("./Weaver.toml"));
+            initial_config.write(Path::new("./Barrel.toml"));
             Config::setup_example();
         }
         CliCommand::Generate {} => {
@@ -126,7 +126,7 @@ fn main() {
 
         }
         CliCommand::Publish {} => {
-            let config = Config::from(Path::new("./Weaver.toml"));
+            let config = Config::from(Path::new("./Barrel.toml"));
             let mut command = Command::new("git");
             command.arg("add");
             command.arg("./nix-build/*");
@@ -156,7 +156,7 @@ fn main() {
                              &linux.version_name.unwrap()
                     );
                     
-                    println!("Do you want to install nix and weaver into your system ?");
+                    println!("Do you want to install nix and barrel into your system ?");
                     if !user_conset() {
                         return;
                     }

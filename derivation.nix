@@ -1,7 +1,7 @@
 { naersk, src, lib, pkg-config, cmake, zlib, openssl }:
 
 naersk.buildPackage {
-  pname = "weaver";
+  pname = "barrel";
   version = "0.1.0";
 
   src = ./.;
@@ -13,6 +13,6 @@ naersk.buildPackage {
 
   meta = with lib; {
     description = "Simple package manager for lingua franca";
-    homepage = "https://github.com/revol-xut/weaver";
+    homepage = "https://github.com/revol-xut/barrel";
   };
 }
