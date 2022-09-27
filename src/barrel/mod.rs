@@ -128,12 +128,12 @@ impl Config {
 
         let mut dependency_string = String::new();
         for (key, _value) in &self.dependencies {
-            dependency_string += &key;
+            dependency_string += &key + " ";
         }
 
         let mut library_string = String::new();
         for (key, _value) in &self.libraries {
-            library_string += &key;
+            library_string += &key + " ";
         }
 
 
