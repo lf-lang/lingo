@@ -145,7 +145,7 @@ buildLinguaFranca {{
     src = ../.;
     language = \"{language}\";
     mainReactor = \"{mainreactor}\";
-    buildInputs = with lfPackages; [ {dependencies} ] ++ with pkgs; [ {libraries} ];
+    buildInputs = (with lfPackages; [ {dependencies} ]) ++ (with pkgs; [ {libraries} ]);
     meta = with lib; {{
         {meta}
     }};
