@@ -10,7 +10,8 @@ use git2::Repository;
 #[derive(Deserialize, Serialize)]
 pub struct Config {
     pub package: Package,
-    dependencies: HashMap<String, String>
+    dependencies: HashMap<String, String>,
+    libraries: HashMap<String, String>
 
 }
 
@@ -58,7 +59,8 @@ impl Config {
                 description: None,
                 homepage: None
             },
-            dependencies: HashMap::new()
+            dependencies: HashMap::new(),
+            libraries: HashMap::new()
         }
     }
 
@@ -129,6 +131,12 @@ impl Config {
             dependency_string += &key;
         }
 
+        let mut library_string = String::new();
+        for (key, _value) in &self.libraries {
+            library_string += &key;
+        }
+
+
         format!("
 {{ pkgs, stdenv, lib, buildLinguaFranca, lfPackages}}: 
 buildLinguaFranca {{
@@ -137,13 +145,14 @@ buildLinguaFranca {{
     src = ../.;
     language = \"{language}\";
     mainReactor = \"{mainreactor}\";
-    buildInputs = with lfPackages; [ {dependencies} ];
+    buildInputs = with lfPackages; [ {dependencies} ] ++ with pkgs; [ {libraries} ];
     meta = with lib; {{
         {meta}
     }};
 }}
             ", 
             dependencies = dependency_string, 
+            libraries = library_string, 
             name = self.package.name, 
             version = self.package.version,
             language = self.package.language, 
