@@ -28,9 +28,6 @@ pub enum Command {
     Clean {
 
     },
-    CollectGarbage {
-
-    },
     Publish {
 
     },
@@ -39,12 +36,15 @@ pub enum Command {
     }
 }
 
-#[derive(Parser, Debug)]
+#[derive(Parser)]
 #[clap(name = "lingua-franca package manager")]
 #[clap(author = "tassilo.tanneberger@tu-dresden.de")]
 #[clap(version = "0.1.0")]
-#[clap(about = "This program is a frontend for nix build system.", long_about = None)]
-pub struct Args {
+#[clap(about = "Build system of lingua-franca projects", long_about = None)]
+pub struct CommandLineArgs {
     #[clap(subcommand)]
-    pub command: Command
+    pub command: Command,
+
+    #[clap(short, long, default_value_t = String::from("cli"))]
+    pub backend: String
 }
