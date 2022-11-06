@@ -56,5 +56,3 @@ impl Backend for LFC {
             && fs::remove_dir_all("./build").is_ok()
     }
 }
-
-

@@ -27,7 +27,9 @@ fn main() {
                 return;
             }
 
-            if !backends::select_backend("lfc", config.unwrap().package).build(build_command_args.package) {
+            if !backends::select_backend("lfc", config.unwrap().package)
+                .build(build_command_args.package)
+            {
                 println!("error has occured!")
             }
         }

@@ -65,11 +65,9 @@ impl Config {
 
     pub fn from(path: &Path) -> Option<Config> {
         match read_to_string(path) {
-            Ok(content) => {
-                toml::from_str(&content).map_err(|_| {
-                    println!("the Barrel.toml has an invalid format!")
-                }).ok()
-            }
+            Ok(content) => toml::from_str(&content)
+                .map_err(|_| println!("the Barrel.toml has an invalid format!"))
+                .ok(),
             Err(_) => {
                 println!("cannot read Barrel.toml does it exist?");
                 None
