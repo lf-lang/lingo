@@ -1,9 +1,9 @@
-use regex::Regex;
-
 use crate::interface::Backend;
 use crate::package::Package;
 
+use crate::util;
 use crate::util::command_line::run_and_capture;
+use std::env;
 use std::fs;
 use std::process::Command;
 
@@ -17,29 +17,18 @@ impl Backend for LFC {
     }
 
     fn build(&self, binary: Option<String>) -> bool {
-        let mut reactor_copy = self.package.main_reactor.clone();
+        let reactor_copy = self.package.main_reactor.clone();
 
-        // a package can define multiple binaries the binary argument defines which one to
-        // build if the argument is not specified all binaries are build
-        if binary.is_some() {
-            reactor_copy.retain(|x| match Regex::new(&binary.as_ref().unwrap()) {
-                Ok(result) => result.is_match(x),
-                Err(_) => false,
-            });
-        }
-
-        let mut success = true;
-
-        for main_reactor in reactor_copy {
+        let build_lambda = |main_reactor: &String| -> bool {
             println!("building main reactor: {}", &main_reactor);
             let mut command = Command::new("lfc");
             command.arg("--output");
-            command.arg("./target");
+            command.arg("./");
             command.arg(format!("./src/{}.lf", &main_reactor));
-            success = success && run_and_capture(&mut command).is_ok();
-        }
+            run_and_capture(&mut command).is_ok()
+        };
 
-        success
+        util::invoke_on_selected(binary, reactor_copy, build_lambda)
     }
 
     fn update(&self) -> bool {
@@ -47,6 +36,7 @@ impl Backend for LFC {
     }
 
     fn clean(&self) -> bool {
+        println!("removing build artifacts in {:?}", env::current_dir());
         // just removes all the lingua-franca build artifacts
         fs::remove_dir_all("./bin").is_ok()
             && fs::remove_dir_all("./include").is_ok()

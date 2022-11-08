@@ -7,6 +7,10 @@ pub struct BuildArgs {
     /// which binary to build
     #[clap(short, long)]
     pub package: Option<String>,
+
+    /// which backend to use
+    #[clap(short, long, default_value_t = String::from("lfc"))]
+    pub backend: String,
 }
 
 #[derive(Subcommand, Debug)]
@@ -21,7 +25,7 @@ pub enum Command {
     Update,
 
     /// builds and runs binaries
-    Run,
+    Run(BuildArgs),
 
     /// removes build artifacts
     Clean,
