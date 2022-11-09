@@ -2,11 +2,15 @@ pub mod lfc;
 
 use crate::{interface::Backend, package::Package};
 
-pub fn select_backend(name: &str, package: Package) -> Box<dyn Backend> {
+pub fn select_backend(name: &str, package: &Package) -> Option<Box<dyn Backend>> {
     match name {
-        _ => {
+        "lfc" => {
             let lfc = lfc::LFC::from_package(package);
-            Box::new(lfc)
+            Some(Box::new(lfc))
+        }
+        _ => {
+            println!("error unkown backend!");
+            None
         }
     }
 }

@@ -13,7 +13,7 @@ pub struct Config {
     libraries: HashMap<String, String>,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct Package {
     pub name: String,
     pub version: String,
@@ -28,12 +28,11 @@ pub struct Package {
 
 impl Config {
     pub fn new() -> Config {
-        let main_reactor;
-        if !std::path::Path::new("./src").exists() {
-            main_reactor = vec![String::from("Main")];
+        let main_reactor = if !std::path::Path::new("./src").exists() {
+            vec![String::from("Main")]
         } else {
-            main_reactor = analyzer::search(Path::new("./src"));
-        }
+            analyzer::search(Path::new("./src"))
+        };
 
         Config {
             package: Package {

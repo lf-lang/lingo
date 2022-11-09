@@ -12,8 +12,8 @@ pub struct LFC {
 }
 
 impl Backend for LFC {
-    fn from_package(package: Package) -> Self {
-        LFC { package }
+    fn from_package(package: &Package) -> Self {
+        LFC { package: package.clone() }
     }
 
     fn build(&self, binary: Option<String>) -> bool {

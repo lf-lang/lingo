@@ -2,7 +2,7 @@ use crate::package::Package;
 
 /// trait that all different build backends need to implement
 pub trait Backend {
-    fn from_package(package: Package) -> Self
+    fn from_package(package: &Package) -> Self
     where
         Self: Sized;
 

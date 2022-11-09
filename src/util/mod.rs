@@ -7,7 +7,7 @@ where
     F: Fn(&String) -> bool,
 {
     // throws out all the sources that dont match the input regex
-    binary.map(|filter| {
+    if let Some(filter) = binary {
         // takes a binary contructs a regex out of it and checks
         // if a given source input matches the filter
         let regex_match = |input: &String| match Regex::new(&filter) {
@@ -16,7 +16,7 @@ where
         };
 
         sources.retain(regex_match);
-    });
+    }
 
     // evaluate f on everyelement inside sources and then compute the logical conjuction
     sources
@@ -24,5 +24,5 @@ where
         .map(f)
         .collect::<Vec<bool>>()
         .iter()
-        .fold(true, |x, y| x && *y)
+        .all(|y| *y)
 }

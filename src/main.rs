@@ -13,35 +13,30 @@ use clap::Parser;
 use std::path::Path;
 use std::process::Command;
 
-fn build(args: &BuildArgs) {
-    let config = package::Config::from(Path::new("./Barrel.toml"));
-
-    if config.is_none() {
-        return;
-    }
-
-    if !backends::select_backend("lfc", config.unwrap().package).build(args.package.clone()) {
-        println!("error has occured!")
+fn build(args: &BuildArgs, config: &package::Config) {
+    if let Some(backend) = backends::select_backend("lfc", &config.package) {
+        if !backend.build(args.package.clone()) {
+            println!("error has occured!")
+        }
     }
 }
 
 fn main() {
-    let args = CommandLineArgs::parse();
-    let config = package::Config::from(Path::new("./Barrel.toml"));
+    const PACKAGE_FILE: &str = "./Barrel.toml";
 
-    match args.command {
-        ConsoleCommand::Init => {
+    let args = CommandLineArgs::parse();
+    let wrapped_config = package::Config::from(Path::new(PACKAGE_FILE));
+
+    // we match on a tuple here 
+    match (wrapped_config, args.command) {
+        (_, ConsoleCommand::Init) => {
             let initial_config = package::Config::new();
-            initial_config.write(Path::new("./Barrel.toml"));
+            initial_config.write(Path::new(PACKAGE_FILE));
             package::Config::setup_example();
         }
-        ConsoleCommand::Build(build_command_args) => build(&build_command_args),
-        ConsoleCommand::Run(build_command_args) => {
-            if config.is_none() {
-                return;
-            }
-
-            build(&build_command_args);
+        (Some(config), ConsoleCommand::Build(build_command_args)) => build(&build_command_args, &config),
+        (Some(config), ConsoleCommand::Run(build_command_args)) => {
+            build(&build_command_args, &config);
 
             let execute_binary = |binary: &String| -> bool {
                 let mut command = Command::new(format!("./bin/{}", binary));
@@ -50,19 +45,15 @@ fn main() {
 
             util::invoke_on_selected(
                 build_command_args.package,
-                config.unwrap().package.main_reactor,
+                config.package.main_reactor,
                 execute_binary,
             );
         }
-        ConsoleCommand::Clean => {
-            let config = package::Config::from(Path::new("./Barrel.toml"));
-
-            if config.is_none() {
-                return;
-            }
-
-            if !backends::select_backend("lfc", config.unwrap().package).clean() {
-                println!("error has occured!")
+        (Some(config), ConsoleCommand::Clean) => {
+            if let Some(backend) = backends::select_backend("lfc", &config.package) {
+                if !backend.clean() {
+                    println!("error has occured!")
+                }
             }
         }
         _ => todo!(),
