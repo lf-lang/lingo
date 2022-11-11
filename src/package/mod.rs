@@ -6,6 +6,7 @@ use std::collections::HashMap;
 use std::fs::{read_to_string, write};
 use std::path::Path;
 
+/// the Barrel.toml format is defined by this struct
 #[derive(Deserialize, Serialize)]
 pub struct Config {
     pub package: Package,

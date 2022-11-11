@@ -2,6 +2,9 @@ pub mod command_line;
 
 use regex::Regex;
 
+/// given is some list of build targets which are filtered by the binary regex
+/// the lambda f is invoked on every element of the remaining elements which fit
+/// the regex.
 pub fn invoke_on_selected<F>(binary: Option<String>, mut sources: Vec<String>, f: F) -> bool
 where
     F: Fn(&String) -> bool,

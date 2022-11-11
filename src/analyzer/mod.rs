@@ -1,5 +1,6 @@
 use std::path::Path;
 
+/// this functions searches inside the file for a main reactor declaration
 pub fn search_inside_file(path: &Path) -> Option<String> {
     println!("Searching File {:?}", path);
     let content = std::fs::read_to_string(path).expect("Cannot read config file");
@@ -14,6 +15,7 @@ pub fn search_inside_file(path: &Path) -> Option<String> {
     None
 }
 
+/// searches recursively for main reactos
 pub fn search(path: &Path) -> Vec<String> {
     let mut main_reactors = Vec::new();
 
@@ -29,7 +31,7 @@ pub fn search(path: &Path) -> Vec<String> {
             main_reactors.append(&mut main_reactor.clone())
         } else {
             let optional_main_reactor = search_inside_file(&file);
-            if let Some(main_reactor) = optional_main_reactor{
+            if let Some(main_reactor) = optional_main_reactor {
                 main_reactors.push(main_reactor);
             }
         }

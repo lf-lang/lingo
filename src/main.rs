@@ -27,14 +27,16 @@ fn main() {
     let args = CommandLineArgs::parse();
     let wrapped_config = package::Config::from(Path::new(PACKAGE_FILE));
 
-    // we match on a tuple here 
+    // we match on a tuple here
     match (wrapped_config, args.command) {
         (_, ConsoleCommand::Init) => {
             let initial_config = package::Config::new();
             initial_config.write(Path::new(PACKAGE_FILE));
             package::Config::setup_example();
         }
-        (Some(config), ConsoleCommand::Build(build_command_args)) => build(&build_command_args, &config),
+        (Some(config), ConsoleCommand::Build(build_command_args)) => {
+            build(&build_command_args, &config)
+        }
         (Some(config), ConsoleCommand::Run(build_command_args)) => {
             build(&build_command_args, &config);
 
