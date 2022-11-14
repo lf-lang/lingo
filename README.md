@@ -2,42 +2,43 @@
 
 **Contact:** <revol-xut@protonmail.com>
 
-Package manager for the lingua-franca which uses lf-pkgs
-functions as a backend. This tool transpiles the Barrel.toml 
-into nix code which then is used to build the actuall package.
+Barrel is a build tool for lingua-franca project it will manage dependencies 
+configure build scripts and protentially cross compile for microcontrollers.
 
 The Barrel.toml may look something like this.
 
 ```toml
+[package]
+name = "test"
+version = "0.1.0"
+language = "c"
+main_reactor = [ "Main", "Test" ]
 
+[dependencies]
+lf-square = "0.1"
 ```
 
 
 ### command line interface
 
 ```
-lingua-franca package manager 0.1.0
+lingua-franca package manager and build tool 0.1.0
 tassilo.tanneberger@tu-dresden.de
-This program is a frontend for nix build system.
+Build system of lingua-franca projects
 
 USAGE:
-    barrel <SUBCOMMAND>
+    barrel [OPTIONS] <SUBCOMMAND>
 
 OPTIONS:
-    -h, --help       Print help information
-    -V, --version    Print version information
+    -b, --backend <BACKEND>    [default: cli]
+    -h, --help                 Print help information
+    -V, --version              Print version information
 
 SUBCOMMANDS:
-    build
-    check
-    clean
-    collect-garbage
-    generate
-    help               Print this message or the help of the given subcommand(s)
-    init
-    install
-    publish
-    run
-    search
-    update
+    build     compiling one ore multiple binaries in a lingua-franca package
+    clean     removes build artifacts
+    help      Print this message or the help of the given subcommand(s)
+    init      initializing a lingua-franca project
+    run       builds and runs binaries
+    update    Updates the dependencies and potentially build tools
 ```

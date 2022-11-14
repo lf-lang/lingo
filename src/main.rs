@@ -1,198 +1,63 @@
-mod cli;
-mod barrel;
-mod wrapper;
-mod analyzer;
-mod install;
-
-use cli::{Args, Command as CliCommand};
-use barrel::{Config};
-use wrapper::run_and_capture;
-pub use analyzer::search;
-use install::{debian_install, arch_install, default_install, edit_config};
-
-use clap::Parser;
-use git2::Repository;
-use termion::color;
-use os_version::OsVersion;
-
 extern crate termion;
 
+pub mod analyzer;
+pub mod args;
+pub mod backends;
+pub mod interface;
+pub mod package;
+pub mod util;
+
+use args::{BuildArgs, Command as ConsoleCommand, CommandLineArgs};
+
+use clap::Parser;
 use std::path::Path;
 use std::process::Command;
-use std::io::Read;
 
-
-
-fn generate_code() {
-    let config = Config::from(Path::new("./Barrel.toml"));
-    let mut command = Command::new("git");
-    command.arg("add");
-    command.arg("./nix-build/*");
-    run_and_capture(&mut command).ok();
-
-    config.write_nix_code();
-}
-
-fn build() {
-    generate_code();
-    let mut command = Command::new("nix");
-    command.arg("build");
-    command.arg("./nix-build");
-    command.arg("-L");
-    command.arg("--impure");
-    run_and_capture(&mut command).ok();
-}
-
-fn run() {
-    build();
-    let mut command = Command::new("nix");
-    command.arg("run");
-    command.arg("./nix-build");
-    command.arg("-L");
-    run_and_capture(&mut command).ok();
-}
-
-fn user_conset() -> bool {
-    println!("{} Do you want to continue ? [Y/n] {}", 
-        color::Fg(color::Red), color::Fg(color::White));
-
-    let mut stdin = std::io::stdin();
-    let mut buffer = [0;1];
-
-    stdin.read_exact(&mut buffer).unwrap();
-
-    buffer[0] as char == 'n' || buffer[0] as char == 'N'
+fn build(args: &BuildArgs, config: &package::Config) {
+    if let Some(backend) = backends::select_backend("lfc", &config.package) {
+        if !backend.build(args.package.clone()) {
+            println!("error has occured!")
+        }
+    }
 }
 
 fn main() {
-    let args = Args::parse();
-    match args.command {
-        CliCommand::Init { } => {
+    const PACKAGE_FILE: &str = "./Barrel.toml";
 
-            let _ = match Repository::init("./") {
-                Ok(repo) => repo,
-                Err(e) => panic!("failed to init: {}", e),
+    let args = CommandLineArgs::parse();
+    let wrapped_config = package::Config::from(Path::new(PACKAGE_FILE));
+
+    // we match on a tuple here
+    match (wrapped_config, args.command) {
+        (_, ConsoleCommand::Init) => {
+            let initial_config = package::Config::new();
+            initial_config.write(Path::new(PACKAGE_FILE));
+            package::Config::setup_example();
+        }
+        (Some(config), ConsoleCommand::Build(build_command_args)) => {
+            build(&build_command_args, &config)
+        }
+        (Some(config), ConsoleCommand::Run(build_command_args)) => {
+            build(&build_command_args, &config);
+
+            let execute_binary = |binary: &String| -> bool {
+                let mut command = Command::new(format!("./bin/{}", binary));
+                util::command_line::run_and_capture(&mut command).is_ok()
             };
 
-            let initial_config = Config::new();
-            initial_config.write(Path::new("./Barrel.toml"));
-            Config::setup_example();
-        }
-        CliCommand::Generate {} => {
-            generate_code();
-        }
-        CliCommand::Check {} => {
-            let mut command = Command::new("nix");
-            command.arg("flake");
-            command.arg("check");
-            command.arg("./nix-build");
-            command.arg("-L");
-            run_and_capture(&mut command).ok();
-        }
-        CliCommand::Build {} => {
-            build()
-        }
-        CliCommand::Update {} => {
-            let mut command = Command::new("nix");
-            command.arg("flake");
-            command.arg("update");
-            command.arg("./nix-build");
-            command.arg("-L");
-            run_and_capture(&mut command).ok();
-        }
-        CliCommand::Run {} => {
-            run();
-        }
-        CliCommand::Search { package } => {
-            let mut command = Command::new("nix");
-            command.arg("search");
-            command.arg("./nix-build");
-            command.arg(package);
-            run_and_capture(&mut command).ok();
-        }
-        CliCommand::Clean {} => {
-            std::fs::remove_dir_all(Path::new("./result")).ok();
-        }
-        CliCommand::CollectGarbage {} => {
-            println!("Warning this will collect the garbage from the entire nix store.");
-            
-            if !user_conset() {
-                return;
-            }
-
-            let mut command = Command::new("nix-collect-garbage");
-            command.arg("-d");
-            run_and_capture(&mut command).ok();
-
-        }
-        CliCommand::Publish {} => {
-            let config = Config::from(Path::new("./Barrel.toml"));
-            let mut command = Command::new("git");
-            command.arg("add");
-            command.arg("./nix-build/*");
-            run_and_capture(&mut command).ok();
-            //color::Fg(color::Red), color::Fg(color::White));
-
-            println!("{} pkgs/{}/{}.nix\n{}\n{}\n{} pkgs/root.nix{}\n{}", 
-                    color::Fg(color::Green), 
-                    &config.package.language, 
-                    &config.package.name,
-                    color::Fg(color::White), 
-                    config.publish_nix(),
-                    color::Fg(color::Green),
-                    color::Fg(color::White), 
-                    config.root_nix_publish()
+            util::invoke_on_selected(
+                build_command_args.package,
+                config.package.main_reactor,
+                execute_binary,
             );
-
         }
-        CliCommand::Install {} => {
-            let distro = os_version::detect();
-
-            match distro.unwrap() {
-                OsVersion::Linux(linux) => {
-                    println!("Detected Linux: {} Version: {}, Version Name: {}", 
-                             &linux.distro, 
-                             &linux.version.unwrap(), 
-                             &linux.version_name.unwrap()
-                    );
-                    
-                    println!("Do you want to install nix and barrel into your system ?");
-                    if !user_conset() {
-                        return;
-                    }
-
-                    match linux.distro.as_str() {
-                        "nixos" => {
-                            println!("it's your system package manager lol! just enable flakes");
-                            return;
-                        }
-                        "ubuntu" => {
-                            debian_install();
-                        }
-                        "debian" => {
-                            debian_install();
-                        }
-                        "arch" => {
-                            arch_install();
-                        }
-                        "manjaro" => {
-                            arch_install();
-                        }
-                        &_ => {
-                            default_install();
-                        }
-                    }
-                }
-                OsVersion::MacOS(macos) => {
-                    println!("Detected MacOs Version: {}", &macos.version);
-                    default_install();
-                }
-                _ => {
-                    println!("Unsupported Version");
+        (Some(config), ConsoleCommand::Clean) => {
+            if let Some(backend) = backends::select_backend("lfc", &config.package) {
+                if !backend.clean() {
+                    println!("error has occured!")
                 }
             }
-            edit_config();
         }
-    };
-
+        _ => todo!(),
+    }
 }

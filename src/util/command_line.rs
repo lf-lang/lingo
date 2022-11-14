@@ -1,5 +1,5 @@
 use std::io::{self, Write};
-use std::process::{Command, Stdio, ExitStatus};
+use std::process::{Command, ExitStatus, Stdio};
 
 use crossbeam::thread;
 
@@ -10,10 +10,7 @@ struct TeeWriter<'a, W0: Write, W1: Write> {
 
 impl<'a, W0: Write, W1: Write> TeeWriter<'a, W0, W1> {
     fn new(w0: &'a mut W0, w1: &'a mut W1) -> Self {
-        Self {
-            w0,
-            w1,
-        }
+        Self { w0, w1 }
     }
 }
 
@@ -34,7 +31,6 @@ impl<'a, W0: Write, W1: Write> Write for TeeWriter<'a, W0, W1> {
 }
 
 pub fn run_and_capture(command: &mut Command) -> io::Result<(ExitStatus, Vec<u8>, Vec<u8>)> {
-
     command.stdout(Stdio::piped());
     command.stderr(Stdio::piped());
     let mut child = command.spawn()?;
@@ -67,7 +63,6 @@ pub fn run_and_capture(command: &mut Command) -> io::Result<(ExitStatus, Vec<u8>
         let stderr_log = stderr_thread.join().expect("stderr thread panicked")?;
 
         Ok((status, stdout_log, stderr_log))
-    }).expect("stdout/stderr thread panicked")
+    })
+    .expect("stdout/stderr thread panicked")
 }
-
-
