@@ -1,6 +1,6 @@
 # Barrel
 
-**Contact:** <revol-xut@protonmail.com>
+**Contact:** <tassilo-tanneberger@tu-dresden.de>
 
 Barrel is a build tool for lingua-franca project it will manage dependencies 
 configure build scripts and protentially cross compile for microcontrollers.
@@ -18,8 +18,9 @@ main_reactor = [ "Main", "Test" ]
 lf-square = "0.1"
 ```
 
-
 ### command line interface
+
+**Installing** is done on the most systems with `cargo install`.
 
 ```
 lingua-franca package manager and build tool 0.1.0
