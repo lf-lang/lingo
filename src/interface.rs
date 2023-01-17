@@ -1,13 +1,13 @@
-use crate::package::Package;
+use crate::{args::BuildArgs, package::App};
 
 /// trait that all different build backends need to implement
 pub trait Backend {
-    fn from_package(package: &Package) -> Self
+    fn from_target(target: &App) -> Self
     where
         Self: Sized;
 
     /// builds the package
-    fn build(&self, package: Option<String>) -> bool;
+    fn build(&self, config: &BuildArgs) -> bool;
 
     /// updates dependencies
     fn update(&self) -> bool;

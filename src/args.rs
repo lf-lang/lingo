@@ -4,13 +4,17 @@ use clap::{Args, Parser, Subcommand};
 
 #[derive(Args, Debug)]
 pub struct BuildArgs {
-    /// which binary to build
-    #[clap(short, long)]
-    pub package: Option<String>,
-
     /// which backend to use
     #[clap(short, long, default_value_t = String::from("lfc"))]
     pub backend: String,
+
+    /// which target to build
+    #[clap(short, long)]
+    pub target: Option<String>,
+
+    /// overwrites any possible board definition in Barrel.toml
+    #[clap(long)]
+    pub board: Option<String>,
 }
 
 #[derive(Subcommand, Debug)]
