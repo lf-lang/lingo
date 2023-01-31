@@ -133,7 +133,7 @@ impl ConfigFile {
 
     pub fn write(&self, path: &Path) {
         let toml_string = toml::to_string(&self).unwrap();
-        write(path, &toml_string).expect("cannot write toml file");
+        write(path, toml_string).expect("cannot write toml file");
     }
 
     pub fn test_from(path: &Path) -> Option<ConfigFile> {

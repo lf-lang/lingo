@@ -39,7 +39,7 @@ impl Backend for LFC {
             return false;
         }
 
-        return true;
+        true
     }
 
     fn update(&self) -> bool {

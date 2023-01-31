@@ -14,7 +14,7 @@ use std::process::Command;
 
 fn build(args: &BuildArgs, config: &package::Config) {
     let build_target = |app: &App| -> bool {
-        if let Some(backend) = backends::select_backend("lfc", &app) {
+        if let Some(backend) = backends::select_backend("lfc", app) {
             if !backend.build(args) {
                 println!("error has occured!");
                 return false;
@@ -36,10 +36,10 @@ fn main() {
     let args = CommandLineArgs::parse();
 
     // tries to read barrel toml
-    let wrapped_config = if barrel_path == None {
+    let wrapped_config = if barrel_path.is_none() {
         None
     } else {
-        package::ConfigFile::from(&PathBuf::from(barrel_path.clone().unwrap()))
+        package::ConfigFile::from(&barrel_path.clone().unwrap())
     };
 
     // we match on a tuple here

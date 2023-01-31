@@ -44,23 +44,20 @@ pub fn find_toml(input_path: &Path) -> Option<PathBuf> {
     match std::fs::read_dir(&path) {
         Ok(data) => {
             for element in data {
-                match element {
-                    Ok(path_data) => {
-                        if path_data
-                            .path()
-                            .file_name()
-                            .map_or_else(|| false, |file_name| file_name == "Barrel.toml")
-                        {
-                            return Some(path_data.path());
-                        }
+                if let Ok(path_data) = element {
+                    if path_data
+                        .path()
+                        .file_name()
+                        .map_or_else(|| false, |file_name| file_name == "Barrel.toml")
+                    {
+                        return Some(path_data.path());
                     }
-                    Err(_) => {}
                 }
             }
             //return Some(path.to_path_buf());
         }
         Err(e) => {
-            println!("cannot find toml file with error: {:?}", e);
+            println!("cannot find toml file with error: {e:?}");
             return None;
         }
     };
@@ -69,10 +66,4 @@ pub fn find_toml(input_path: &Path) -> Option<PathBuf> {
         Some(parent) => find_toml(parent),
         None => None,
     }
-}
-
-pub fn strip_file_name(path: &mut PathBuf) -> PathBuf {
-    path.pop();
-    println!("{:?}", &path);
-    path.to_path_buf()
 }
