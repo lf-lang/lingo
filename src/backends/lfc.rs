@@ -26,13 +26,16 @@ impl Backend for LFC {
             let mut command = Command::new("lfc");
             command.arg("--output");
             command.arg("./");
-            command.arg(format!("./src/{}.lf", &main_reactor));
+            command.arg(format!("{}/{}", &self.target.root_path.display(), &main_reactor));
             run_and_capture(&mut command).is_ok()
         };
 
-        build_lambda(&reactor_copy);
+        if !build_lambda(&reactor_copy) {
+            println!("calling lfc returned an error can lfc be found in $PATH ?");
+            return false;
+        }
 
-        true
+        return true;
     }
 
     fn update(&self) -> bool {

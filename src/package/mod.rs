@@ -5,7 +5,7 @@ use toml::value::{Array, Value};
 
 use std::collections::HashMap;
 use std::fs::{read_to_string, write};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct AppVec {
@@ -65,6 +65,9 @@ pub struct AppFile {
 
 #[derive(Clone, Deserialize, Serialize)]
 pub struct App {
+    /// where the Lingo.toml is located in the filesystem
+    pub root_path: PathBuf,
+
     pub name: String,
     pub main_reactor: String,
     pub target: String,
@@ -176,7 +179,7 @@ impl ConfigFile {
         }
     }
 
-    pub fn to_config(mut self) -> Config {
+    pub fn to_config(mut self, path: PathBuf) -> Config {
         Config {
             package: self.package.clone(),
             properties: self.properties,
@@ -187,11 +190,12 @@ impl ConfigFile {
                     let app: AppFile = Value::try_into::<AppFile>(app_file.clone()).unwrap();
 
                     App {
+                        root_path: path.clone(),
                         name: app.name.as_ref().unwrap_or(&self.package.name).clone(),
                         main_reactor: app
                             .main_reactor
                             .clone()
-                            .unwrap_or("src/main.lf".to_string()),
+                            .unwrap_or("src/root.lf".to_string()),
                         target: app.target.clone(),
                         dependencies: app.dependencies.clone(),
                         properties: app.properties.clone(),
