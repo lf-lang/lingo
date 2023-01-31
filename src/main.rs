@@ -34,9 +34,11 @@ fn main() {
 
     // parses command line arguments
     let args = CommandLineArgs::parse();
-    
+
     // tries to read barrel toml
-    let wrapped_config = if barrel_path == None {None} else {
+    let wrapped_config = if barrel_path == None {
+        None
+    } else {
         package::ConfigFile::from(&PathBuf::from(barrel_path.clone().unwrap()))
     };
 

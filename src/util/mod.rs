@@ -2,7 +2,7 @@ pub mod command_line;
 
 use crate::package::App;
 use regex::Regex;
-use std::path::{PathBuf, Path};
+use std::path::{Path, PathBuf};
 
 /// given is some list of build targets which are filtered by the binary regex
 /// the lambda f is invoked on every element of the remaining elements which fit
@@ -36,7 +36,9 @@ where
 pub fn find_toml(input_path: &Path) -> Option<PathBuf> {
     let path = match std::fs::canonicalize(input_path) {
         Ok(absolute_path) => absolute_path,
-        Err(_) => {return None;}
+        Err(_) => {
+            return None;
+        }
     };
 
     match std::fs::read_dir(&path) {
@@ -44,16 +46,19 @@ pub fn find_toml(input_path: &Path) -> Option<PathBuf> {
             for element in data {
                 match element {
                     Ok(path_data) => {
-                        if path_data.path().file_name().map_or_else(|| {false}, |file_name| {file_name == "Barrel.toml"})  {
+                        if path_data
+                            .path()
+                            .file_name()
+                            .map_or_else(|| false, |file_name| file_name == "Barrel.toml")
+                        {
                             return Some(path_data.path());
                         }
                     }
                     Err(_) => {}
                 }
-
             }
             //return Some(path.to_path_buf());
-        },
+        }
         Err(e) => {
             println!("cannot find toml file with error: {:?}", e);
             return None;
@@ -62,10 +67,9 @@ pub fn find_toml(input_path: &Path) -> Option<PathBuf> {
 
     match path.parent() {
         Some(parent) => find_toml(parent),
-        None => None
+        None => None,
     }
 }
-
 
 pub fn strip_file_name(path: &mut PathBuf) -> PathBuf {
     path.pop();

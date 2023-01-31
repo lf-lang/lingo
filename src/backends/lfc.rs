@@ -26,7 +26,11 @@ impl Backend for LFC {
             let mut command = Command::new("lfc");
             command.arg("--output");
             command.arg("./");
-            command.arg(format!("{}/{}", &self.target.root_path.display(), &main_reactor));
+            command.arg(format!(
+                "{}/{}",
+                &self.target.root_path.display(),
+                &main_reactor
+            ));
             run_and_capture(&mut command).is_ok()
         };
 

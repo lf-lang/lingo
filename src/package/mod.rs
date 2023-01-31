@@ -12,16 +12,6 @@ pub struct AppVec {
     pub app: Vec<AppFile>,
 }
 
-#[derive(Clone, Deserialize, Serialize)]
-pub struct TestConfigFile {
-    /// top level package description
-    pub package: PackageDescription,
-
-    pub properties: HashMap<String, serde_json::Value>,
-
-    pub app: Array,
-}
-
 /// the Barrel.toml format is defined by this struct
 #[derive(Clone, Deserialize, Serialize)]
 pub struct ConfigFile {
@@ -146,7 +136,7 @@ impl ConfigFile {
         write(path, &toml_string).expect("cannot write toml file");
     }
 
-    pub fn test_from(path: &Path) -> Option<TestConfigFile> {
+    pub fn test_from(path: &Path) -> Option<ConfigFile> {
         match read_to_string(path) {
             Ok(content) => toml::from_str(&content)
                 .map_err(|_| println!("the Barrel.toml has an invalid format!"))
