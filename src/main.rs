@@ -23,7 +23,7 @@ fn build(args: &BuildArgs, config: &package::Config) {
         true
     };
 
-    util::invoke_on_selected(args.target.clone(), config.app.clone(), build_target);
+    util::invoke_on_selected(args.target.clone(), config.apps.clone(), build_target);
 }
 
 fn main() {
@@ -46,7 +46,8 @@ fn main() {
     match (wrapped_config, args.command) {
         (_, ConsoleCommand::Init) => {
             let initial_config = package::ConfigFile::new();
-            initial_config.write(Path::new(PACKAGE_FILE));
+            let toml_path = format!("{}/Barrel.toml", PACKAGE_FILE);
+            initial_config.write(Path::new(&toml_path));
             package::ConfigFile::setup_example();
         }
         (Some(file_config), ConsoleCommand::Build(build_command_args)) => {
@@ -68,7 +69,7 @@ fn main() {
                 util::command_line::run_and_capture(&mut command).is_ok()
             };
 
-            util::invoke_on_selected(build_command_args.target, config.app, execute_binary);
+            util::invoke_on_selected(build_command_args.target, config.apps, execute_binary);
         }
         (Some(_config), ConsoleCommand::Clean) => todo!(),
         _ => todo!(),

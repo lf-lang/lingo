@@ -1,7 +1,6 @@
 use crate::analyzer;
 
 use serde_derive::{Deserialize, Serialize};
-use toml::value::{Array, Value};
 
 use std::collections::HashMap;
 use std::fs::{read_to_string, write};
@@ -22,7 +21,8 @@ pub struct ConfigFile {
     pub properties: HashMap<String, serde_json::Value>,
 
     /// list of apps defined inside this package
-    pub app: Array,
+    #[serde(rename = "app")]
+    pub apps: Vec<AppFile>,
 }
 
 #[derive(Clone, Deserialize, Serialize)]
@@ -34,7 +34,8 @@ pub struct Config {
     pub properties: HashMap<String, serde_json::Value>,
 
     /// list of apps defined inside this package
-    pub app: Vec<App>,
+    #[serde(rename = "app")]
+    pub apps: Vec<App>,
 }
 
 /// Schema of the configuration parsed from the Lingo.toml
@@ -50,6 +51,7 @@ pub struct AppFile {
     pub target: String,
 
     pub dependencies: HashMap<String, DetailedDependency>,
+
     pub properties: HashMap<String, serde_json::Value>,
 }
 
@@ -120,38 +122,25 @@ impl ConfigFile {
                 homepage: None,
             },
             properties: HashMap::new(),
-            app: vec![Value::try_from(AppFile {
+            apps: vec![AppFile {
                 name: None,
                 main_reactor: None,
                 target: "cpp".to_string(),
                 dependencies: HashMap::new(),
                 properties: HashMap::new(),
-            })
-            .unwrap()],
+            }],
         }
     }
 
     pub fn write(&self, path: &Path) {
         let toml_string = toml::to_string(&self).unwrap();
-        write(path, toml_string).expect("cannot write toml file");
-    }
-
-    pub fn test_from(path: &Path) -> Option<ConfigFile> {
-        match read_to_string(path) {
-            Ok(content) => toml::from_str(&content)
-                .map_err(|_| println!("the Barrel.toml has an invalid format!"))
-                .ok(),
-            Err(_) => {
-                println!("cannot read Barrel.toml does it exist?");
-                None
-            }
-        }
+        write(path, toml_string).expect(format!("cannot write toml file {:?}", &path).as_str());
     }
 
     pub fn from(path: &Path) -> Option<ConfigFile> {
         match read_to_string(path) {
             Ok(content) => toml::from_str(&content)
-                .map_err(|_| println!("the Barrel.toml has an invalid format!"))
+                .map_err(|e| println!("the Barrel.toml has an invalid format! Error: {:?}", e))
                 .ok(),
             Err(_) => {
                 println!("cannot read Barrel.toml does it exist?");
@@ -173,23 +162,19 @@ impl ConfigFile {
         Config {
             package: self.package.clone(),
             properties: self.properties,
-            app: self
-                .app
+            apps: self
+                .apps
                 .iter_mut()
-                .map(|app_file| {
-                    let app: AppFile = Value::try_into::<AppFile>(app_file.clone()).unwrap();
-
-                    App {
-                        root_path: path.clone(),
-                        name: app.name.as_ref().unwrap_or(&self.package.name).clone(),
-                        main_reactor: app
-                            .main_reactor
-                            .clone()
-                            .unwrap_or("src/root.lf".to_string()),
-                        target: app.target.clone(),
-                        dependencies: app.dependencies.clone(),
-                        properties: app.properties.clone(),
-                    }
+                .map(|app| App {
+                    root_path: path.clone(),
+                    name: app.name.as_ref().unwrap_or(&self.package.name).clone(),
+                    main_reactor: app
+                        .main_reactor
+                        .clone()
+                        .unwrap_or("src/root.lf".to_string()),
+                    target: app.target.clone(),
+                    dependencies: app.dependencies.clone(),
+                    properties: app.properties.clone(),
                 })
                 .collect(),
         }
