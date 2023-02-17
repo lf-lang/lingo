@@ -1,36 +1,45 @@
+use crate::args::BuildArgs;
 use crate::interface::Backend;
-use crate::package::Package;
+use crate::package::App;
 
-use crate::util;
 use crate::util::command_line::run_and_capture;
 use std::env;
 use std::fs;
 use std::process::Command;
 
 pub struct LFC {
-    package: Package,
+    target: App,
 }
 
 impl Backend for LFC {
-    fn from_package(package: &Package) -> Self {
+    fn from_target(target: &App) -> Self {
         LFC {
-            package: package.clone(),
+            target: target.clone(),
         }
     }
 
-    fn build(&self, binary: Option<String>) -> bool {
-        let reactor_copy = self.package.main_reactor.clone();
+    fn build(&self, _config: &BuildArgs) -> bool {
+        let reactor_copy = self.target.main_reactor.clone();
 
         let build_lambda = |main_reactor: &String| -> bool {
             println!("building main reactor: {}", &main_reactor);
             let mut command = Command::new("lfc");
             command.arg("--output");
             command.arg("./");
-            command.arg(format!("./src/{}.lf", &main_reactor));
+            command.arg(format!(
+                "{}/{}",
+                &self.target.root_path.display(),
+                &main_reactor
+            ));
             run_and_capture(&mut command).is_ok()
         };
 
-        util::invoke_on_selected(binary, reactor_copy, build_lambda)
+        if !build_lambda(&reactor_copy) {
+            println!("calling lfc returned an error can lfc be found in $PATH ?");
+            return false;
+        }
+
+        true
     }
 
     fn update(&self) -> bool {
