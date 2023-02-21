@@ -3,7 +3,7 @@
 **Contact:** <tassilo-tanneberger@tu-dresden.de>
 
 Lingo is a build tool for lingua-franca project it will manage dependencies 
-configure build scripts and protentially cross compile for microcontrollers.
+configure build scripts and potentially cross compile for microcontrollers.
 
 The Lingo.toml may look something like this.
 
