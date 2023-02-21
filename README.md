@@ -1,21 +1,53 @@
-# Barrel
+# Lingo
 
 **Contact:** <tassilo-tanneberger@tu-dresden.de>
 
-Barrel is a build tool for lingua-franca project it will manage dependencies 
+Lingo is a build tool for lingua-franca project it will manage dependencies 
 configure build scripts and protentially cross compile for microcontrollers.
 
-The Barrel.toml may look something like this.
+The Lingo.toml may look something like this.
 
 ```toml
 [package]
-name = "test"
+name = "example_project"
 version = "0.1.0"
-language = "c"
-main_reactor = [ "Main", "Test" ]
+authors = ["tassilo.tannerber@tu-dresden.de"]
+homepage = "https://lf-lang.org"
+license = "Weird Stallman License"
+description = "A little Lingo.toml for people"
 
-[dependencies]
-lf-square = "0.1"
+# shared properties of all binaries
+[properties]
+fast = true
+
+# first binary in the project
+[[app]]
+name = "git-hook"
+target = "cpp"
+main_reactor = "src/Main.lf"
+# main_reactor defaults to src/main.lf
+
+# dependencies
+[[app.dependencies]]
+git = {version = "0.3.2"}
+tarfetcher = {version = "0.4.2"}
+
+# replacement for target properties
+[[app.properties]]
+cmake-include = "./my-cmake.cmake"
+logging = true
+
+# second binary
+[[app]]
+name = "embedded"
+# main_reactor = "src/SayHello.lf"
+target = "zephyre"
+
+[[app.dependencies]]
+blink = {version = "0.1.2"}
+
+[[app.properties]]
+no-compile = true
 ```
 
 ### command line interface
@@ -28,7 +60,7 @@ tassilo.tanneberger@tu-dresden.de
 Build system of lingua-franca projects
 
 USAGE:
-    barrel [OPTIONS] <SUBCOMMAND>
+    lingo [OPTIONS] <SUBCOMMAND>
 
 OPTIONS:
     -b, --backend <BACKEND>    [default: cli]

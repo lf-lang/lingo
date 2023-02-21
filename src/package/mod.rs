@@ -11,7 +11,7 @@ pub struct AppVec {
     pub app: Vec<AppFile>,
 }
 
-/// the Barrel.toml format is defined by this struct
+/// the Lingo.toml format is defined by this struct
 #[derive(Clone, Deserialize, Serialize)]
 pub struct ConfigFile {
     /// top level package description
@@ -140,10 +140,10 @@ impl ConfigFile {
     pub fn from(path: &Path) -> Option<ConfigFile> {
         match read_to_string(path) {
             Ok(content) => toml::from_str(&content)
-                .map_err(|e| println!("the Barrel.toml has an invalid format! Error: {:?}", e))
+                .map_err(|e| println!("the Lingo.toml has an invalid format! Error: {:?}", e))
                 .ok(),
             Err(_) => {
-                println!("cannot read Barrel.toml does it exist?");
+                println!("cannot read Lingo.toml does it exist?");
                 None
             }
         }
@@ -171,7 +171,7 @@ impl ConfigFile {
                     main_reactor: app
                         .main_reactor
                         .clone()
-                        .unwrap_or("src/root.lf".to_string()),
+                        .unwrap_or("src/main.lf".to_string()),
                     target: app.target.clone(),
                     dependencies: app.dependencies.clone(),
                     properties: app.properties.clone(),

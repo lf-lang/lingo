@@ -30,35 +30,35 @@ fn main() {
     const PACKAGE_FILE: &str = "./";
 
     // finds Lingo.toml recurisvely inside the parent directories.
-    let barrel_path = util::find_toml(&PathBuf::from(PACKAGE_FILE));
+    let lingo_path = util::find_toml(&PathBuf::from(PACKAGE_FILE));
 
     // parses command line arguments
     let args = CommandLineArgs::parse();
 
-    // tries to read barrel toml
-    let wrapped_config = if barrel_path.is_none() {
+    // tries to read Lingo.toml
+    let wrapped_config = if lingo_path.is_none() {
         None
     } else {
-        package::ConfigFile::from(&barrel_path.clone().unwrap())
+        package::ConfigFile::from(&lingo_path.clone().unwrap())
     };
 
     // we match on a tuple here
     match (wrapped_config, args.command) {
         (_, ConsoleCommand::Init) => {
             let initial_config = package::ConfigFile::new();
-            let toml_path = format!("{}/Barrel.toml", PACKAGE_FILE);
+            let toml_path = format!("{}/Lingo.toml", PACKAGE_FILE);
             initial_config.write(Path::new(&toml_path));
             package::ConfigFile::setup_example();
         }
         (Some(file_config), ConsoleCommand::Build(build_command_args)) => {
-            let mut working_path = barrel_path.unwrap();
+            let mut working_path = lingo_path.unwrap();
             working_path.pop();
             let config = file_config.to_config(working_path);
 
             build(&build_command_args, &config)
         }
         (Some(file_config), ConsoleCommand::Run(build_command_args)) => {
-            let mut working_path = barrel_path.unwrap();
+            let mut working_path = lingo_path.unwrap();
             working_path.pop();
             let config = file_config.to_config(working_path);
 

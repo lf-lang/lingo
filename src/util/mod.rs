@@ -48,7 +48,7 @@ pub fn find_toml(input_path: &Path) -> Option<PathBuf> {
                     if path_data
                         .path()
                         .file_name()
-                        .map_or_else(|| false, |file_name| file_name == "Barrel.toml")
+                        .map_or_else(|| false, |file_name| file_name == "Lingo.toml")
                     {
                         return Some(path_data.path());
                     }

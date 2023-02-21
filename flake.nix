@@ -24,10 +24,10 @@
         in
         rec {
           checks = packages;
-          packages.barrel = package;
+          packages.lingo = package;
           defaultPackage = package;
           overlay = (final: prev: {
-            barrel = package;
+            lingo = package;
           });
         }
       ) // {
