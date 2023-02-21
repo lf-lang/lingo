@@ -2,7 +2,7 @@
 # will have compiled files and executables
 /target/
 Weaver.toml
-Barrel.toml
+Lingo.toml
 nix-build
 .idea
 

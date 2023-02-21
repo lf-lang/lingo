@@ -1,5 +1,3 @@
-extern crate derive_builder;
-
 use clap::{Args, Parser, Subcommand};
 
 #[derive(Args, Debug)]
@@ -12,7 +10,7 @@ pub struct BuildArgs {
     #[clap(short, long)]
     pub target: Option<String>,
 
-    /// overwrites any possible board definition in Barrel.toml
+    /// overwrites any possible board definition in Lingo.toml
     #[clap(long)]
     pub board: Option<String>,
 }
