@@ -2,6 +2,7 @@ pub mod analyzer;
 pub mod args;
 pub mod backends;
 pub mod interface;
+pub mod lfc;
 pub mod package;
 pub mod util;
 
