@@ -134,7 +134,7 @@ impl ConfigFile {
 
     pub fn write(&self, path: &Path) {
         let toml_string = toml::to_string(&self).unwrap();
-        write(path, toml_string).expect(format!("cannot write toml file {:?}", &path).as_str());
+        write(path, toml_string).unwrap_or_else(|_| panic!("cannot write toml file {:?}", &path));
     }
 
     pub fn from(path: &Path) -> Option<ConfigFile> {

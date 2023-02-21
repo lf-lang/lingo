@@ -43,15 +43,13 @@ pub fn find_toml(input_path: &Path) -> Option<PathBuf> {
 
     match std::fs::read_dir(&path) {
         Ok(data) => {
-            for element in data {
-                if let Ok(path_data) = element {
-                    if path_data
-                        .path()
-                        .file_name()
-                        .map_or_else(|| false, |file_name| file_name == "Lingo.toml")
-                    {
-                        return Some(path_data.path());
-                    }
+            for element in data.flatten() {
+                if element
+                    .path()
+                    .file_name()
+                    .map_or_else(|| false, |file_name| file_name == "Lingo.toml")
+                {
+                    return Some(element.path());
                 }
             }
             //return Some(path.to_path_buf());
