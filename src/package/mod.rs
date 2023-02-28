@@ -64,8 +64,8 @@ pub struct App {
     pub main_reactor: String,
     pub target: String,
 
-    dependencies: HashMap<String, DetailedDependency>,
-    properties: HashMap<String, serde_json::Value>,
+    pub dependencies: HashMap<String, DetailedDependency>,
+    pub properties: HashMap<String, serde_json::Value>,
 }
 
 /// Simple or DetailedDependcy

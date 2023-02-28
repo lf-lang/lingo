@@ -22,7 +22,7 @@ pub struct CommunicationLFC {
 
 impl CommunicationLFC {
     /// path points to root of project
-    pub fn default(
+    pub fn new(
         path: &PathBuf,
         properties: HashMap<String, serde_json::Value>,
     ) -> CommunicationLFC {

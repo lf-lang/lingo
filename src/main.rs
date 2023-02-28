@@ -15,6 +15,22 @@ use std::process::Command;
 
 fn build(args: &BuildArgs, config: &package::Config) {
     let build_target = |app: &App| -> bool {
+        // path to the main reactor
+        let mut main_reactor_path = app.root_path.clone();
+        main_reactor_path.push(app.main_reactor.clone());
+
+        // path to the src-gen directory
+        let mut src_gen_directory = app.root_path.clone();
+        src_gen_directory.push(PathBuf::from("./src-gen"));
+
+        let lfc = lfc::CommunicationLFC::new(&main_reactor_path,  app.properties.clone());
+        match lfc.write(&src_gen_directory) {
+            Ok(_) => {},
+            Err(e) => {
+                println!("cannot write src-ge/lfc.json with error {:?}", &e);
+            }
+        }
+
         if let Some(backend) = backends::select_backend("lfc", app) {
             if !backend.build(args) {
                 println!("error has occured!");
@@ -23,7 +39,6 @@ fn build(args: &BuildArgs, config: &package::Config) {
         }
         true
     };
-
     util::invoke_on_selected(args.target.clone(), config.apps.clone(), build_target);
 }
 
