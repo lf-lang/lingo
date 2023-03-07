@@ -36,7 +36,7 @@ pub enum Command {
 #[derive(Parser)]
 #[clap(name = "lingua-franca package manager and build tool")]
 #[clap(author = "tassilo.tanneberger@tu-dresden.de")]
-#[clap(version = "0.1.0")]
+#[clap(version = env!("CARGO_PKG_VERSION"))]
 #[clap(about = "Build system of lingua-franca projects", long_about = None)]
 pub struct CommandLineArgs {
     #[clap(subcommand)]

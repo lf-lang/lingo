@@ -1,4 +1,4 @@
-use crate::analyzer;
+use crate::util::analyzer;
 
 use serde_derive::{Deserialize, Serialize};
 
