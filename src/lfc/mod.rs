@@ -1,12 +1,12 @@
-use crate::App;
 use crate::util::command_line::run_and_capture;
+use crate::App;
 
 use serde_derive::{Deserialize, Serialize};
 use serde_json;
-use std::process::Command;
 use std::collections::HashMap;
 use std::fs::write;
 use std::path::{Path, PathBuf};
+use std::process::Command;
 
 ///
 /// taken from: https://www.lf-lang.org/docs/handbook/target-declaration?target=c
@@ -29,15 +29,12 @@ pub struct LFCProperties {
 ///
 pub struct CodeGenerator {
     pub lfc: PathBuf,
-    pub properties: LFCProperties
+    pub properties: LFCProperties,
 }
 
 impl LFCProperties {
     /// root points to root of project
-    pub fn new(
-        root: PathBuf,
-        properties: HashMap<String, serde_json::Value>,
-    ) -> LFCProperties {
+    pub fn new(root: PathBuf, properties: HashMap<String, serde_json::Value>) -> LFCProperties {
         let mut src = root.clone();
         src.push(PathBuf::from("src"));
 
@@ -63,9 +60,11 @@ impl CodeGenerator {
         lfc: PathBuf,
         properties: HashMap<String, serde_json::Value>,
     ) -> CodeGenerator {
-        CodeGenerator { lfc, properties: LFCProperties::new(root, properties)}
+        CodeGenerator {
+            lfc,
+            properties: LFCProperties::new(root, properties),
+        }
     }
-
 
     pub fn generate_code(self, app: &App) -> std::io::Result<()> {
         // path to the src-gen directory
@@ -73,7 +72,7 @@ impl CodeGenerator {
         src_gen_directory.push(PathBuf::from("./src-gen"));
 
         match self.properties.write(&src_gen_directory) {
-            Ok(_) => {},
+            Ok(_) => {}
             Err(e) => {
                 eprintln!("cannot write src-ge/lfc.json with error {:?}", &e);
             }
@@ -89,9 +88,7 @@ impl CodeGenerator {
             &app.main_reactor
         ));
         match run_and_capture(&mut command) {
-            Ok(_) => {
-                Ok(())
-            }
+            Ok(_) => Ok(()),
             Err(e) => {
                 eprintln!("error while generating code {:?}", e);
                 Err(e)
@@ -99,4 +96,3 @@ impl CodeGenerator {
         }
     }
 }
-
