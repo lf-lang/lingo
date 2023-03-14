@@ -18,6 +18,13 @@ fn build(args: &BuildArgs, config: &package::Config) {
         let mut main_reactor_path = app.root_path.clone();
         main_reactor_path.push(app.main_reactor.clone());
 
+        let code_generator = lfc::CodeGenerator::new(app.root_path.clone(), PathBuf::new(), app.properties.clone());
+
+        if let Err(e) = code_generator.generate_code(app) {
+            eprintln!("cannot generate code {:?}", e);
+            return false;
+        }
+
         if let Some(backend) = backends::select_backend("lfc", app) {
             if !backend.build(args) {
                 println!("error has occured!");

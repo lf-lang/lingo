@@ -47,11 +47,16 @@ impl LFCProperties {
             properties,
         }
     }
-
+    
+    /// write lfc properties to file
     pub fn write(&self, path: &Path) -> std::io::Result<()> {
-        let json_string = serde_json::to_string(&self).unwrap();
-        write(path, json_string)
+        write(path, self.to_string())
     }
+    
+    /// convert lfc properties to string
+    pub fn to_string(&self) -> String {
+        serde_json::to_string(&self).unwrap()
+    } 
 }
 
 impl CodeGenerator {
@@ -71,16 +76,10 @@ impl CodeGenerator {
         let mut src_gen_directory = app.root_path.clone();
         src_gen_directory.push(PathBuf::from("./src-gen"));
 
-        match self.properties.write(&src_gen_directory) {
-            Ok(_) => {}
-            Err(e) => {
-                eprintln!("cannot write src-ge/lfc.json with error {:?}", &e);
-            }
-        }
-
         let mut command = Command::new("lfc");
         command.arg("--no-compile");
         command.arg("--output");
+        command.arg(format!("--json {}", self.properties.to_string()));
         command.arg("./");
         command.arg(format!(
             "{}/{}",
