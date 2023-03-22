@@ -13,6 +13,10 @@ pub struct BuildArgs {
     /// overwrites any possible board definition in Lingo.toml
     #[clap(long)]
     pub board: Option<String>,
+
+    /// tell lingo where the lfc toolchain can be found
+    #[clap(short, long)]
+    pub lfc: Option<String>,
 }
 
 #[derive(Subcommand, Debug)]
@@ -39,9 +43,11 @@ pub enum Command {
 #[clap(version = env!("CARGO_PKG_VERSION"))]
 #[clap(about = "Build system of lingua-franca projects", long_about = None)]
 pub struct CommandLineArgs {
+    /// which command of lingo to use
     #[clap(subcommand)]
     pub command: Command,
 
+    /// force lingo to use the specified backend
     #[clap(short, long, default_value_t = String::from("cli"))]
     pub backend: String,
 }

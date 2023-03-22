@@ -18,7 +18,12 @@ fn build(args: &BuildArgs, config: &package::Config) {
         let mut main_reactor_path = app.root_path.clone();
         main_reactor_path.push(app.main_reactor.clone());
 
-        let code_generator = lfc::CodeGenerator::new(app.root_path.clone(), PathBuf::new(), app.properties.clone());
+        let code_generator = lfc::CodeGenerator::new(
+            PathBuf::from(format!("{}/{}", app.root_path.display(), app.main_reactor)),
+            PathBuf::from(format!("{}/src-gen", app.root_path.display())),
+            args.lfc.clone().map(|x| PathBuf::from(x)),
+            app.properties.clone(),
+        );
 
         if let Err(e) = code_generator.generate_code(app) {
             eprintln!("cannot generate code {:?}", e);
