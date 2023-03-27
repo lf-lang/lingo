@@ -81,11 +81,11 @@ impl CodeGenerator {
         println!(
             "generating code ... {}/bin/lfc --json={}",
             &self.lfc.display(),
-            self.properties.to_string()
+            self.properties
         );
 
         let mut command = Command::new(format!("{}/bin/lfc", &self.lfc.display()));
-        command.arg(format!("--json={}", self.properties.to_string()));
+        command.arg(format!("--json={}", self.properties));
 
         match run_and_capture(&mut command) {
             Ok(_) => Ok(()),
