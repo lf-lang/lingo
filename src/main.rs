@@ -21,7 +21,7 @@ fn build(args: &BuildArgs, config: &package::Config) {
         let code_generator = lfc::CodeGenerator::new(
             PathBuf::from(format!("{}/{}", app.root_path.display(), app.main_reactor)),
             PathBuf::from(format!("{}/src-gen", app.root_path.display())),
-            args.lfc.clone().map(|x| PathBuf::from(x)),
+            args.lfc.clone().map(PathBuf::from),
             app.properties.clone(),
         );
 

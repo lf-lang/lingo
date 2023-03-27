@@ -4,6 +4,7 @@ use crate::App;
 use serde_derive::{Deserialize, Serialize};
 use serde_json;
 use std::collections::HashMap;
+use std::fmt::Display;
 use std::fs::write;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -32,6 +33,14 @@ pub struct CodeGenerator {
     pub properties: LFCProperties,
 }
 
+impl Display for LFCProperties {
+    /// convert lfc properties to string
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let string = serde_json::to_string(&self).map_err(|_| std::fmt::Error)?;
+        write!(f, "{}", string)
+    }
+}
+
 impl LFCProperties {
     /// root points to root of project
     pub fn new(
@@ -49,11 +58,6 @@ impl LFCProperties {
     /// write lfc properties to file
     pub fn write(&self, path: &Path) -> std::io::Result<()> {
         write(path, self.to_string())
-    }
-
-    /// convert lfc properties to string
-    pub fn to_string(&self) -> String {
-        serde_json::to_string(&self).unwrap()
     }
 }
 

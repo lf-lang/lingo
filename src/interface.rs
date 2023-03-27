@@ -1,5 +1,4 @@
 use crate::{args::BuildArgs, package::App};
-use std::path::PathBuf;
 
 /// trait that all different build backends need to implement
 pub trait Backend {
