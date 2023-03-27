@@ -55,7 +55,7 @@ no-compile = true
 **Installing** is done on the most systems with `cargo install`.
 
 ```
-lingua-franca package manager and build tool 0.1.0
+lingua-franca package manager and build tool 0.1.1
 tassilo.tanneberger@tu-dresden.de
 Build system of lingua-franca projects
 
@@ -63,7 +63,7 @@ USAGE:
     lingo [OPTIONS] <SUBCOMMAND>
 
 OPTIONS:
-    -b, --backend <BACKEND>    [default: cli]
+    -b, --backend <BACKEND>    force lingo to use the specified backend [default: cli]
     -h, --help                 Print help information
     -V, --version              Print version information
 
