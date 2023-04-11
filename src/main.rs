@@ -1,7 +1,7 @@
-pub mod analyzer;
 pub mod args;
 pub mod backends;
 pub mod interface;
+pub mod lfc;
 pub mod package;
 pub mod util;
 
@@ -14,6 +14,22 @@ use std::process::Command;
 
 fn build(args: &BuildArgs, config: &package::Config) {
     let build_target = |app: &App| -> bool {
+        // path to the main reactor
+        let mut main_reactor_path = app.root_path.clone();
+        main_reactor_path.push(app.main_reactor.clone());
+
+        let code_generator = lfc::CodeGenerator::new(
+            PathBuf::from(format!("{}/{}", app.root_path.display(), app.main_reactor)),
+            PathBuf::from(format!("{}/src-gen", app.root_path.display())),
+            args.lfc.clone().map(PathBuf::from),
+            app.properties.clone(),
+        );
+
+        if let Err(e) = code_generator.generate_code(app) {
+            eprintln!("cannot generate code {:?}", e);
+            return false;
+        }
+
         if let Some(backend) = backends::select_backend("lfc", app) {
             if !backend.build(args) {
                 println!("error has occured!");
@@ -22,7 +38,6 @@ fn build(args: &BuildArgs, config: &package::Config) {
         }
         true
     };
-
     util::invoke_on_selected(args.target.clone(), config.apps.clone(), build_target);
 }
 

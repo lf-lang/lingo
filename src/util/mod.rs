@@ -1,3 +1,4 @@
+pub mod analyzer;
 pub mod command_line;
 
 use crate::package::App;
