@@ -59,8 +59,9 @@ fn main() {
 
     // we match on a tuple here
     match (wrapped_config, args.command) {
-        (_, ConsoleCommand::Init) => {
-            let initial_config = package::ConfigFile::new();
+        (_, ConsoleCommand::Init(init_config)) => {
+            println!("{:?}", init_config);
+            let initial_config = package::ConfigFile::new(init_config);
             let toml_path = format!("{}/Lingo.toml", PACKAGE_FILE);
             initial_config.write(Path::new(&toml_path));
             package::ConfigFile::setup_example();

@@ -1,3 +1,4 @@
+use crate::args::{InitArgs, TargetLanguage, Platform};
 use crate::util::analyzer;
 
 use serde_derive::{Deserialize, Serialize};
@@ -48,7 +49,9 @@ pub struct AppFile {
     pub main_reactor: Option<String>,
 
     /// target of the app
-    pub target: String,
+    pub target: TargetLanguage,
+
+    pub platform: Platform,
 
     pub dependencies: HashMap<String, DetailedDependency>,
 
@@ -62,7 +65,8 @@ pub struct App {
 
     pub name: String,
     pub main_reactor: String,
-    pub target: String,
+    pub target: TargetLanguage,
+    pub platform: Platform,
 
     pub dependencies: HashMap<String, DetailedDependency>,
     pub properties: HashMap<String, serde_json::Value>,
@@ -98,7 +102,7 @@ pub struct PackageDescription {
 }
 
 impl ConfigFile {
-    pub fn new() -> ConfigFile {
+    pub fn new(init_args: InitArgs) -> ConfigFile {
         let _main_reactor = if !std::path::Path::new("./src").exists() {
             vec![String::from("Main")]
         } else {
@@ -125,7 +129,8 @@ impl ConfigFile {
             apps: vec![AppFile {
                 name: None,
                 main_reactor: None,
-                target: "cpp".to_string(),
+                target: init_args.target_lang.unwrap_or(TargetLanguage::Cpp),
+                platform: init_args.platform.unwrap_or(Platform::Native),
                 dependencies: HashMap::new(),
                 properties: HashMap::new(),
             }],
@@ -173,6 +178,7 @@ impl ConfigFile {
                         .clone()
                         .unwrap_or("src/main.lf".to_string()),
                     target: app.target.clone(),
+                    platform: app.platform.clone(),
                     dependencies: app.dependencies.clone(),
                     properties: app.properties.clone(),
                 })
@@ -181,8 +187,8 @@ impl ConfigFile {
     }
 }
 
-impl Default for ConfigFile {
-    fn default() -> Self {
-        Self::new()
-    }
-}
+// impl Default for ConfigFile {
+//     fn default() -> Self {
+//         Self::new()
+//     }
+// }
