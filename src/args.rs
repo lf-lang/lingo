@@ -22,7 +22,9 @@ pub struct BuildArgs {
 
 #[derive(clap::ValueEnum, Clone, Debug, Deserialize, Serialize)]
 pub enum TargetLanguage {
-    C, Cpp, Rust,
+    C,
+    Cpp,
+    Rust,
 }
 
 impl ToString for TargetLanguage {
@@ -30,14 +32,15 @@ impl ToString for TargetLanguage {
         match self {
             TargetLanguage::C => "C".to_string(),
             TargetLanguage::Cpp => "Cpp".to_string(),
-            TargetLanguage::Rust => "Rust".to_string()
+            TargetLanguage::Rust => "Rust".to_string(),
         }
     }
 }
 
 #[derive(clap::ValueEnum, Clone, Debug, Deserialize, Serialize)]
 pub enum Platform {
-    Native, Zephyr
+    Native,
+    Zephyr,
 }
 
 #[derive(Args, Debug)]

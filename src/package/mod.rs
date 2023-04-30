@@ -1,18 +1,16 @@
-use crate::args::{InitArgs, TargetLanguage, Platform};
+use crate::args::{InitArgs, Platform, TargetLanguage};
 use crate::util::analyzer;
 
 use serde_derive::{Deserialize, Serialize};
 
 use std::collections::HashMap;
-use std::fs::{read_to_string, write, rename, remove_dir_all, create_dir};
+use std::fs::{create_dir, read_to_string, remove_dir_all, rename, write};
 use std::path::{Path, PathBuf};
 
 use git2::Repository;
 
 fn is_valid_location_for_project(path: &std::path::Path) -> bool {
-    !path.join("src").exists() && 
-    !path.join(".git").exists() &&
-    !path.join("application").exists()
+    !path.join("src").exists() && !path.join(".git").exists() && !path.join("application").exists()
 }
 
 #[derive(Deserialize, Serialize, Clone)]
@@ -168,14 +166,12 @@ impl ConfigFile {
         let hello_world_code: &'static str = match self.apps[0].target {
             TargetLanguage::Cpp => include_str!("../../defaults/HelloCpp.lf"),
             TargetLanguage::C => include_str!("../../defaults/HelloC.lf"),
-            _ => panic!("Target langauge not supported yet") // FIXME: Add examples for other programs
+            _ => panic!("Target langauge not supported yet"), // FIXME: Add examples for other programs
         };
-        
-        write(Path::new("./src/Main.lf"), hello_world_code)
-            .expect("cannot write Main.lf file!");
 
+        write(Path::new("./src/Main.lf"), hello_world_code).expect("cannot write Main.lf file!");
     }
-    
+
     // Sets up a LF project with Zephyr as the target platform.
     pub fn setup_zephyr(&self) {
         // Clone lf-west-template into a temporary directory
@@ -200,9 +196,10 @@ impl ConfigFile {
             rename(tmp_path.join(d), Path::new(d)).expect("Could not move dir");
         }
         for f in &files {
-            rename(tmp_path.join(f), Path::new(f)).expect("Could not move files from cloned template into project");
+            rename(tmp_path.join(f), Path::new(f))
+                .expect("Could not move files from cloned template into project");
         }
-        
+
         // Remove the temporary folder
         remove_dir_all(tmp_path).expect("Could not remove temporarily cloned repository");
     }
@@ -211,7 +208,7 @@ impl ConfigFile {
         if is_valid_location_for_project(Path::new(".")) {
             match self.apps[0].platform {
                 Platform::Native => self.setup_native(),
-                Platform::Zephyr => self.setup_zephyr()
+                Platform::Zephyr => self.setup_zephyr(),
             }
         } else {
             panic!("Failed to initilize project, invalid location"); // FIXME: Handle properly
@@ -241,4 +238,3 @@ impl ConfigFile {
         }
     }
 }
-
