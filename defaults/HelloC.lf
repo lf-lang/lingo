@@ -1,0 +1,8 @@
+target C;
+
+main reactor {
+    reaction (startup)  {=
+        lf_print("Hello World!");
+    =}
+} 
+

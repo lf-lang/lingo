@@ -37,13 +37,13 @@ impl ToString for TargetLanguage {
 
 #[derive(clap::ValueEnum, Clone, Debug, Deserialize, Serialize)]
 pub enum Platform {
-    Native, Zephyr, FreeRTOS,
+    Native, Zephyr
 }
 
 #[derive(Args, Debug)]
 pub struct InitArgs {
     #[clap(value_enum, short, long)]
-    pub target_lang: Option<TargetLanguage>,
+    pub language: Option<TargetLanguage>,
 
     #[clap(value_enum, short, long)]
     pub platform: Option<Platform>,

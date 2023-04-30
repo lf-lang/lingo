@@ -4,8 +4,16 @@ use crate::util::analyzer;
 use serde_derive::{Deserialize, Serialize};
 
 use std::collections::HashMap;
-use std::fs::{read_to_string, write};
+use std::fs::{read_to_string, write, rename, remove_dir_all, create_dir};
 use std::path::{Path, PathBuf};
+
+use git2::Repository;
+
+fn is_valid_location_for_project(path: &std::path::Path) -> bool {
+    !path.join("src").exists() && 
+    !path.join(".git").exists() &&
+    !path.join("application").exists()
+}
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct AppVec {
@@ -129,7 +137,7 @@ impl ConfigFile {
             apps: vec![AppFile {
                 name: None,
                 main_reactor: None,
-                target: init_args.target_lang.unwrap_or(TargetLanguage::Cpp),
+                target: init_args.language.unwrap_or(TargetLanguage::Cpp),
                 platform: init_args.platform.unwrap_or(Platform::Native),
                 dependencies: HashMap::new(),
                 properties: HashMap::new(),
@@ -154,12 +162,59 @@ impl ConfigFile {
         }
     }
 
-    pub fn setup_example() {
-        if !std::path::Path::new("./src").exists() {
-            std::fs::create_dir_all("./src").expect("Cannot create target directory");
-            let hello_world_code: &'static str = include_str!("../../defaults/Main.lf");
-            write(Path::new("./src/Main.lf"), hello_world_code)
-                .expect("cannot write Main.lf file!");
+    // Sets up a standard LF project for "native" development and deployment
+    pub fn setup_native(&self) {
+        std::fs::create_dir_all("./src").expect("Cannot create target directory");
+        let hello_world_code: &'static str = match self.apps[0].target {
+            TargetLanguage::Cpp => include_str!("../../defaults/HelloCpp.lf"),
+            TargetLanguage::C => include_str!("../../defaults/HelloC.lf"),
+            _ => panic!("Target langauge not supported yet") // FIXME: Add examples for other programs
+        };
+        
+        write(Path::new("./src/Main.lf"), hello_world_code)
+            .expect("cannot write Main.lf file!");
+
+    }
+    
+    // Sets up a LF project with Zephyr as the target platform.
+    pub fn setup_zephyr(&self) {
+        // Clone lf-west-template into a temporary directory
+        let tmp_path = Path::new("zephyr_tmp");
+        if tmp_path.exists() {
+            remove_dir_all(tmp_path).expect("Could not remove temporarily cloned repository");
+        }
+        let url = "https://github.com/lf-lang/lf-west-template";
+        let _repo = match Repository::clone(url, tmp_path) {
+            Ok(repo) => repo,
+            Err(e) => panic!("failed to clone: {}", e), // FIXME: How to handle errors?
+        };
+
+        // Move the relevant files/directories from the cloned template
+        let dirs = vec![".west", "application", "scripts"];
+        let files = vec!["west.yml", "README.md"];
+        for d in &dirs {
+            if Path::new(d).exists() {
+                remove_dir_all(Path::new(d)).expect("Could not remove dir");
+            }
+            create_dir(Path::new(d)).expect("Could not create dir");
+            rename(tmp_path.join(d), Path::new(d)).expect("Could not move dir");
+        }
+        for f in &files {
+            rename(tmp_path.join(f), Path::new(f)).expect("Could not move files from cloned template into project");
+        }
+        
+        // Remove the temporary folder
+        remove_dir_all(tmp_path).expect("Could not remove temporarily cloned repository");
+    }
+
+    pub fn setup_example(&self) {
+        if is_valid_location_for_project(Path::new(".")) {
+            match self.apps[0].platform {
+                Platform::Native => self.setup_native(),
+                Platform::Zephyr => self.setup_zephyr()
+            }
+        } else {
+            panic!("Failed to initilize project, invalid location"); // FIXME: Handle properly
         }
     }
 
@@ -187,8 +242,3 @@ impl ConfigFile {
     }
 }
 
-// impl Default for ConfigFile {
-//     fn default() -> Self {
-//         Self::new()
-//     }
-// }
