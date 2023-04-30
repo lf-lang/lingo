@@ -228,7 +228,7 @@ impl ConfigFile {
                     main_reactor: app
                         .main_reactor
                         .clone()
-                        .unwrap_or("src/main.lf".to_string()),
+                        .unwrap_or("src/Main.lf".to_string()), // FIXME: The default should be that it searches the `src` directory for a main reactor
                     target: app.target.clone(),
                     platform: app.platform.clone(),
                     dependencies: app.dependencies.clone(),
