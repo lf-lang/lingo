@@ -69,7 +69,7 @@ impl CodeGenerator {
         properties: HashMap<String, serde_json::Value>,
     ) -> CodeGenerator {
         CodeGenerator {
-            lfc: lfc.unwrap_or(PathBuf::from("/")),
+            lfc: lfc.unwrap_or(PathBuf::from("/bin/lfc")),
             properties: LFCProperties::new(src, out, properties),
         }
     }
@@ -78,13 +78,19 @@ impl CodeGenerator {
         // path to the src-gen directory
         let mut src_gen_directory = app.root_path.clone();
         src_gen_directory.push(PathBuf::from("./src-gen"));
+
+        // FIXME: This validation should be somewhere else
+        if !self.lfc.exists() {
+            panic!("lfc not found at `{}`", &self.lfc.display());
+        }
+
         println!(
-            "generating code ... {}/bin/lfc --json={}",
+            "Invoking code-generator: `{} --json={}`",
             &self.lfc.display(),
             self.properties
         );
 
-        let mut command = Command::new(format!("{}/bin/lfc", &self.lfc.display()));
+        let mut command = Command::new(format!("{}", &self.lfc.display()));
         command.arg(format!("--json={}", self.properties));
 
         match run_and_capture(&mut command) {
