@@ -4,7 +4,7 @@ pub mod command_line;
 use crate::package::App;
 use regex::Regex;
 use std::path::{Path, PathBuf};
-
+use std::{io, fs};
 /// given is some list of build targets which are filtered by the binary regex
 /// the lambda f is invoked on every element of the remaining elements which fit
 /// the regex.
@@ -65,4 +65,20 @@ pub fn find_toml(input_path: &Path) -> Option<PathBuf> {
         Some(parent) => find_toml(parent),
         None => None,
     }
+}
+
+/// Copy files from source to destination recursively.
+// Copied from https://nick.groenen.me/notes/recursively-copy-files-in-rust/
+pub fn copy_recursively(source: impl AsRef<Path>, destination: impl AsRef<Path>) -> io::Result<()> {
+    fs::create_dir_all(&destination)?;
+    for entry in fs::read_dir(source)? {
+        let entry = entry?;
+        let filetype = entry.file_type()?;
+        if filetype.is_dir() {
+            copy_recursively(entry.path(), destination.as_ref().join(entry.file_name()))?;
+        } else {
+            fs::copy(entry.path(), destination.as_ref().join(entry.file_name()))?;
+        }
+    }
+    Ok(())
 }

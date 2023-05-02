@@ -1,11 +1,12 @@
 use crate::args::{InitArgs, Platform, TargetLanguage};
-use crate::util::analyzer;
+use crate::util::{analyzer, copy_recursively};
 
 use serde_derive::{Deserialize, Serialize};
 
 use std::collections::HashMap;
-use std::fs::{create_dir, read_to_string, remove_dir_all, rename, write};
+use std::fs::{read_to_string, remove_dir_all, write, remove_file};
 use std::path::{Path, PathBuf};
+
 
 use git2::Repository;
 
@@ -191,22 +192,12 @@ impl ConfigFile {
             Err(e) => panic!("failed to clone: {}", e), // FIXME: How to handle errors?
         };
 
-        // Move the relevant files/directories from the cloned template
-        let dirs = vec![".west", "application", "scripts"];
-        let files = vec!["west.yml", "README.md"];
-        for d in &dirs {
-            if Path::new(d).exists() {
-                remove_dir_all(Path::new(d)).expect("Could not remove dir");
-            }
-            create_dir(Path::new(d)).expect("Could not create dir");
-            rename(tmp_path.join(d), Path::new(d)).expect("Could not move dir");
-        }
-        for f in &files {
-            rename(tmp_path.join(f), Path::new(f))
-                .expect("Could not move files from cloned template into project");
-        }
-
-        // Remove the temporary folder
+        // Copy the cloned template repo into the project directory
+        copy_recursively(tmp_path, Path::new(".")).expect("Could not copy cloned repo");
+        
+        // Remove .git, .gitignore ad temporary folder
+        remove_file(".gitignore").expect("Could not remove .gitignore");
+        remove_dir_all(Path::new(".git")).expect("Could not remove .git directory");
         remove_dir_all(tmp_path).expect("Could not remove temporarily cloned repository");
     }
 
