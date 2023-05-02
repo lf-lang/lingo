@@ -4,7 +4,7 @@ pub mod command_line;
 use crate::package::App;
 use regex::Regex;
 use std::path::{Path, PathBuf};
-use std::{io, fs};
+use std::{fs, io};
 /// given is some list of build targets which are filtered by the binary regex
 /// the lambda f is invoked on every element of the remaining elements which fit
 /// the regex.

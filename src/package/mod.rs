@@ -4,9 +4,8 @@ use crate::util::{analyzer, copy_recursively};
 use serde_derive::{Deserialize, Serialize};
 
 use std::collections::HashMap;
-use std::fs::{read_to_string, remove_dir_all, write, remove_file};
+use std::fs::{read_to_string, remove_dir_all, remove_file, write};
 use std::path::{Path, PathBuf};
-
 
 use git2::Repository;
 
@@ -194,7 +193,7 @@ impl ConfigFile {
 
         // Copy the cloned template repo into the project directory
         copy_recursively(tmp_path, Path::new(".")).expect("Could not copy cloned repo");
-        
+
         // Remove .git, .gitignore ad temporary folder
         remove_file(".gitignore").expect("Could not remove .gitignore");
         remove_dir_all(Path::new(".git")).expect("Could not remove .git directory");
