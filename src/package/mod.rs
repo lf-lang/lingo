@@ -135,7 +135,7 @@ impl ConfigFile {
             apps: vec![AppFile {
                 name: None,
                 main_reactor: None,
-                target: init_args.language.unwrap_or_else(|| {
+                target: init_args.language.unwrap_or({
                     // Target langauge for Zephyr is C, else Cpp.
                     match init_args.platform {
                         Some(Platform::Zephyr) => TargetLanguage::C,
