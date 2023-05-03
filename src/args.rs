@@ -1,4 +1,5 @@
 use clap::{Args, Parser, Subcommand};
+use serde_derive::{Deserialize, Serialize};
 
 #[derive(Args, Debug)]
 pub struct BuildArgs {
@@ -19,10 +20,42 @@ pub struct BuildArgs {
     pub lfc: Option<String>,
 }
 
+#[derive(clap::ValueEnum, Clone, Debug, Deserialize, Serialize)]
+pub enum TargetLanguage {
+    C,
+    Cpp,
+    Rust,
+}
+
+impl ToString for TargetLanguage {
+    fn to_string(&self) -> String {
+        match self {
+            TargetLanguage::C => "C".to_string(),
+            TargetLanguage::Cpp => "Cpp".to_string(),
+            TargetLanguage::Rust => "Rust".to_string(),
+        }
+    }
+}
+
+#[derive(clap::ValueEnum, Clone, Debug, Deserialize, Serialize)]
+pub enum Platform {
+    Native,
+    Zephyr,
+}
+
+#[derive(Args, Debug)]
+pub struct InitArgs {
+    #[clap(value_enum, short, long)]
+    pub language: Option<TargetLanguage>,
+
+    #[clap(value_enum, short, long)]
+    pub platform: Option<Platform>,
+}
+
 #[derive(Subcommand, Debug)]
 pub enum Command {
     /// initializing a lingua-franca project
-    Init,
+    Init(InitArgs),
 
     /// compiling one ore multiple binaries in a lingua-franca package
     Build(BuildArgs),

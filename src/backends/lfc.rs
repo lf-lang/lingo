@@ -23,6 +23,8 @@ impl Backend for LFC {
 
         let build_lambda = |main_reactor: &String| -> bool {
             println!("building main reactor: {}", &main_reactor);
+            // FIXME: What is this supposed to do? `lfc` does not have n `--output` argument
+            //  also. Why isnt the lfc from the CLI `-l` used.
             let mut command = Command::new("lfc");
             command.arg("--output");
             command.arg("./");

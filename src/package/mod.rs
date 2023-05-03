@@ -1,10 +1,17 @@
-use crate::util::analyzer;
+use crate::args::{InitArgs, Platform, TargetLanguage};
+use crate::util::{analyzer, copy_recursively};
 
 use serde_derive::{Deserialize, Serialize};
 
 use std::collections::HashMap;
-use std::fs::{read_to_string, write};
+use std::fs::{read_to_string, remove_dir_all, remove_file, write};
 use std::path::{Path, PathBuf};
+
+use git2::Repository;
+
+fn is_valid_location_for_project(path: &std::path::Path) -> bool {
+    !path.join("src").exists() && !path.join(".git").exists() && !path.join("application").exists()
+}
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct AppVec {
@@ -48,7 +55,9 @@ pub struct AppFile {
     pub main_reactor: Option<String>,
 
     /// target of the app
-    pub target: String,
+    pub target: TargetLanguage,
+
+    pub platform: Platform,
 
     pub dependencies: HashMap<String, DetailedDependency>,
 
@@ -62,7 +71,8 @@ pub struct App {
 
     pub name: String,
     pub main_reactor: String,
-    pub target: String,
+    pub target: TargetLanguage,
+    pub platform: Platform,
 
     pub dependencies: HashMap<String, DetailedDependency>,
     pub properties: HashMap<String, serde_json::Value>,
@@ -98,7 +108,7 @@ pub struct PackageDescription {
 }
 
 impl ConfigFile {
-    pub fn new() -> ConfigFile {
+    pub fn new(init_args: InitArgs) -> ConfigFile {
         let _main_reactor = if !std::path::Path::new("./src").exists() {
             vec![String::from("Main")]
         } else {
@@ -125,7 +135,14 @@ impl ConfigFile {
             apps: vec![AppFile {
                 name: None,
                 main_reactor: None,
-                target: "cpp".to_string(),
+                target: init_args.language.unwrap_or({
+                    // Target langauge for Zephyr is C, else Cpp.
+                    match init_args.platform {
+                        Some(Platform::Zephyr) => TargetLanguage::C,
+                        _ => TargetLanguage::Cpp,
+                    }
+                }),
+                platform: init_args.platform.unwrap_or(Platform::Native),
                 dependencies: HashMap::new(),
                 properties: HashMap::new(),
             }],
@@ -149,12 +166,48 @@ impl ConfigFile {
         }
     }
 
-    pub fn setup_example() {
-        if !std::path::Path::new("./src").exists() {
-            std::fs::create_dir_all("./src").expect("Cannot create target directory");
-            let hello_world_code: &'static str = include_str!("../../defaults/Main.lf");
-            write(Path::new("./src/Main.lf"), hello_world_code)
-                .expect("cannot write Main.lf file!");
+    // Sets up a standard LF project for "native" development and deployment
+    pub fn setup_native(&self) {
+        std::fs::create_dir_all("./src").expect("Cannot create target directory");
+        let hello_world_code: &'static str = match self.apps[0].target {
+            TargetLanguage::Cpp => include_str!("../../defaults/HelloCpp.lf"),
+            TargetLanguage::C => include_str!("../../defaults/HelloC.lf"),
+            _ => panic!("Target langauge not supported yet"), // FIXME: Add examples for other programs
+        };
+
+        write(Path::new("./src/Main.lf"), hello_world_code).expect("cannot write Main.lf file!");
+    }
+
+    // Sets up a LF project with Zephyr as the target platform.
+    pub fn setup_zephyr(&self) {
+        // Clone lf-west-template into a temporary directory
+        let tmp_path = Path::new("zephyr_tmp");
+        if tmp_path.exists() {
+            remove_dir_all(tmp_path).expect("Could not remove temporarily cloned repository");
+        }
+        let url = "https://github.com/lf-lang/lf-west-template";
+        let _repo = match Repository::clone(url, tmp_path) {
+            Ok(repo) => repo,
+            Err(e) => panic!("failed to clone: {}", e), // FIXME: How to handle errors?
+        };
+
+        // Copy the cloned template repo into the project directory
+        copy_recursively(tmp_path, Path::new(".")).expect("Could not copy cloned repo");
+
+        // Remove .git, .gitignore ad temporary folder
+        remove_file(".gitignore").expect("Could not remove .gitignore");
+        remove_dir_all(Path::new(".git")).expect("Could not remove .git directory");
+        remove_dir_all(tmp_path).expect("Could not remove temporarily cloned repository");
+    }
+
+    pub fn setup_example(&self) {
+        if is_valid_location_for_project(Path::new(".")) {
+            match self.apps[0].platform {
+                Platform::Native => self.setup_native(),
+                Platform::Zephyr => self.setup_zephyr(),
+            }
+        } else {
+            panic!("Failed to initilize project, invalid location"); // FIXME: Handle properly
         }
     }
 
@@ -171,18 +224,13 @@ impl ConfigFile {
                     main_reactor: app
                         .main_reactor
                         .clone()
-                        .unwrap_or("src/main.lf".to_string()),
+                        .unwrap_or("src/Main.lf".to_string()), // FIXME: The default should be that it searches the `src` directory for a main reactor
                     target: app.target.clone(),
+                    platform: app.platform.clone(),
                     dependencies: app.dependencies.clone(),
                     properties: app.properties.clone(),
                 })
                 .collect(),
         }
-    }
-}
-
-impl Default for ConfigFile {
-    fn default() -> Self {
-        Self::new()
     }
 }
