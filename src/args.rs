@@ -1,30 +1,55 @@
 use clap::{Args, Parser, Subcommand};
 use serde_derive::{Deserialize, Serialize};
 
-#[derive(Args, Debug)]
-pub struct BuildArgs {
-    /// which backend to use
-    #[clap(short, long, default_value_t = String::from("lfc"))]
-    pub backend: String,
-
-    /// which target to build
-    #[clap(short, long)]
-    pub target: Option<String>,
-
-    /// overwrites any possible board definition in Lingo.toml
-    #[clap(long)]
-    pub board: Option<String>,
-
-    /// tell lingo where the lfc toolchain can be found
-    #[clap(short, long)]
-    pub lfc: Option<String>,
-}
-
 #[derive(clap::ValueEnum, Clone, Debug, Deserialize, Serialize)]
 pub enum TargetLanguage {
     C,
     Cpp,
     Rust,
+}
+
+#[derive(clap::ValueEnum, Clone, Debug, Deserialize, Serialize)]
+pub enum Platform {
+    Native,
+    Zephyr,
+}
+
+#[derive(clap::ValueEnum, Clone, Debug, Deserialize, Serialize)]
+pub enum BuildSystem {
+    LFC,
+    CMake,
+}
+
+#[derive(Args, Debug)]
+pub struct BuildArgs {
+    /// which build system to use
+    /// TODO: discuss this
+    #[clap(short, long)]
+    pub build_system: Option<BuildSystem>,
+
+    /// which target to build
+    #[clap(short, long)]
+    pub language: Option<TargetLanguage>,
+
+    /// overwrites any possible board definition in Lingo.toml
+    #[clap(long)]
+    pub platform: Option<Platform>,
+
+    /// tell lingo where the lfc toolchain can be found
+    #[clap(long)]
+    pub lfc: Option<String>,
+
+    /// skips building aka invoking the build system so it only generates code
+    #[clap(short, long, action)]
+    pub no_compile: bool,
+
+    /// if one of the apps fails to build dont interrupt the build process
+    #[clap(short, long, action)]
+    pub keep_going: bool,
+
+    /// list of apps to build if left empty all apps are built
+    #[clap(short, long, value_delimiter = ',')]
+    pub apps: Vec<String>,
 }
 
 impl ToString for TargetLanguage {
@@ -35,12 +60,6 @@ impl ToString for TargetLanguage {
             TargetLanguage::Rust => "Rust".to_string(),
         }
     }
-}
-
-#[derive(clap::ValueEnum, Clone, Debug, Deserialize, Serialize)]
-pub enum Platform {
-    Native,
-    Zephyr,
 }
 
 #[derive(Args, Debug)]
@@ -80,7 +99,11 @@ pub struct CommandLineArgs {
     #[clap(subcommand)]
     pub command: Command,
 
-    /// force lingo to use the specified backend
-    #[clap(short, long, default_value_t = String::from("cli"))]
-    pub backend: String,
+    /// lingo wouldn't produce any output
+    #[clap(short, long, action)]
+    pub quiet: bool,
+
+    /// lingo wouldn't produce any output
+    #[clap(short, long, action)]
+    pub verbose: bool,
 }

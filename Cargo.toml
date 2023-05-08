@@ -8,13 +8,11 @@ edition = "2021"
 clap = { version = "4.1", features = ["derive"] }
 os-version = "0.2"
 
-regex = "1"
 serde = "*"
-
 serde_json = "*"
 serde_derive = "*"
 
-toml = {version = "0.5"}
+toml = {version = "0"}
 crossbeam = "*"
 
 termion = "1.5"

@@ -30,7 +30,7 @@ fn build(args: &BuildArgs, config: &package::Config) {
             return false;
         }
 
-        if let Some(backend) = backends::select_backend("lfc", app) {
+        if let Some(backend) = backends::select_backend(&args::BuildSystem::LFC, app) {
             if !backend.build(args) {
                 println!("error has occured!");
                 return false;
@@ -38,7 +38,7 @@ fn build(args: &BuildArgs, config: &package::Config) {
         }
         true
     };
-    util::invoke_on_selected(args.target.clone(), config.apps.clone(), build_target);
+    util::invoke_on_selected(&args.apps, config.apps.clone(), build_target);
 }
 
 fn main() {
@@ -78,13 +78,12 @@ fn main() {
             let config = file_config.to_config(working_path);
 
             build(&build_command_args, &config);
-
             let execute_binary = |app: &App| -> bool {
                 let mut command = Command::new(format!("./bin/{}", app.name));
                 util::command_line::run_and_capture(&mut command).is_ok()
             };
 
-            util::invoke_on_selected(build_command_args.target, config.apps, execute_binary);
+            util::invoke_on_selected(&build_command_args.apps, config.apps, execute_binary);
         }
         (Some(_config), ConsoleCommand::Clean) => todo!(),
         _ => todo!(),
