@@ -8,6 +8,7 @@ use std::fmt::Display;
 use std::fs::write;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use which::which;
 
 ///
 /// taken from: https://www.lf-lang.org/docs/handbook/target-declaration?target=c
@@ -70,8 +71,10 @@ impl CodeGenerator {
         lfc: Option<PathBuf>,
         properties: HashMap<String, serde_json::Value>,
     ) -> CodeGenerator {
+        let lfc_path = lfc.unwrap_or(which("rustc").expect("cannot find lingua franca."));
+
         CodeGenerator {
-            lfc: lfc.unwrap_or(PathBuf::from("/bin/lfc")),
+            lfc: lfc_path,
             properties: LFCProperties::new(src, out, properties),
         }
     }
@@ -94,12 +97,7 @@ impl CodeGenerator {
 
         let mut command = Command::new(format!("{}", &self.lfc.display()));
         command.arg(format!("--json={}", self.properties));
-        command.arg("--no-compile");
-        println!(
-            "ARGS: {:?}",
-            command.get_args().collect::<Vec<&std::ffi::OsStr>>()
-        );
-        println!("ENV: {:?}", command.get_envs());
+
         match run_and_capture(&mut command) {
             Ok(_) => Ok(()),
             Err(e) => {
