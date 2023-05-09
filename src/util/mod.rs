@@ -11,7 +11,9 @@ pub fn invoke_on_selected<F>(apps: &Vec<String>, mut sources: Vec<App>, f: F) ->
 where
     F: Fn(&App) -> bool,
 {
-    sources.retain(|input: &App| apps.contains(&input.name));
+    if !apps.is_empty() {
+        sources.retain(|input: &App| apps.contains(&input.name));
+    }
 
     // evaluate f on everyelement inside sources and then compute the logical conjuction
     sources

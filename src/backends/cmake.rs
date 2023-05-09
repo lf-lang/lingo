@@ -1,5 +1,7 @@
 use crate::args::BuildArgs;
-use crate::interface::{Backend, TargetInformation};
+use crate::interface::Backend;
+use crate::lfc::LFCProperties;
+use crate::App;
 
 use crate::util::command_line::run_and_capture;
 use std::env;
@@ -7,52 +9,54 @@ use std::fs;
 use std::process::Command;
 
 pub struct Cmake {
-    target: TargetInformation,
+    app: App,
+    lfc: LFCProperties,
 }
 
 impl Backend for Cmake {
-    fn from_target(target: TargetInformation) -> Self {
-        Cmake { target: target }
+    fn from_target(target: &App, lfc: &LFCProperties) -> Self {
+        Cmake {
+            app: target.clone(),
+            lfc: lfc.clone(),
+        }
     }
 
-    fn build(&self, _config: &BuildArgs) -> bool {
-        let reactor_copy = self.target.app.main_reactor.clone();
+    fn build(&self, config: &BuildArgs) -> bool {
+        // cmake generation
+        let mut cmake_command = Command::new("cmake");
+        cmake_command.arg(format!(
+            "-DCMAKE_BUILD_TYPE={}",
+            if config.release { "RELEASE" } else { "DEBUG" }
+        ));
+        cmake_command.arg(format!("-DCMAKE_INSTALL_PREFIX={}", self.lfc.out.display()));
+        cmake_command.arg(format!("-DCMAKE_INSTALL_BINDIR=bin"));
+        cmake_command.arg(format!("-DREACTOR_CPP_VALIDATE=ON"));
+        cmake_command.arg(format!("-DREACTOR_CPP_TRACE=OFF"));
+        cmake_command.arg(format!("-DREACTOR_CPP_LOG_LEVEL=3"));
+        cmake_command.arg(format!(
+            "-DLF_SRC_PKG_PATH={}",
+            self.app.root_path.display()
+        ));
+        cmake_command.arg(format!("{}/src-gen", self.lfc.out.display().to_string()));
+        cmake_command.arg(format!("-B {}/build", self.lfc.out.display().to_string()));
+        cmake_command.current_dir(format!("{}/build", self.lfc.out.display().to_string()));
+        let cmake_gen = run_and_capture(&mut cmake_command).is_ok();
 
-        let build_lambda = |main_reactor: &String| -> bool {
-            println!("building main reactor: {}", &main_reactor);
-            let mut cmake_command = Command::new("cmake");
-            cmake_command.arg("-DCMAKE_BUILD_TYPE=DEBUG"); // TODO: progagate from cli args
-            cmake_command.arg(format!(
-                "-DCMAKE_INSTALL_PREFIX={}",
-                self.target.lfc.out.display()
-            )); // TODO: I Think this is actually the root_dir
-            cmake_command.arg(format!("-DCMAKE_INSTALL_BINDIR=bin"));
-            cmake_command.arg(format!("-DREACTOR_CPP_VALIDATE=ON"));
-            cmake_command.arg(format!("-DREACTOR_CPP_TRACE=OFF"));
-            cmake_command.arg(format!("-DREACTOR_CPP_LOG_LEVEL=3"));
-            cmake_command.arg(format!(
-                "-DLF_SRC_PKG_PATH={}",
-                self.target.app.root_path.display()
-            ));
-            cmake_command.arg(self.target.lfc.out.display().to_string());
-            cmake_command.arg(format!(
-                "-B {}/build",
-                self.target.lfc.out.display().to_string()
-            ));
-            run_and_capture(&mut cmake_command).is_ok();
+        // compiling
+        let mut cmake_build_command = Command::new("cmake");
+        cmake_build_command.current_dir(format!("{}/build", self.lfc.out.display().to_string()));
+        cmake_build_command.arg("--build");
+        cmake_build_command.arg("./");
+        let cmake_build = run_and_capture(&mut cmake_build_command).is_ok();
 
-            let mut cmake_build_command = Command::new("cmake");
-            cmake_build_command.arg("--build");
-            cmake_build_command.arg("--target");
-            run_and_capture(&mut cmake_build_command).is_ok()
-        };
+        // installing
+        let mut cmake_install_command = Command::new("cmake");
+        cmake_install_command.current_dir(format!("{}/build", self.lfc.out.display().to_string()));
+        cmake_install_command.arg("--install");
+        cmake_install_command.arg("./");
+        let cmake_install = run_and_capture(&mut cmake_install_command).is_ok();
 
-        if !build_lambda(&reactor_copy) {
-            println!("calling cmake returned an error can cmake be found in $PATH ?");
-            return false;
-        }
-
-        true
+        cmake_gen && cmake_build && cmake_install
     }
 
     fn update(&self) -> bool {

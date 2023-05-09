@@ -1,16 +1,11 @@
+pub mod cmake;
 pub mod lfc;
 
-use crate::{args::BuildSystem, interface::Backend, package::App};
+use crate::{args::BuildSystem, interface::Backend, lfc::LFCProperties, package::App};
 
-pub fn select_backend(name: &BuildSystem, app: &App) -> Option<Box<dyn Backend>> {
+pub fn select_backend(name: &BuildSystem, app: &App, lfc: &LFCProperties) -> Box<dyn Backend> {
     match name {
-        BuildSystem::LFC => {
-            let lfc = lfc::LFC::from_target(app);
-            Some(Box::new(lfc))
-        }
-        _ => {
-            println!("error unkown backend!");
-            None
-        }
+        BuildSystem::LFC => Box::new(lfc::LFC::from_target(app, lfc)),
+        BuildSystem::CMake => Box::new(cmake::Cmake::from_target(app, lfc)),
     }
 }

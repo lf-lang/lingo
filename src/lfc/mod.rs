@@ -28,6 +28,7 @@ pub struct LFCProperties {
 ///
 /// this struct contains everything that is required to invoke lfc
 ///
+#[derive(Clone)]
 pub struct CodeGenerator {
     pub lfc: PathBuf,
     pub properties: LFCProperties,
@@ -46,8 +47,9 @@ impl LFCProperties {
     pub fn new(
         src: PathBuf,
         out: PathBuf,
-        properties: HashMap<String, serde_json::Value>,
+        mut properties: HashMap<String, serde_json::Value>,
     ) -> LFCProperties {
+        properties.insert("no-compile".to_string(), serde_json::Value::Bool(true));
         LFCProperties {
             src,
             out,
@@ -92,7 +94,12 @@ impl CodeGenerator {
 
         let mut command = Command::new(format!("{}", &self.lfc.display()));
         command.arg(format!("--json={}", self.properties));
-
+        command.arg("--no-compile");
+        println!(
+            "ARGS: {:?}",
+            command.get_args().collect::<Vec<&std::ffi::OsStr>>()
+        );
+        println!("ENV: {:?}", command.get_envs());
         match run_and_capture(&mut command) {
             Ok(_) => Ok(()),
             Err(e) => {

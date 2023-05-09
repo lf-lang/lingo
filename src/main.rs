@@ -20,21 +20,26 @@ fn build(args: &BuildArgs, config: &package::Config) {
 
         let code_generator = lfc::CodeGenerator::new(
             PathBuf::from(format!("{}/{}", app.root_path.display(), app.main_reactor)),
-            PathBuf::from(format!("{}/src-gen", app.root_path.display())),
+            PathBuf::from(format!("{}/", app.root_path.display())),
             args.lfc.clone().map(PathBuf::from),
             app.properties.clone(),
         );
 
-        if let Err(e) = code_generator.generate_code(app) {
+        if let Err(e) = code_generator.clone().generate_code(app) {
+            //TODO: optimize
             eprintln!("cannot generate code {:?}", e);
             return false;
         }
 
-        if let Some(backend) = backends::select_backend(&args::BuildSystem::LFC, app) {
-            if !backend.build(args) {
-                println!("error has occured!");
-                return false;
-            }
+        let backend = backends::select_backend(
+            &args.build_system.clone().unwrap_or(args::BuildSystem::LFC),
+            app,
+            &code_generator.properties,
+        );
+
+        if !backend.build(args) {
+            println!("error has occured!");
+            return false;
         }
         true
     };
@@ -69,7 +74,7 @@ fn main() {
             let mut working_path = lingo_path.unwrap();
             working_path.pop();
             let config = file_config.to_config(working_path);
-
+            println!("building ...");
             build(&build_command_args, &config)
         }
         (Some(file_config), ConsoleCommand::Run(build_command_args)) => {

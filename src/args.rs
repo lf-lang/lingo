@@ -47,6 +47,10 @@ pub struct BuildArgs {
     #[clap(short, long, action)]
     pub keep_going: bool,
 
+    /// compiles the binaries with optimizations turned on and strips debug symbols
+    #[clap(short, long, action)]
+    pub release: bool,
+
     /// list of apps to build if left empty all apps are built
     #[clap(short, long, value_delimiter = ',')]
     pub apps: Vec<String>,
