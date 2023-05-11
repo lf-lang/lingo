@@ -1,6 +1,6 @@
 [package]
 name = "lingo"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 
 [dependencies]
@@ -8,13 +8,12 @@ edition = "2021"
 clap = { version = "4.1", features = ["derive"] }
 os-version = "0.2"
 
-regex = "1"
 serde = "*"
-
 serde_json = "*"
 serde_derive = "*"
+which = "*"
 
-toml = {version = "0.5"}
+toml = {version = "0"}
 crossbeam = "*"
 
 termion = "1.5"

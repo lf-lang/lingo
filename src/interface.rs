@@ -1,8 +1,9 @@
+use crate::lfc::LFCProperties;
 use crate::{args::BuildArgs, package::App};
 
 /// trait that all different build backends need to implement
 pub trait Backend {
-    fn from_target(target: &App) -> Self
+    fn from_target(target: &App, lfc: &LFCProperties) -> Self
     where
         Self: Sized;
 

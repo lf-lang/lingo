@@ -1,5 +1,6 @@
 use crate::args::BuildArgs;
 use crate::interface::Backend;
+use crate::lfc::LFCProperties;
 use crate::package::App;
 
 use crate::util::command_line::run_and_capture;
@@ -12,7 +13,7 @@ pub struct LFC {
 }
 
 impl Backend for LFC {
-    fn from_target(target: &App) -> Self {
+    fn from_target(target: &App, _lfc: &LFCProperties) -> Self {
         LFC {
             target: target.clone(),
         }

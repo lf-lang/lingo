@@ -8,6 +8,7 @@ use std::fmt::Display;
 use std::fs::write;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use which::which;
 
 ///
 /// taken from: https://www.lf-lang.org/docs/handbook/target-declaration?target=c
@@ -28,6 +29,7 @@ pub struct LFCProperties {
 ///
 /// this struct contains everything that is required to invoke lfc
 ///
+#[derive(Clone)]
 pub struct CodeGenerator {
     pub lfc: PathBuf,
     pub properties: LFCProperties,
@@ -46,8 +48,9 @@ impl LFCProperties {
     pub fn new(
         src: PathBuf,
         out: PathBuf,
-        properties: HashMap<String, serde_json::Value>,
+        mut properties: HashMap<String, serde_json::Value>,
     ) -> LFCProperties {
+        properties.insert("no-compile".to_string(), serde_json::Value::Bool(true));
         LFCProperties {
             src,
             out,
@@ -68,8 +71,10 @@ impl CodeGenerator {
         lfc: Option<PathBuf>,
         properties: HashMap<String, serde_json::Value>,
     ) -> CodeGenerator {
+        let lfc_path = lfc.unwrap_or(which("rustc").expect("cannot find lingua franca."));
+
         CodeGenerator {
-            lfc: lfc.unwrap_or(PathBuf::from("/bin/lfc")),
+            lfc: lfc_path,
             properties: LFCProperties::new(src, out, properties),
         }
     }
