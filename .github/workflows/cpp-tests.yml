@@ -1,0 +1,80 @@
+name: C++ tests
+
+on:
+  workflow_call:
+    inputs:
+      compiler-ref:
+        required: false
+        type: string
+      runtime-ref:
+        required: false
+        type: string
+jobs:
+  run:
+    strategy:
+      matrix:
+        platform: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Check out lingua-franca repository
+        uses: actions/checkout@v3
+        with:
+          repository: lf-lang/lingo
+          submodules: true
+          ref: ${{ inputs.compiler-ref }}
+          fetch-depth: 0
+      - name: Prepare build environment
+        uses: ./.github/actions/prepare-build-env
+      - name: Install Dependencies OS X
+        run: |
+          brew install coreutils
+          brew install cargo 
+        if: runner.os == 'macOS'
+      - name: Install clang-tidy and lcov on Ubuntu
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-tidy
+          sudo apt-get install -y lcov
+          sudo apt-get install -y cargo
+        if: matrix.platform == 'ubuntu-latest'
+      - name: Build Lingo
+        run: cargo build --release
+      
+      - name: Check out specific ref of lingua-franca
+        uses: actions/checkout@v2
+        with:
+          repository: lf-lang/reactor-cpp
+          path: ./lingua-franca
+          ref: ${{ inputs.runtime-ref }}
+        if: ${{ inputs.runtime-ref }}
+
+
+      - name: Run C++ tests;
+        run: |
+          ./gradlew test --tests org.lflang.tests.runtime.CppTest.*
+      - name: Report Java coverage to CodeCov
+        uses: codecov/codecov-action@v3.1.1
+        with:
+          file: org.lflang.tests/build/reports/xml/jacoco
+          fail_ci_if_error: false
+          verbose: true
+        if: ${{ !inputs.runtime-ref }}  # i.e., if this is part of the main repo's CI
+      - name: Collect reactor-cpp coverage data
+        run: |
+          lcov --capture --directory test/Cpp --output-file coverage.info
+          lcov --extract coverage.info ${GITHUB_WORKSPACE}/test/Cpp/src-gen/reactor-cpp-default/\* --output-file reactor-cpp.info
+          genhtml reactor-cpp.info --output-directory reactor-cpp.coverage
+        if: matrix.platform == 'ubuntu-latest'
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: reactor-cpp.coverage
+          path: reactor-cpp.coverage
+        if: matrix.platform == 'ubuntu-latest'
+      - name: Report C++ coverage to CodeCov
+        uses: codecov/codecov-action@v3.1.1
+        with:
+          file: reactor-cpp.info
+          fail_ci_if_error: false
+          verbose: true
+        if: matrix.platform == 'ubuntu-latest'

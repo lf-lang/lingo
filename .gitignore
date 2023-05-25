@@ -2,7 +2,6 @@
 # will have compiled files and executables
 /target/
 Weaver.toml
-Lingo.toml
 nix-build
 .idea
 .direnv

@@ -1,5 +1,33 @@
 {
   "nodes": {
+    "lingua-franca-compiler": {
+      "flake": false,
+      "locked": {
+        "narHash": "sha256-6smkF3Ff6nqol/ZKZEY8KvqBu+r21kjw/YyWQwK9YVQ=",
+        "type": "tarball",
+        "url": "https://github.com/lf-lang/lingua-franca/releases/download/nightly/lf-cli-nightly-20230516-050417.tar.gz"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://github.com/lf-lang/lingua-franca/releases/download/nightly/lf-cli-nightly-20230516-050417.tar.gz"
+      }
+    },
+    "lingua-franca-tests": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1684221841,
+        "narHash": "sha256-2/R//H6qqJlz3M+gIaJq635rboqXLSv/EkBM7XXamVg=",
+        "owner": "lf-lang",
+        "repo": "lingua-franca",
+        "rev": "4d237472b90ecabc90a3bc107cf51e72187f5827",
+        "type": "github"
+      },
+      "original": {
+        "owner": "lf-lang",
+        "repo": "lingua-franca",
+        "type": "github"
+      }
+    },
     "naersk": {
       "inputs": {
         "nixpkgs": "nixpkgs"
@@ -50,6 +78,8 @@
     },
     "root": {
       "inputs": {
+        "lingua-franca-compiler": "lingua-franca-compiler",
+        "lingua-franca-tests": "lingua-franca-tests",
         "naersk": "naersk",
         "nixpkgs": "nixpkgs_2",
         "utils": "utils"

@@ -71,7 +71,8 @@ impl CodeGenerator {
         lfc: Option<PathBuf>,
         properties: HashMap<String, serde_json::Value>,
     ) -> CodeGenerator {
-        let lfc_path = lfc.unwrap_or(which("rustc").expect("cannot find lingua franca."));
+        println!("{:?}", &lfc);
+        let lfc_path = lfc.unwrap_or(which("lfc").expect("cannot find lingua franca."));
 
         CodeGenerator {
             lfc: lfc_path,
