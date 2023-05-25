@@ -6,6 +6,7 @@ pub enum TargetLanguage {
     C,
     Cpp,
     Rust,
+    TypeScript
 }
 
 #[derive(clap::ValueEnum, Clone, Debug, Deserialize, Serialize)]
@@ -18,6 +19,7 @@ pub enum Platform {
 pub enum BuildSystem {
     LFC,
     CMake,
+    Npm,
 }
 
 #[derive(Args, Debug)]
@@ -62,6 +64,7 @@ impl ToString for TargetLanguage {
             TargetLanguage::C => "C".to_string(),
             TargetLanguage::Cpp => "Cpp".to_string(),
             TargetLanguage::Rust => "Rust".to_string(),
+            TargetLanguage::TypeScript => "TypeScript".to_string(),
         }
     }
 }
