@@ -19,7 +19,6 @@ pub enum Platform {
 pub enum BuildSystem {
     LFC,
     CMake,
-    Cargo,
 }
 
 #[derive(Args, Debug)]
