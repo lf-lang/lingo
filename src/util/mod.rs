@@ -1,27 +1,30 @@
+use std::{fs, io};
+use std::path::{Path, PathBuf};
+
+use crate::package::App;
+
 pub mod analyzer;
 pub mod command_line;
 
-use crate::package::App;
-use std::path::{Path, PathBuf};
-use std::{fs, io};
 /// given is some list of build targets which are filtered by the binary regex
 /// the lambda f is invoked on every element of the remaining elements which fit
 /// the regex.
-pub fn invoke_on_selected<F>(apps: &Vec<String>, mut sources: Vec<App>, f: F) -> bool
-where
-    F: Fn(&App) -> bool,
+pub fn invoke_on_selected<F>(apps: &Vec<String>, sources: &Vec<App>, f: F) -> Result<(), Vec<io::Error>>
+    where
+        F: Fn(&App) -> io::Result<()>,
 {
-    if !apps.is_empty() {
-        sources.retain(|input: &App| apps.contains(&input.name));
+    // evaluate f on every element inside sources and accumulate errors
+    let errors: Vec<io::Error> =
+        sources.iter()
+            .filter(|&app| apps.is_empty() || apps.contains(&app.name))
+            .map(f)
+            .flat_map(|r| r.err())
+            .collect();
+    if errors.is_empty() {
+        Ok(())
+    } else {
+        Err(errors)
     }
-
-    // evaluate f on everyelement inside sources and then compute the logical conjuction
-    sources
-        .iter()
-        .map(f)
-        .collect::<Vec<bool>>()
-        .iter()
-        .all(|y| *y)
 }
 
 /// finds toml file recurisvely

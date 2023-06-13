@@ -8,16 +8,17 @@ pub enum TargetLanguage {
     Rust,
 }
 
-#[derive(clap::ValueEnum, Clone, Debug, Deserialize, Serialize)]
+#[derive(clap::ValueEnum, Clone, Copy, Debug, Deserialize, Serialize)]
 pub enum Platform {
     Native,
     Zephyr,
 }
 
-#[derive(clap::ValueEnum, Clone, Debug, Deserialize, Serialize)]
+#[derive(clap::ValueEnum, Clone, Copy, Debug, Deserialize, Serialize)]
 pub enum BuildSystem {
     LFC,
     CMake,
+    // Cargo,
 }
 
 #[derive(Args, Debug)]
