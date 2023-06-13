@@ -4,7 +4,10 @@ use crate::util::{analyzer, copy_recursively};
 use serde_derive::{Deserialize, Serialize};
 
 use std::collections::HashMap;
+
 use std::fs::{read_to_string, remove_dir_all, remove_file, write};
+use std::io;
+use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
 
 use git2::Repository;
@@ -154,16 +157,10 @@ impl ConfigFile {
         write(path, toml_string).unwrap_or_else(|_| panic!("cannot write toml file {:?}", &path));
     }
 
-    pub fn from(path: &Path) -> Option<ConfigFile> {
-        match read_to_string(path) {
-            Ok(content) => toml::from_str(&content)
-                .map_err(|e| println!("the Lingo.toml has an invalid format! Error: {:?}", e))
-                .ok(),
-            Err(_) => {
-                println!("cannot read Lingo.toml does it exist?");
-                None
-            }
-        }
+    pub fn from(path: &Path) -> io::Result<ConfigFile> {
+        read_to_string(path)
+            .and_then(|contents| toml::from_str(&contents)
+                .map_err(|e| io::Error::new(ErrorKind::InvalidData, format!("{}", e))))
     }
 
     // Sets up a standard LF project for "native" development and deployment
@@ -207,30 +204,30 @@ impl ConfigFile {
                 Platform::Zephyr => self.setup_zephyr(),
             }
         } else {
-            panic!("Failed to initilize project, invalid location"); // FIXME: Handle properly
+            panic!("Failed to initialize project, invalid location"); // FIXME: Handle properly
         }
     }
 
-    pub fn to_config(mut self, path: PathBuf) -> Config {
+    pub fn to_config(self, path: PathBuf) -> Config {
+        let package_name = &self.package.name;
         Config {
-            package: self.package.clone(),
             properties: self.properties,
             apps: self
                 .apps
-                .iter_mut()
+                .into_iter()
                 .map(|app| App {
                     root_path: path.clone(),
-                    name: app.name.as_ref().unwrap_or(&self.package.name).clone(),
+                    name: app.name.unwrap_or(package_name.clone()),
                     main_reactor: app
                         .main_reactor
-                        .clone()
                         .unwrap_or("src/Main.lf".to_string()), // FIXME: The default should be that it searches the `src` directory for a main reactor
-                    target: app.target.clone(),
-                    platform: app.platform.clone(),
-                    dependencies: app.dependencies.clone(),
-                    properties: app.properties.clone(),
+                    target: app.target,
+                    platform: app.platform,
+                    dependencies: app.dependencies,
+                    properties: app.properties,
                 })
                 .collect(),
+            package: self.package,
         }
     }
 }

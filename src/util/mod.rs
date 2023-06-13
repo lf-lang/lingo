@@ -1,7 +1,9 @@
 use std::{fs, io};
 use std::path::{Path, PathBuf};
-use crate::lfc::LFCProperties;
 
+use which::which;
+
+use crate::lfc::LFCProperties;
 use crate::package::App;
 
 pub mod analyzer;
@@ -102,4 +104,15 @@ pub fn default_build_clean(lfc: &LFCProperties) -> io::Result<()> {
         "share",
         "build"
     ])
+}
+
+pub fn find_lfc_exec(args: &crate::BuildArgs) -> Result<PathBuf, io::Error> {
+    if let Some(lfc) = &args.lfc {
+        if lfc.exists() {
+            return Ok(lfc.clone())
+        }
+    } else if let Ok(lfc) = which("lfc") {
+        return Ok(lfc)
+    }
+    Err(io::Error::new(io::ErrorKind::NotFound, "LFC executable not found"))
 }

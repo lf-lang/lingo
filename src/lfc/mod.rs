@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::fmt::Display;
 use std::fs::write;
 use std::io;
-use std::io::ErrorKind;
+
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -62,11 +62,6 @@ pub fn invoke_code_generator(lfc_exec: &Path, properties: &LFCProperties, app: &
     // path to the src-gen directory
     let mut src_gen_directory = app.root_path.clone();
     src_gen_directory.push("src-gen");
-
-    // FIXME: This validation should be somewhere else
-    if !lfc_exec.exists() {
-        return Err(io::Error::new(ErrorKind::NotFound, format!("lfc not found at `{}`", lfc_exec.display())));
-    }
 
     println!(
         "Invoking code-generator: `{} --json={}`",

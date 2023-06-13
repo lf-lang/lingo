@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use clap::Parser;
-use which::which;
+
 
 use args::{BuildArgs, Command as ConsoleCommand, CommandLineArgs};
 use package::App;
@@ -15,7 +15,7 @@ pub mod backends;
 pub mod interface;
 pub mod lfc;
 pub mod package;
-pub mod util;
+pub(crate) mod util;
 
 fn build(args: &BuildArgs, config: &package::Config) -> Result<(), Vec<io::Error>> {
     util::invoke_on_selected(
@@ -31,7 +31,7 @@ fn build(args: &BuildArgs, config: &package::Config) -> Result<(), Vec<io::Error
                 app.properties.clone(),
             );
 
-            let lfc_exec = find_lfc_exec(args)?;
+            let lfc_exec = util::find_lfc_exec(args)?;
             lfc::invoke_code_generator(&lfc_exec, &lfc_props, app)?;
 
             backends::run_build(
@@ -43,41 +43,32 @@ fn build(args: &BuildArgs, config: &package::Config) -> Result<(), Vec<io::Error
         })
 }
 
-fn find_lfc_exec(args: &BuildArgs) -> Result<PathBuf, io::Error> {
-    if let Some(lfc) = &args.lfc {
-        if lfc.exists() {
-            return Ok(lfc.clone())
-        }
-    } else if let Ok(lfc) = which("lfc") {
-        return Ok(lfc)
-    }
-    Err(io::Error::new(io::ErrorKind::NotFound, "LFC executable not found"))
-}
 
 fn main() {
-    const PACKAGE_FILE: &str = "./";
-
-    // finds Lingo.toml recurisvely inside the parent directories.
-    let lingo_path = util::find_toml(&PathBuf::from(PACKAGE_FILE));
-
     // parses command line arguments
     let args = CommandLineArgs::parse();
 
+    // finds Lingo.toml recursively inside the parent directories.
+    let lingo_path = util::find_toml(&PathBuf::from("."));
+
     // tries to read Lingo.toml
-    let wrapped_config = if lingo_path.is_none() {
-        None
-    } else {
-        package::ConfigFile::from(&lingo_path.clone().unwrap())
-    };
+    let wrapped_config = lingo_path.as_ref().and_then(|path| {
+        package::ConfigFile::from(path)
+            .map_err(|err| println!("Error while reading Lingo.toml: {}", err))
+            .ok()
+    });
 
     // we match on a tuple here
     let result = match (wrapped_config, args.command) {
         (_, ConsoleCommand::Init(init_config)) => {
             let initial_config = package::ConfigFile::new(init_config);
-            let toml_path = format!("{}/Lingo.toml", PACKAGE_FILE);
-            initial_config.write(Path::new(&toml_path));
+            initial_config.write(Path::new("./Lingo.toml"));
             initial_config.setup_example();
             Ok(())
+        }
+        (None, _) => {
+            println!("Error: Missing Lingo.toml file");
+            return;
         }
         (Some(file_config), ConsoleCommand::Build(build_command_args)) => {
             let mut working_path = lingo_path.unwrap();
