@@ -1,12 +1,11 @@
+use std::io;
+use std::process::Command;
+
 use crate::args::BuildArgs;
 use crate::interface::Backend;
 use crate::lfc::LFCProperties;
 use crate::package::App;
-
 use crate::util::command_line::run_and_capture;
-use std::{env, io};
-use std::fs;
-use std::process::Command;
 
 pub struct LFC<'a> {
     target: &'a App,

@@ -1,17 +1,21 @@
+use std::io;
+use std::path::{Path, PathBuf};
+use std::process::Command;
+
+use clap::Parser;
+use which::which;
+
+use args::{BuildArgs, Command as ConsoleCommand, CommandLineArgs};
+use package::App;
+
+use crate::lfc::LFCProperties;
+
 pub mod args;
 pub mod backends;
 pub mod interface;
 pub mod lfc;
 pub mod package;
 pub mod util;
-
-use std::io;
-use args::{BuildArgs, Command as ConsoleCommand, CommandLineArgs};
-use package::App;
-
-use clap::Parser;
-use std::path::{Path, PathBuf};
-use std::process::Command;
 
 fn build(args: &BuildArgs, config: &package::Config) -> Result<(), Vec<io::Error>> {
     util::invoke_on_selected(
@@ -21,23 +25,33 @@ fn build(args: &BuildArgs, config: &package::Config) -> Result<(), Vec<io::Error
             // path to the main reactor
             let mut main_reactor_path = app.root_path.clone();
             main_reactor_path.push(app.main_reactor.clone());
-
-            let code_generator = lfc::CodeGenerator::new(
+            let lfc_props = LFCProperties::new(
                 PathBuf::from(format!("{}/{}", app.root_path.display(), app.main_reactor)),
                 PathBuf::from(format!("{}/", app.root_path.display())),
-                args.lfc.clone().map(PathBuf::from),
                 app.properties.clone(),
             );
 
-            code_generator.clone().generate_code(app)?;
+            let lfc_exec = find_lfc_exec(args)?;
+            lfc::invoke_code_generator(&lfc_exec, &lfc_props, app)?;
 
             backends::run_build(
                 args.build_system.unwrap_or(args::BuildSystem::LFC),
                 app,
-                &code_generator.properties,
+                &lfc_props,
                 &args,
             )
         })
+}
+
+fn find_lfc_exec(args: &BuildArgs) -> Result<PathBuf, io::Error> {
+    if let Some(lfc) = &args.lfc {
+        if lfc.exists() {
+            return Ok(lfc.clone())
+        }
+    } else if let Ok(lfc) = which("lfc") {
+        return Ok(lfc)
+    }
+    Err(io::Error::new(io::ErrorKind::NotFound, "LFC executable not found"))
 }
 
 fn main() {

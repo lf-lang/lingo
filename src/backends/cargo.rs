@@ -1,13 +1,12 @@
+use std::io;
+use std::fs;
+use std::process::Command;
+
+use crate::App;
 use crate::args::BuildArgs;
 use crate::interface::Backend;
 use crate::lfc::LFCProperties;
-use crate::App;
-
 use crate::util::command_line::run_and_capture;
-use std::{env, io};
-use std::fs;
-use std::path::PathBuf;
-use std::process::Command;
 
 pub struct CargoBackend<'a> {
     app: &'a App,

@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use clap::{Args, Parser, Subcommand};
 use serde_derive::{Deserialize, Serialize};
 
@@ -38,7 +39,7 @@ pub struct BuildArgs {
 
     /// tell lingo where the lfc toolchain can be found
     #[clap(long)]
-    pub lfc: Option<String>,
+    pub lfc: Option<PathBuf>,
 
     /// skips building aka invoking the build system so it only generates code
     #[clap(short, long, action)]

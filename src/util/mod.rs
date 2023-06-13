@@ -1,6 +1,5 @@
 use std::{fs, io};
 use std::path::{Path, PathBuf};
-use crate::backends::lfc::LFC;
 use crate::lfc::LFCProperties;
 
 use crate::package::App;
