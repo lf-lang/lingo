@@ -19,6 +19,10 @@ pub trait Backend<'a> {
     /// updates dependencies
     fn update(&self) -> bool;
 
+    fn lfc(&self) -> &LFCProperties;
+
     /// cleans the folder of any build arficacts
-    fn clean(&self) -> bool;
+    fn clean(&self) -> io::Result<()> {
+        crate::util::default_build_clean(self.lfc())
+    }
 }

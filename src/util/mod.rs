@@ -1,5 +1,7 @@
 use std::{fs, io};
 use std::path::{Path, PathBuf};
+use crate::backends::lfc::LFC;
+use crate::lfc::LFCProperties;
 
 use crate::package::App;
 
@@ -75,4 +77,30 @@ pub fn copy_recursively(source: impl AsRef<Path>, destination: impl AsRef<Path>)
         }
     }
     Ok(())
+}
+
+pub fn delete_subdirs(path_root: &mut PathBuf, subdirs: &[&str]) -> io::Result<()> {
+    for &sub_dir in subdirs {
+        path_root.push(sub_dir);
+        if path_root.is_dir() {
+            // ignore errors
+            let _ = fs::remove_dir_all(&path_root);
+        }
+        path_root.pop();
+    }
+
+    Ok(())
+}
+
+pub fn default_build_clean(lfc: &LFCProperties) -> io::Result<()> {
+    println!("removing build artifacts in {:?}", lfc.out);
+    let mut path = lfc.out.clone();
+    delete_subdirs(&mut path, &[
+        "bin",
+        "include",
+        "src-gen",
+        "lib64",
+        "share",
+        "build"
+    ])
 }

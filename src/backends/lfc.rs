@@ -10,11 +10,12 @@ use std::process::Command;
 
 pub struct LFC<'a> {
     target: &'a App,
+    lfc:&'a LFCProperties
 }
 
 impl<'a> Backend<'a> for LFC<'a> {
-    fn from_target(target: &'a App, _lfc: &'a LFCProperties) -> Self {
-        LFC { target }
+    fn from_target(target: &'a App, lfc: &'a LFCProperties) -> Self {
+        LFC { target, lfc }
     }
 
     fn build(&self, _config: &BuildArgs) -> io::Result<()> {
@@ -37,14 +38,7 @@ impl<'a> Backend<'a> for LFC<'a> {
         true
     }
 
-    fn clean(&self) -> bool {
-        println!("removing build artifacts in {:?}", env::current_dir());
-        // just removes all the lingua-franca build artifacts
-        fs::remove_dir_all("./bin").is_ok()
-            && fs::remove_dir_all("./include").is_ok()
-            && fs::remove_dir_all("./src-gen").is_ok()
-            && fs::remove_dir_all("./lib64").is_ok()
-            && fs::remove_dir_all("./share").is_ok()
-            && fs::remove_dir_all("./build").is_ok()
+    fn lfc(&self) -> &LFCProperties {
+        self.lfc
     }
 }

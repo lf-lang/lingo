@@ -6,6 +6,7 @@ use crate::App;
 use crate::util::command_line::run_and_capture;
 use std::{env, io};
 use std::fs;
+use std::path::PathBuf;
 use std::process::Command;
 
 pub struct CargoBackend<'a> {
@@ -24,7 +25,7 @@ impl<'a> Backend<'a> for CargoBackend<'a> {
         // Cargo command
         let mut cargo = Command::new("cargo");
         if config.release {
-            cargo.arg("--release")
+            cargo.arg("--release");
         }
         // todo custom profile
         println!("{:?}", self.lfc.properties);
@@ -43,14 +44,7 @@ impl<'a> Backend<'a> for CargoBackend<'a> {
         true
     }
 
-    fn clean(&self) -> bool {
-        println!("removing build artifacts in {:?}", env::current_dir());
-        // just removes all the lingua-franca build artifacts
-        fs::remove_dir_all("./bin").is_ok()
-            && fs::remove_dir_all("./include").is_ok()
-            && fs::remove_dir_all("./src-gen").is_ok()
-            && fs::remove_dir_all("./lib64").is_ok()
-            && fs::remove_dir_all("./share").is_ok()
-            && fs::remove_dir_all("./build").is_ok()
+    fn lfc(&self) -> &LFCProperties {
+        self.lfc
     }
 }
