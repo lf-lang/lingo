@@ -208,7 +208,7 @@ impl ConfigFile {
         }
     }
 
-    pub fn to_config(self, path: PathBuf) -> Config {
+    pub fn to_config(self, path: &Path) -> Config {
         let package_name = &self.package.name;
         Config {
             properties: self.properties,
@@ -216,7 +216,7 @@ impl ConfigFile {
                 .apps
                 .into_iter()
                 .map(|app| App {
-                    root_path: path.clone(),
+                    root_path: path.to_path_buf(),
                     name: app.name.unwrap_or(package_name.clone()),
                     main_reactor: app
                         .main_reactor

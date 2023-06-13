@@ -32,36 +32,18 @@ pub fn invoke_on_selected<F>(apps: &Vec<String>, sources: &Vec<App>, f: F) -> Re
 
 /// finds toml file recurisvely
 pub fn find_toml(input_path: &Path) -> Option<PathBuf> {
-    let path = match std::fs::canonicalize(input_path) {
-        Ok(absolute_path) => absolute_path,
-        Err(_) => {
-            return None;
+    let mut path = fs::canonicalize(input_path).ok()?;
+    while path.is_dir() {
+        path.push("Lingo.toml");
+        if path.is_file() {
+            return Some(path)
         }
-    };
-
-    match std::fs::read_dir(&path) {
-        Ok(data) => {
-            for element in data.flatten() {
-                if element
-                    .path()
-                    .file_name()
-                    .map_or_else(|| false, |file_name| file_name == "Lingo.toml")
-                {
-                    return Some(element.path());
-                }
-            }
-            //return Some(path.to_path_buf());
+        path.pop(); // remove Lingo.toml
+        if !path.pop() { // truncate path to the parent
+            break
         }
-        Err(e) => {
-            println!("cannot find toml file with error: {e:?}");
-            return None;
-        }
-    };
-
-    match path.parent() {
-        Some(parent) => find_toml(parent),
-        None => None,
     }
+    None
 }
 
 /// Copy files from source to destination recursively.
