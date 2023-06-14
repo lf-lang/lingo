@@ -9,8 +9,8 @@ use std::process::Command;
 use serde_derive::{Deserialize, Serialize};
 use serde_json;
 
-use crate::App;
 use crate::util::command_line::run_and_capture;
+use crate::App;
 
 ///
 /// taken from: https://www.lf-lang.org/docs/handbook/target-declaration?target=c
@@ -27,7 +27,6 @@ pub struct LFCProperties {
     pub out: PathBuf,
     pub properties: HashMap<String, serde_json::Value>,
 }
-
 
 impl Display for LFCProperties {
     /// convert lfc properties to string
@@ -58,7 +57,11 @@ impl LFCProperties {
     }
 }
 
-pub fn invoke_code_generator(lfc_exec: &Path, properties: &LFCProperties, app: &App) -> io::Result<()> {
+pub fn invoke_code_generator(
+    lfc_exec: &Path,
+    properties: &LFCProperties,
+    app: &App,
+) -> io::Result<()> {
     // path to the src-gen directory
     let mut src_gen_directory = app.root_path.clone();
     src_gen_directory.push("src-gen");

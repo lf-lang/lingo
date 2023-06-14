@@ -9,7 +9,7 @@ use crate::util::command_line::run_and_capture;
 
 pub struct LFC<'a> {
     target: &'a App,
-    lfc:&'a LFCProperties
+    lfc: &'a LFCProperties,
 }
 
 impl<'a> Backend<'a> for LFC<'a> {
@@ -18,7 +18,6 @@ impl<'a> Backend<'a> for LFC<'a> {
     }
 
     fn build(&self, _config: &BuildArgs) -> io::Result<()> {
-
         println!("building main reactor: {}", self.target.main_reactor);
         // FIXME: What is this supposed to do? `lfc` does not have n `--output` argument
         //  also. Why isnt the lfc from the CLI `-l` used.

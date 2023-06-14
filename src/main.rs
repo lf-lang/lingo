@@ -1,10 +1,9 @@
-use std::io;
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::{env, io};
 
 use clap::Parser;
-
 
 use args::{BuildArgs, Command as ConsoleCommand, CommandLineArgs};
 use package::App;
@@ -20,31 +19,27 @@ pub mod package;
 pub(crate) mod util;
 
 fn build(args: &BuildArgs, config: &package::Config) -> Result<(), Vec<io::Error>> {
-    util::invoke_on_selected(
-        &args.apps,
-        &config.apps,
-        |app: &App| {
-            // path to the main reactor
-            let mut main_reactor_path = app.root_path.clone();
-            main_reactor_path.push(app.main_reactor.clone());
-            let lfc_props = LFCProperties::new(
-                PathBuf::from(format!("{}/{}", app.root_path.display(), app.main_reactor)),
-                PathBuf::from(format!("{}/", app.root_path.display())),
-                app.properties.clone(),
-            );
+    util::invoke_on_selected(&args.apps, &config.apps, |app: &App| {
+        // path to the main reactor
+        let mut main_reactor_path = app.root_path.clone();
+        main_reactor_path.push(app.main_reactor.clone());
+        let lfc_props = LFCProperties::new(
+            PathBuf::from(format!("{}/{}", app.root_path.display(), app.main_reactor)),
+            PathBuf::from(format!("{}/", app.root_path.display())),
+            app.properties.clone(),
+        );
 
-            let lfc_exec = util::find_lfc_exec(args)?;
-            lfc::invoke_code_generator(&lfc_exec, &lfc_props, app)?;
+        let lfc_exec = util::find_lfc_exec(args)?;
+        lfc::invoke_code_generator(&lfc_exec, &lfc_props, app)?;
 
-            backends::run_build(
-                args.build_system.unwrap_or(args::BuildSystem::LFC),
-                app,
-                &lfc_props,
-                &args,
-            )
-        })
+        backends::run_build(
+            args.build_system.unwrap_or(args::BuildSystem::LFC),
+            app,
+            &lfc_props,
+            &args,
+        )
+    })
 }
-
 
 fn main() {
     // parses command line arguments
@@ -52,7 +47,7 @@ fn main() {
 
     // Finds Lingo.toml recursively inside the parent directories.
     // If it exists the returned path is absolute.
-    let lingo_path = util::find_toml(&PathBuf::from("."));
+    let lingo_path = util::find_toml(&env::current_dir().unwrap());
 
     // tries to read Lingo.toml
     let wrapped_config = lingo_path.as_ref().and_then(|path| {
@@ -87,22 +82,22 @@ fn execute_command(config: Option<Config>, command: ConsoleCommand) -> Result<()
             initial_config.setup_example();
             Ok(())
         }
-        (None, _) => {
-            Err(vec![io::Error::new(ErrorKind::NotFound, "Error: Missing Lingo.toml file")])
-        }
+        (None, _) => Err(vec![io::Error::new(
+            ErrorKind::NotFound,
+            "Error: Missing Lingo.toml file",
+        )]),
         (Some(config), ConsoleCommand::Build(build_command_args)) => {
             println!("Building ...");
             build(&build_command_args, &config)
         }
         (Some(config), ConsoleCommand::Run(build_command_args)) => {
-            build(&build_command_args, &config)
-                .and_then(|_| {
-                    // the run command
-                    util::invoke_on_selected(&build_command_args.apps, &config.apps, |app: &App| {
-                        let mut command = Command::new(format!("./bin/{}", app.name));
-                        util::command_line::run_and_capture(&mut command).map(|_| ())
-                    })
+            build(&build_command_args, &config).and_then(|_| {
+                // the run command
+                util::invoke_on_selected(&build_command_args.apps, &config.apps, |app: &App| {
+                    let mut command = Command::new(format!("./bin/{}", app.name));
+                    util::command_line::run_and_capture(&mut command).map(|_| ())
                 })
+            })
         }
         (Some(_config), ConsoleCommand::Clean) => todo!(),
         _ => todo!(),

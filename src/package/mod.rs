@@ -158,9 +158,10 @@ impl ConfigFile {
     }
 
     pub fn from(path: &Path) -> io::Result<ConfigFile> {
-        read_to_string(path)
-            .and_then(|contents| toml::from_str(&contents)
-                .map_err(|e| io::Error::new(ErrorKind::InvalidData, format!("{}", e))))
+        read_to_string(path).and_then(|contents| {
+            toml::from_str(&contents)
+                .map_err(|e| io::Error::new(ErrorKind::InvalidData, format!("{}", e)))
+        })
     }
 
     // Sets up a standard LF project for "native" development and deployment
@@ -218,9 +219,7 @@ impl ConfigFile {
                 .map(|app| App {
                     root_path: path.to_path_buf(),
                     name: app.name.unwrap_or(package_name.clone()),
-                    main_reactor: app
-                        .main_reactor
-                        .unwrap_or("src/Main.lf".to_string()), // FIXME: The default should be that it searches the `src` directory for a main reactor
+                    main_reactor: app.main_reactor.unwrap_or("src/Main.lf".to_string()), // FIXME: The default should be that it searches the `src` directory for a main reactor
                     target: app.target,
                     platform: app.platform,
                     dependencies: app.dependencies,

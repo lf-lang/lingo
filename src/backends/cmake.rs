@@ -1,12 +1,12 @@
-use std::io;
 use std::fs;
+use std::io;
 use std::process::Command;
 
-use crate::App;
 use crate::args::BuildArgs;
 use crate::interface::Backend;
 use crate::lfc::LFCProperties;
 use crate::util::command_line::run_and_capture;
+use crate::App;
 
 pub struct Cmake<'a> {
     app: &'a App,
@@ -65,5 +65,4 @@ impl<'a> Backend<'a> for Cmake<'a> {
     fn lfc(&self) -> &LFCProperties {
         self.lfc
     }
-
 }

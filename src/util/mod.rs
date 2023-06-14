@@ -1,5 +1,5 @@
-use std::{fs, io};
 use std::path::{Path, PathBuf};
+use std::{fs, io};
 
 use which::which;
 
@@ -12,17 +12,21 @@ pub mod command_line;
 /// given is some list of build targets which are filtered by the binary regex
 /// the lambda f is invoked on every element of the remaining elements which fit
 /// the regex.
-pub fn invoke_on_selected<F>(apps: &Vec<String>, sources: &Vec<App>, f: F) -> Result<(), Vec<io::Error>>
-    where
-        F: Fn(&App) -> io::Result<()>,
+pub fn invoke_on_selected<F>(
+    apps: &Vec<String>,
+    sources: &Vec<App>,
+    f: F,
+) -> Result<(), Vec<io::Error>>
+where
+    F: Fn(&App) -> io::Result<()>,
 {
     // evaluate f on every element inside sources and accumulate errors
-    let errors: Vec<io::Error> =
-        sources.iter()
-            .filter(|&app| apps.is_empty() || apps.contains(&app.name))
-            .map(f)
-            .flat_map(|r| r.err())
-            .collect();
+    let errors: Vec<io::Error> = sources
+        .iter()
+        .filter(|&app| apps.is_empty() || apps.contains(&app.name))
+        .map(f)
+        .flat_map(|r| r.err())
+        .collect();
     if errors.is_empty() {
         Ok(())
     } else {
@@ -36,11 +40,12 @@ pub fn find_toml(input_path: &Path) -> Option<PathBuf> {
     while path.is_dir() {
         path.push("Lingo.toml");
         if path.is_file() {
-            return Some(path)
+            return Some(path);
         }
         path.pop(); // remove Lingo.toml
-        if !path.pop() { // truncate path to the parent
-            break
+        if !path.pop() {
+            // cannot pop more
+            break;
         }
     }
     None
@@ -78,23 +83,22 @@ pub fn delete_subdirs(path_root: &mut PathBuf, subdirs: &[&str]) -> io::Result<(
 pub fn default_build_clean(lfc: &LFCProperties) -> io::Result<()> {
     println!("removing build artifacts in {:?}", lfc.out);
     let mut path = lfc.out.clone();
-    delete_subdirs(&mut path, &[
-        "bin",
-        "include",
-        "src-gen",
-        "lib64",
-        "share",
-        "build"
-    ])
+    delete_subdirs(
+        &mut path,
+        &["bin", "include", "src-gen", "lib64", "share", "build"],
+    )
 }
 
 pub fn find_lfc_exec(args: &crate::BuildArgs) -> Result<PathBuf, io::Error> {
     if let Some(lfc) = &args.lfc {
         if lfc.exists() {
-            return Ok(lfc.clone())
+            return Ok(lfc.clone());
         }
     } else if let Ok(lfc) = which("lfc") {
-        return Ok(lfc)
+        return Ok(lfc);
     }
-    Err(io::Error::new(io::ErrorKind::NotFound, "LFC executable not found"))
+    Err(io::Error::new(
+        io::ErrorKind::NotFound,
+        "LFC executable not found",
+    ))
 }
