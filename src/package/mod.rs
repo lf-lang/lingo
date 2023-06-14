@@ -114,14 +114,33 @@ pub struct PackageDescription {
 }
 
 impl ConfigFile {
-    pub fn new(init_args: InitArgs) -> ConfigFile {
-        let _main_reactor = if !std::path::Path::new("./src").exists() {
-            vec![String::from("Main")]
-        } else {
-            analyzer::search(Path::new("./src"))
-        };
+    // FIXME: The default should be that it searches the `src` directory for a main reactor
+    const DEFAULT_MAIN_REACTOR_RELPATH: &'static str = "src/Main.lf";
 
-        ConfigFile {
+    pub fn new_for_init_task(init_args: InitArgs) -> io::Result<ConfigFile> {
+        let src_path = Path::new("./src");
+        let main_reactors = if src_path.exists() {
+            analyzer::find_main_reactors(src_path)?
+        } else {
+            vec![analyzer::MainReactorSpec {
+                name: "Main".into(),
+                path: src_path.join("Main.lf"),
+                target: init_args.get_target_language(),
+            }]
+        };
+        let app_specs = main_reactors
+            .into_iter()
+            .map(|spec| AppFile {
+                name: Some(spec.name),
+                main_reactor: Some(spec.path),
+                target: spec.target,
+                platform: init_args.platform.unwrap_or(Platform::Native),
+                dependencies: HashMap::new(),
+                properties: HashMap::new(),
+            })
+            .collect::<Vec<_>>();
+
+        let result = ConfigFile {
             package: PackageDescription {
                 name: std::env::current_dir()
                     .expect("error while reading current directory")
@@ -138,21 +157,9 @@ impl ConfigFile {
                 homepage: None,
             },
             properties: HashMap::new(),
-            apps: vec![AppFile {
-                name: None,
-                main_reactor: None,
-                target: init_args.language.unwrap_or({
-                    // Target langauge for Zephyr is C, else Cpp.
-                    match init_args.platform {
-                        Some(Platform::Zephyr) => TargetLanguage::C,
-                        _ => TargetLanguage::Cpp,
-                    }
-                }),
-                platform: init_args.platform.unwrap_or(Platform::Native),
-                dependencies: HashMap::new(),
-                properties: HashMap::new(),
-            }],
-        }
+            apps: app_specs,
+        };
+        Ok(result)
     }
 
     pub fn write(&self, path: &Path) {
@@ -225,8 +232,10 @@ impl ConfigFile {
                     name: app.name.unwrap_or(package_name.clone()),
                     main_reactor: {
                         let mut abs = path.to_path_buf();
-                        // FIXME: The default should be that it searches the `src` directory for a main reactor
-                        abs.push(app.main_reactor.unwrap_or("src/Main.lf".into()));
+                        abs.push(
+                            app.main_reactor
+                                .unwrap_or(Self::DEFAULT_MAIN_REACTOR_RELPATH.into()),
+                        );
                         abs
                     },
                     target: app.target,

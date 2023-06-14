@@ -2,11 +2,13 @@ use clap::{Args, Parser, Subcommand};
 use serde_derive::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-#[derive(clap::ValueEnum, Clone, Debug, Deserialize, Serialize)]
+#[derive(clap::ValueEnum, Clone, Copy, Debug, Deserialize, Serialize)]
 pub enum TargetLanguage {
     C,
     Cpp,
     Rust,
+    TypeScript,
+    Python,
 }
 
 #[derive(clap::ValueEnum, Clone, Copy, Debug, Deserialize, Serialize)]
@@ -59,11 +61,7 @@ pub struct BuildArgs {
 
 impl ToString for TargetLanguage {
     fn to_string(&self) -> String {
-        match self {
-            TargetLanguage::C => "C".to_string(),
-            TargetLanguage::Cpp => "Cpp".to_string(),
-            TargetLanguage::Rust => "Rust".to_string(),
-        }
+        format!("{:?}", self)
     }
 }
 
@@ -74,6 +72,17 @@ pub struct InitArgs {
 
     #[clap(value_enum, short, long)]
     pub platform: Option<Platform>,
+}
+impl InitArgs {
+    pub fn get_target_language(&self) -> TargetLanguage {
+        self.language.unwrap_or_else(|| {
+            // Target language for Zephyr is C, else Cpp.
+            match self.platform {
+                Some(Platform::Zephyr) => TargetLanguage::C,
+                _ => TargetLanguage::Cpp,
+            }
+        })
+    }
 }
 
 #[derive(Subcommand, Debug)]

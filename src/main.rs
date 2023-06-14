@@ -75,7 +75,7 @@ fn main() {
 fn execute_command(config: Option<Config>, command: ConsoleCommand) -> Result<(), Vec<io::Error>> {
     match (config, command) {
         (_, ConsoleCommand::Init(init_config)) => {
-            let initial_config = ConfigFile::new(init_config);
+            let initial_config = ConfigFile::new_for_init_task(init_config).map_err(|e| vec![e])?;
             initial_config.write(Path::new("./Lingo.toml"));
             initial_config.setup_example();
             Ok(())

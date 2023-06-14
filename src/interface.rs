@@ -24,7 +24,7 @@ pub trait Backend<'a> {
 
     fn lfc(&self) -> &LFCProperties;
 
-    /// cleans the folder of any build arficacts
+    /// cleans the folder of any build artifacts
     fn clean(&self) -> io::Result<()> {
         crate::util::default_build_clean(self.lfc())
     }

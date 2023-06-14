@@ -25,7 +25,7 @@ fast = true
 name = "git-hook"
 target = "cpp"
 main_reactor = "src/Main.lf"
-# main_reactor defaults to src/main.lf
+# main_reactor defaults to src/Main.lf
 
 # dependencies
 [[app.dependencies]]
