@@ -21,9 +21,14 @@ pub struct Properties {}
 ///
 /// struct which is given to lfc for code generation
 ///
+/// TODO all of this is contained in the App struct. Why do we need this?
+///
 #[derive(Serialize, Deserialize, Clone)]
 pub struct LFCProperties {
+    /// Path to the LF source file containing the main reactor.
     pub src: PathBuf,
+    /// Path to the directory into which build artifacts like
+    /// the src-gen and bin directory are generated.
     pub out: PathBuf,
     pub properties: HashMap<String, serde_json::Value>,
 }

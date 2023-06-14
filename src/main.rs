@@ -1,5 +1,5 @@
 use std::io::ErrorKind;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::process::Command;
 use std::{env, io};
 
@@ -18,14 +18,12 @@ pub mod lfc;
 pub mod package;
 pub(crate) mod util;
 
-fn build(args: &BuildArgs, config: &package::Config) -> Result<(), Vec<io::Error>> {
+fn build(args: &BuildArgs, config: &Config) -> Result<(), Vec<io::Error>> {
     util::invoke_on_selected(&args.apps, &config.apps, |app: &App| {
-        // path to the main reactor
-        let mut main_reactor_path = app.root_path.clone();
-        main_reactor_path.push(app.main_reactor.clone());
+        // TODO remove LFCProperties?
         let lfc_props = LFCProperties::new(
-            PathBuf::from(format!("{}/{}", app.root_path.display(), app.main_reactor)),
-            PathBuf::from(format!("{}/", app.root_path.display())),
+            app.main_reactor.clone(),
+            app.root_path.clone(),
             app.properties.clone(),
         );
 

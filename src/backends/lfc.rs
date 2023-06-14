@@ -18,17 +18,16 @@ impl<'a> Backend<'a> for LFC<'a> {
     }
 
     fn build(&self, _config: &BuildArgs) -> io::Result<()> {
-        println!("building main reactor: {}", self.target.main_reactor);
+        println!(
+            "building main reactor: {}",
+            self.target.main_reactor.display()
+        );
         // FIXME: What is this supposed to do? `lfc` does not have n `--output` argument
         //  also. Why isnt the lfc from the CLI `-l` used.
         let mut command = Command::new("lfc");
         command.arg("--output");
         command.arg("./");
-        command.arg(format!(
-            "{}/{}",
-            &self.target.root_path.display(),
-            &self.target.main_reactor
-        ));
+        command.arg(&self.target.main_reactor);
         run_and_capture(&mut command).map(|_| ())
     }
 

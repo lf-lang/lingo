@@ -55,7 +55,7 @@ pub struct AppFile {
     pub name: Option<String>,
 
     /// if not specified will default to main.lf
-    pub main_reactor: Option<String>,
+    pub main_reactor: Option<PathBuf>,
 
     /// target of the app
     pub target: TargetLanguage,
@@ -69,11 +69,14 @@ pub struct AppFile {
 
 #[derive(Clone, Deserialize, Serialize)]
 pub struct App {
-    /// where the Lingo.toml is located in the filesystem
+    /// Absolute path to the directory where the Lingo.toml file is located.
     pub root_path: PathBuf,
 
+    /// Name of the app (and the final binary).
     pub name: String,
-    pub main_reactor: String,
+
+    /// Absolute path to the main reactor file.
+    pub main_reactor: PathBuf,
     pub target: TargetLanguage,
     pub platform: Platform,
 
@@ -209,6 +212,7 @@ impl ConfigFile {
         }
     }
 
+    /// The `path` is the path to the directory containing the Lingo.toml file.
     pub fn to_config(self, path: &Path) -> Config {
         let package_name = &self.package.name;
         Config {
@@ -219,7 +223,12 @@ impl ConfigFile {
                 .map(|app| App {
                     root_path: path.to_path_buf(),
                     name: app.name.unwrap_or(package_name.clone()),
-                    main_reactor: app.main_reactor.unwrap_or("src/Main.lf".to_string()), // FIXME: The default should be that it searches the `src` directory for a main reactor
+                    main_reactor: {
+                        let mut abs = path.to_path_buf();
+                        // FIXME: The default should be that it searches the `src` directory for a main reactor
+                        abs.push(app.main_reactor.unwrap_or("src/Main.lf".into()));
+                        abs
+                    },
                     target: app.target,
                     platform: app.platform,
                     dependencies: app.dependencies,
