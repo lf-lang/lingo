@@ -7,8 +7,9 @@ use clap::Parser;
 
 use args::{BuildArgs, Command as ConsoleCommand, CommandLineArgs};
 use package::App;
+use crate::backends::{BatchLingoCommand, BuildCommandOptions, BuildResult, CommandSpec, LingoCommandCtx};
 
-use crate::lfc::LFCProperties;
+
 use crate::package::{Config, ConfigFile};
 
 pub mod args;
@@ -18,25 +19,16 @@ pub mod lfc;
 pub mod package;
 pub(crate) mod util;
 
-fn build(args: &BuildArgs, config: &Config) -> Result<(), Vec<io::Error>> {
-    util::invoke_on_selected(&args.apps, &config.apps, |app: &App| {
-        // TODO remove LFCProperties?
-        let lfc_props = LFCProperties::new(
-            app.main_reactor.clone(),
-            app.root_path.clone(),
-            app.properties.clone(),
-        );
-
-        let lfc_exec = util::find_lfc_exec(args)?;
-        lfc::invoke_code_generator(&lfc_exec, &lfc_props, app)?;
-
-        backends::run_build(
-            args.build_system.unwrap_or(args::BuildSystem::LFC),
-            app,
-            &lfc_props,
-            &args,
-        )
-    })
+fn build(args: &BuildArgs, config: &Config) -> BuildResult {
+    let command = BatchLingoCommand {
+        apps: config.apps.iter().collect(),
+        task: CommandSpec::Build(BuildCommandOptions {
+            profile: args.build_profile(),
+            compile_target_code: !args.no_compile,
+        }),
+    };
+    let mut ctx = LingoCommandCtx::new(args.keep_going);
+    backends::execute_command(command, &mut ctx)
 }
 
 fn main() {
@@ -60,42 +52,36 @@ fn main() {
     match result {
         Ok(_) => {}
         Err(errs) => {
-            if errs.len() == 1 {
-                println!("An error occurred: {}", errs[0]);
-            } else {
-                println!("{} errors occurred:", errs.len());
-                for err in errs {
-                    println!("{}", err)
-                }
-            }
+            println!("{}", errs);
         }
     }
 }
 
-fn execute_command(config: Option<Config>, command: ConsoleCommand) -> Result<(), Vec<io::Error>> {
+fn execute_command(config: Option<Config>, command: ConsoleCommand) -> BuildResult {
     match (config, command) {
         (_, ConsoleCommand::Init(init_config)) => {
-            let initial_config = ConfigFile::new_for_init_task(init_config).map_err(|e| vec![e])?;
+            let initial_config = ConfigFile::new_for_init_task(init_config).map_err(Box::new)?;
             initial_config.write(Path::new("./Lingo.toml"));
             initial_config.setup_example();
             Ok(())
         }
-        (None, _) => Err(vec![io::Error::new(
+        (None, _) => Err(Box::new(io::Error::new(
             ErrorKind::NotFound,
             "Error: Missing Lingo.toml file",
-        )]),
-        (Some(config), ConsoleCommand::Build(build_command_args)) => {
+        ))),
+        (Some(mut config), ConsoleCommand::Build(build_command_args)) => {
+            config.filter_apps(&build_command_args.apps);
             println!("Building ...");
             build(&build_command_args, &config)
         }
-        (Some(config), ConsoleCommand::Run(build_command_args)) => {
-            build(&build_command_args, &config).and_then(|_| {
-                // the run command
-                util::invoke_on_selected(&build_command_args.apps, &config.apps, |app: &App| {
-                    let mut command = Command::new(format!("./bin/{}", app.name));
-                    util::command_line::run_and_capture(&mut command).map(|_| ())
-                })
-            })
+        (Some(mut config), ConsoleCommand::Run(build_command_args)) => {
+            config.filter_apps(&build_command_args.apps);
+            build(&build_command_args, &config)?;
+            for app in config.apps {
+                let mut command = Command::new(app.executable_path());
+                util::command_line::run_and_capture(&mut command).map(|_| ()).map_err(Box::new)?
+            }
+            Ok(()) // todo
         }
         (Some(_config), ConsoleCommand::Clean) => todo!(),
         _ => todo!(),

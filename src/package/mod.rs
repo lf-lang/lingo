@@ -1,4 +1,4 @@
-use crate::args::{InitArgs, Platform, TargetLanguage};
+use crate::args::{BuildSystem, InitArgs, Platform, TargetLanguage};
 use crate::util::{analyzer, copy_recursively};
 
 use serde_derive::{Deserialize, Serialize};
@@ -11,6 +11,7 @@ use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
 
 use git2::Repository;
+use crate::args::BuildSystem::{Cargo, CMake, LFC};
 
 fn is_valid_location_for_project(path: &std::path::Path) -> bool {
     !path.join("src").exists() && !path.join(".git").exists() && !path.join("application").exists()
@@ -48,6 +49,14 @@ pub struct Config {
     pub apps: Vec<App>,
 }
 
+impl Config {
+    pub fn filter_apps(&mut self, names: &Vec<String>) {
+        if !names.is_empty() {
+            self.apps.retain(|app| names.contains(&app.name));
+        }
+    }
+}
+
 /// Schema of the configuration parsed from the Lingo.toml
 #[derive(Clone, Deserialize, Serialize)]
 pub struct AppFile {
@@ -74,6 +83,8 @@ pub struct App {
 
     /// Name of the app (and the final binary).
     pub name: String,
+    /// Root directory where to place src-gen and other compilation-specifics stuff.
+    pub output_root: PathBuf,
 
     /// Absolute path to the main reactor file.
     pub main_reactor: PathBuf,
@@ -83,6 +94,25 @@ pub struct App {
     pub dependencies: HashMap<String, DetailedDependency>,
     pub properties: HashMap<String, serde_json::Value>,
 }
+
+impl App {
+    pub fn build_system(&self) -> BuildSystem {
+        match self.target {
+            TargetLanguage::Cpp => CMake,
+            TargetLanguage::Rust => Cargo,
+            _ => LFC,
+        }
+    }
+    pub fn src_gen_dir(&self) -> PathBuf {
+        self.output_root.join("src-gen")
+    }
+    pub fn executable_path(&self) -> PathBuf {
+        let mut p = self.output_root.join("bin");
+        p.push(&self.name);
+        p
+    }
+}
+
 
 /// Simple or DetailedDependcy
 #[derive(Clone, Deserialize, Serialize)]
@@ -230,6 +260,7 @@ impl ConfigFile {
                 .map(|app| App {
                     root_path: path.to_path_buf(),
                     name: app.name.unwrap_or(package_name.clone()),
+                    output_root: path.join("target"),
                     main_reactor: {
                         let mut abs = path.to_path_buf();
                         abs.push(

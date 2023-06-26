@@ -1,6 +1,7 @@
 use clap::{Args, Parser, Subcommand};
 use serde_derive::{Deserialize, Serialize};
 use std::path::PathBuf;
+use crate::backends::BuildProfile;
 
 #[derive(clap::ValueEnum, Clone, Copy, Debug, Deserialize, Serialize)]
 pub enum TargetLanguage {
@@ -17,10 +18,11 @@ pub enum Platform {
     Zephyr,
 }
 
-#[derive(clap::ValueEnum, Clone, Copy, Debug, Deserialize, Serialize)]
+#[derive(clap::ValueEnum, Clone, Copy, Debug, Deserialize, Serialize, Eq, PartialEq, Hash)]
 pub enum BuildSystem {
     LFC,
     CMake,
+    Cargo,
 }
 
 #[derive(Args, Debug)]
@@ -57,6 +59,16 @@ pub struct BuildArgs {
     /// list of apps to build if left empty all apps are built
     #[clap(short, long, value_delimiter = ',')]
     pub apps: Vec<String>,
+}
+
+impl BuildArgs {
+    pub fn build_profile(&self) -> BuildProfile {
+        if self.release {
+            BuildProfile::Release
+        } else {
+            BuildProfile::Debug
+        }
+    }
 }
 
 impl ToString for TargetLanguage {
