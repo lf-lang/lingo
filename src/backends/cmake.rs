@@ -8,6 +8,7 @@ use crate::App;
 use crate::backends::{
     BatchBackend, BatchLingoCommand, BuildCommandOptions, BuildProfile, BuildResult, CommandSpec,
 };
+use crate::backends::CommandSpec::Build;
 
 pub struct Cmake;
 
@@ -55,13 +56,26 @@ fn build_single_app(app: &App, options: &BuildCommandOptions) -> BuildResult {
 
 impl BatchBackend for Cmake {
     fn execute_command(&mut self, command: BatchLingoCommand) -> BuildResult {
-        match &command.task {
-            CommandSpec::Build(options) => command
-                .apps
-                .iter()
-                .map(|&app| build_single_app(app, options))
-                .reduce(crate::util::errors::merge)
-                .unwrap_or(Ok(())),
+        match command.task {
+            CommandSpec::Build(mut options) => {
+                let do_compile = options.compile_target_code;
+                options.compile_target_code = false;
+                super::lfc::LFC::do_parallel_lfc_codegen(
+                    &options,
+                    &command.apps,
+                )?;
+                if !do_compile {
+                    return Ok(())
+                }
+                options.compile_target_code = true;
+
+                command
+                    .apps
+                    .iter()
+                    .map(|&app| build_single_app(app, &options))
+                    .reduce(crate::util::errors::merge)
+                    .unwrap_or(Ok(()))
+            }
             CommandSpec::Clean => {
                 for &app in &command.apps {
                     crate::util::default_build_clean(&app.output_root)?

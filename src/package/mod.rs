@@ -12,6 +12,7 @@ use std::path::{Path, PathBuf};
 
 use crate::args::BuildSystem::{CMake, Cargo, LFC};
 use git2::Repository;
+use crate::args::Platform::Native;
 
 fn is_valid_location_for_project(path: &std::path::Path) -> bool {
     !path.join("src").exists() && !path.join(".git").exists() && !path.join("application").exists()
@@ -69,7 +70,7 @@ pub struct AppFile {
     /// target of the app
     pub target: TargetLanguage,
 
-    pub platform: Platform,
+    pub platform: Option<Platform>,
 
     pub dependencies: HashMap<String, DetailedDependency>,
 
@@ -163,7 +164,7 @@ impl ConfigFile {
                 name: Some(spec.name),
                 main_reactor: Some(spec.path),
                 target: spec.target,
-                platform: init_args.platform.unwrap_or(Platform::Native),
+                platform: init_args.platform,
                 dependencies: HashMap::new(),
                 properties: HashMap::new(),
             })
@@ -240,8 +241,9 @@ impl ConfigFile {
     pub fn setup_example(&self) {
         if is_valid_location_for_project(Path::new(".")) {
             match self.apps[0].platform {
-                Platform::Native => self.setup_native(),
-                Platform::Zephyr => self.setup_zephyr(),
+                Some(Platform::Native) => self.setup_native(),
+                Some(Platform::Zephyr) => self.setup_zephyr(),
+                _ => {}
             }
         } else {
             panic!("Failed to initialize project, invalid location"); // FIXME: Handle properly
@@ -269,7 +271,7 @@ impl ConfigFile {
                         abs
                     },
                     target: app.target,
-                    platform: app.platform,
+                    platform: app.platform.unwrap_or(Native),
                     dependencies: app.dependencies,
                     properties: app.properties,
                 })
