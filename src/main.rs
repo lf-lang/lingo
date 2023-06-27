@@ -8,36 +8,15 @@ use clap::Parser;
 use args::{BuildArgs, Command as ConsoleCommand, CommandLineArgs};
 use package::App;
 
-use crate::backends::{BatchLingoCommand, BuildCommandOptions, CommandSpec, LingoCommandCtx};
+use crate::backends::{BatchLingoCommand, BuildCommandOptions, CommandSpec};
 use crate::package::{Config, ConfigFile};
 use crate::util::errors::BuildResult;
 
 pub mod args;
 pub mod backends;
-pub mod interface;
 pub mod lfc;
 pub mod package;
 pub(crate) mod util;
-
-fn build(args: &BuildArgs, config: &Config) -> BuildResult {
-    run_command(
-        CommandSpec::Build(BuildCommandOptions {
-            profile: args.build_profile(),
-            compile_target_code: !args.no_compile,
-        }),
-        config,
-        args.keep_going,
-    )
-}
-
-fn run_command(task: CommandSpec, config: &Config, fail_at_end: bool) -> BuildResult {
-    let command = BatchLingoCommand {
-        apps: config.apps.iter().collect(),
-        task,
-    };
-    let mut ctx = LingoCommandCtx::new(fail_at_end);
-    backends::execute_command(command, &mut ctx)
-}
 
 fn main() {
     // parses command line arguments
@@ -96,4 +75,24 @@ fn execute_command(config: Option<Config>, command: ConsoleCommand) -> BuildResu
         (Some(config), ConsoleCommand::Clean) => run_command(CommandSpec::Clean, &config, true),
         _ => todo!(),
     }
+}
+
+fn build(args: &BuildArgs, config: &Config) -> BuildResult {
+    run_command(
+        CommandSpec::Build(BuildCommandOptions {
+            profile: args.build_profile(),
+            compile_target_code: !args.no_compile,
+            lfc_exec_path: util::find_lfc_exec(args)?,
+        }),
+        config,
+        args.keep_going,
+    )
+}
+
+fn run_command(task: CommandSpec, config: &Config, _fail_at_end: bool) -> BuildResult {
+    let command = BatchLingoCommand {
+        apps: config.apps.iter().collect(),
+        task,
+    };
+    backends::execute_command(command)
 }

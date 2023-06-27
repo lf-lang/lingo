@@ -3,8 +3,6 @@ use std::{fs, io};
 
 use which::which;
 
-use crate::lfc::LFCProperties;
-
 pub mod analyzer;
 pub mod command_line;
 pub mod errors;
@@ -56,10 +54,10 @@ pub fn delete_subdirs(path_root: &Path, subdirs: &[&str]) -> io::Result<()> {
     Ok(())
 }
 
-pub fn default_build_clean(lfc: &LFCProperties) -> io::Result<()> {
-    println!("removing build artifacts in {:?}", lfc.out);
+pub fn default_build_clean(out_dir: &Path) -> io::Result<()> {
+    println!("removing build artifacts in {:?}", out_dir);
     delete_subdirs(
-        &lfc.out,
+        &out_dir,
         &["bin", "include", "src-gen", "lib64", "share", "build"],
     )
 }

@@ -1,9 +1,7 @@
 use std::fs;
 use std::process::Command;
 
-use crate::backends::{
-    BatchBackend, BatchLingoCommand, BuildCommandOptions, CommandSpec, LingoCommandCtx,
-};
+use crate::backends::{BatchBackend, BatchLingoCommand, BuildCommandOptions, CommandSpec};
 use crate::util::command_line::run_and_capture;
 use crate::util::errors::{BuildResult, LingoError};
 
@@ -22,10 +20,10 @@ impl LFC {
     pub fn do_parallel_lfc_codegen(
         task: &BuildCommandOptions,
         command: &BatchLingoCommand,
-        _ctx: &LingoCommandCtx,
     ) -> BuildResult {
         let BuildCommandOptions {
             compile_target_code,
+            lfc_exec_path,
             ..
         } = task;
         use rayon::prelude::*;
@@ -33,7 +31,7 @@ impl LFC {
             .apps
             .par_iter()
             .map(|&app| {
-                let mut lfc_command = Command::new("lfc");
+                let mut lfc_command = Command::new(lfc_exec_path);
                 lfc_command.arg("-o");
                 lfc_command.arg(app.src_gen_dir());
                 lfc_command.arg(&app.main_reactor);
@@ -48,13 +46,9 @@ impl LFC {
 }
 
 impl BatchBackend for LFC {
-    fn execute_command(
-        &mut self,
-        command: BatchLingoCommand,
-        ctx: &mut LingoCommandCtx,
-    ) -> BuildResult {
+    fn execute_command(&mut self, command: BatchLingoCommand) -> BuildResult {
         match &command.task {
-            CommandSpec::Build(options) => LFC::do_parallel_lfc_codegen(options, &command, ctx),
+            CommandSpec::Build(options) => LFC::do_parallel_lfc_codegen(options, &command),
             CommandSpec::Update => Ok(()),
             CommandSpec::Clean => {
                 for &app in &command.apps {

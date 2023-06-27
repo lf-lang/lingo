@@ -9,9 +9,9 @@ pub type BuildResult = Result<(), Box<AnyError>>;
 pub enum LingoError {
     Composite(Vec<Box<AnyError>>),
     CommandFailed(Command, ExitStatus),
-    RunAborted(),
 }
 
+/// Merge two build results into one, collecting errors.
 pub fn merge(b1: BuildResult, b2: BuildResult) -> BuildResult {
     match (b1, b2) {
         (Ok(()), Ok(())) => Ok(()),
@@ -47,9 +47,6 @@ impl Display for LingoError {
                     write!(f, "{}\n", error)?
                 }
                 Ok(())
-            }
-            LingoError::RunAborted() => {
-                write!(f, "Run aborted because --keep-going was not set")
             }
             LingoError::CommandFailed(command, status) => {
                 write!(f, "Command exited with status {}: {:?}", status, command)

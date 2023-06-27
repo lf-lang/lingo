@@ -7,7 +7,6 @@ use crate::App;
 
 use crate::backends::{
     BatchBackend, BatchLingoCommand, BuildCommandOptions, BuildProfile, BuildResult, CommandSpec,
-    LingoCommandCtx,
 };
 
 pub struct Cmake;
@@ -55,11 +54,7 @@ fn build_single_app(app: &App, options: &BuildCommandOptions) -> BuildResult {
 }
 
 impl BatchBackend for Cmake {
-    fn execute_command(
-        &mut self,
-        command: BatchLingoCommand,
-        _ctx: &mut LingoCommandCtx,
-    ) -> BuildResult {
+    fn execute_command(&mut self, command: BatchLingoCommand) -> BuildResult {
         match &command.task {
             CommandSpec::Build(options) => command
                 .apps
@@ -67,6 +62,12 @@ impl BatchBackend for Cmake {
                 .map(|&app| build_single_app(app, options))
                 .reduce(crate::util::errors::merge)
                 .unwrap_or(Ok(())),
+            CommandSpec::Clean => {
+                for &app in &command.apps {
+                    crate::util::default_build_clean(&app.output_root)?
+                }
+                Ok(())
+            }
             _ => Ok(()),
         }
     }
