@@ -53,6 +53,7 @@ pub struct Config {
 impl Config {
     pub fn filter_apps(&mut self, names: &Vec<String>) {
         if !names.is_empty() {
+            // todo validate that names are actual apps
             self.apps.retain(|app| names.contains(&app.name));
         }
     }

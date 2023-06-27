@@ -37,6 +37,7 @@ pub fn run_and_capture(command: &mut Command) -> io::Result<(ExitStatus, Vec<u8>
     // These expects should be guaranteed to be ok because we used piped().
     let mut child_stdout = child.stdout.take().expect("logic error getting stdout");
     let mut child_stderr = child.stderr.take().expect("logic error getting stderr");
+    println!("Running {:?}", command);
 
     thread::scope(|s| {
         let stdout_thread = s.spawn(|_| -> io::Result<Vec<u8>> {
