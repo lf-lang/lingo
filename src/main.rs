@@ -10,7 +10,7 @@ use package::App;
 
 use crate::backends::{BatchLingoCommand, BuildCommandOptions, CommandSpec};
 use crate::package::{Config, ConfigFile};
-use crate::util::errors::BuildResult;
+use crate::util::errors::{BuildResult, LingoError};
 
 pub mod args;
 pub mod backends;
@@ -27,15 +27,16 @@ fn main() {
     let lingo_path = util::find_toml(&env::current_dir().unwrap());
 
     // tries to read Lingo.toml
-    let wrapped_config = lingo_path.as_ref().and_then(|path| {
+    let mut wrapped_config = lingo_path.as_ref().and_then(|path| {
         ConfigFile::from(path)
             .map_err(|err| println!("Error while reading Lingo.toml: {}", err))
             .ok()
             .map(|cf| cf.to_config(path.parent().unwrap()))
     });
 
-    // we match on a tuple here
-    let result = execute_command(wrapped_config, args.command);
+    let result: BuildResult = validate(&mut wrapped_config, &args.command)
+        .and_then(|()| execute_command(wrapped_config.as_ref(), args.command));
+
     match result {
         Ok(_) => {}
         Err(errs) => {
@@ -44,7 +45,27 @@ fn main() {
     }
 }
 
-fn execute_command(config: Option<Config>, command: ConsoleCommand) -> BuildResult {
+fn validate(config: &mut Option<Config>, command: &ConsoleCommand) -> BuildResult {
+    match (config, command) {
+        (Some(config), ConsoleCommand::Build(build))
+        | (Some(config), ConsoleCommand::Run(build)) => {
+            let unknown_names = build
+                .apps
+                .iter()
+                .filter(|&name| !config.apps.iter().any(|app| &app.name == name))
+                .map(|s| s.clone())
+                .collect::<Vec<_>>();
+            if !unknown_names.is_empty() {
+                return Err(Box::new(LingoError::UnknownAppNames(unknown_names)));
+            }
+            config.filter_apps(&build.apps);
+            Ok(())
+        }
+        _ => Ok(()),
+    }
+}
+
+fn execute_command(config: Option<&Config>, command: ConsoleCommand) -> BuildResult {
     match (config, command) {
         (_, ConsoleCommand::Init(init_config)) => {
             let initial_config = ConfigFile::new_for_init_task(init_config).map_err(Box::new)?;
@@ -56,15 +77,13 @@ fn execute_command(config: Option<Config>, command: ConsoleCommand) -> BuildResu
             ErrorKind::NotFound,
             "Error: Missing Lingo.toml file",
         ))),
-        (Some(mut config), ConsoleCommand::Build(build_command_args)) => {
-            config.filter_apps(&build_command_args.apps);
+        (Some(config), ConsoleCommand::Build(build_command_args)) => {
             println!("Building ...");
             build(&build_command_args, &config)
         }
-        (Some(mut config), ConsoleCommand::Run(build_command_args)) => {
-            config.filter_apps(&build_command_args.apps);
+        (Some(config), ConsoleCommand::Run(build_command_args)) => {
             build(&build_command_args, &config)?;
-            for app in config.apps {
+            for app in &config.apps {
                 let mut command = Command::new(app.executable_path());
                 util::command_line::run_and_capture(&mut command)
                     .map(|_| ())

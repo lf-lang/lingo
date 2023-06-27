@@ -2,8 +2,8 @@ use std::collections::HashMap;
 
 use std::path::PathBuf;
 
+use crate::util::errors::{merge, BuildResult};
 use crate::{args::BuildSystem, package::App};
-use crate::util::errors::{BuildResult, merge};
 
 pub mod cmake;
 pub mod lfc;

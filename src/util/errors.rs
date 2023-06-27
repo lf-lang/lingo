@@ -9,6 +9,7 @@ pub type BuildResult = Result<(), Box<AnyError>>;
 pub enum LingoError {
     Composite(Vec<Box<AnyError>>),
     CommandFailed(Command, ExitStatus),
+    UnknownAppNames(Vec<String>),
 }
 
 /// Merge two build results into one, collecting errors.
@@ -50,6 +51,9 @@ impl Display for LingoError {
             }
             LingoError::CommandFailed(command, status) => {
                 write!(f, "Command exited with status {}: {:?}", status, command)
+            }
+            LingoError::UnknownAppNames(names) => {
+                write!(f, "Unknown app names: {}", names.join(", "))
             }
         }
     }

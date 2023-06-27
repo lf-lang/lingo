@@ -5,10 +5,10 @@ use std::process::Command;
 use crate::util::command_line::run_and_capture;
 use crate::App;
 
+
 use crate::backends::{
     BatchBackend, BatchLingoCommand, BuildCommandOptions, BuildProfile, BuildResult, CommandSpec,
 };
-use crate::backends::CommandSpec::Build;
 
 pub struct Cmake;
 
@@ -65,9 +65,7 @@ fn build_single_app(app: &App, options: &BuildCommandOptions) -> BuildResult {
     {
         // cleanup: rename executable to match the app name
         let bin_dir = app.output_root.join("bin");
-        fs::rename(bin_dir.join(cmake_binary_name),
-                   bin_dir.join(&app.name),
-        )?;
+        fs::rename(bin_dir.join(cmake_binary_name), bin_dir.join(&app.name))?;
     }
 
     Ok(())
@@ -79,12 +77,9 @@ impl BatchBackend for Cmake {
             CommandSpec::Build(mut options) => {
                 let do_compile = options.compile_target_code;
                 options.compile_target_code = false;
-                super::lfc::LFC::do_parallel_lfc_codegen(
-                    &options,
-                    &command.apps,
-                )?;
+                super::lfc::LFC::do_parallel_lfc_codegen(&options, &command.apps)?;
                 if !do_compile {
-                    return Ok(())
+                    return Ok(());
                 }
                 options.compile_target_code = true;
 

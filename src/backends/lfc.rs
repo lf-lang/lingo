@@ -19,10 +19,7 @@ impl LFC {
         }
     }
     // todo need to identify which apps have failed and which haven't
-    pub fn do_parallel_lfc_codegen(
-        task: &BuildCommandOptions,
-        apps: &Vec<&App>,
-    ) -> BuildResult {
+    pub fn do_parallel_lfc_codegen(task: &BuildCommandOptions, apps: &Vec<&App>) -> BuildResult {
         let BuildCommandOptions {
             compile_target_code,
             lfc_exec_path,
@@ -33,8 +30,7 @@ impl LFC {
         //  LFC should support parallel builds directly, or I shouldn't use gradle?
 
         use rayon::prelude::*;
-        apps
-            .par_iter()
+        apps.par_iter()
             .map(|&app| {
                 fs::create_dir_all(&app.output_root)?;
 
