@@ -7,10 +7,10 @@ use clap::Parser;
 
 use args::{BuildArgs, Command as ConsoleCommand, CommandLineArgs};
 use package::App;
-use crate::backends::{BatchLingoCommand, BuildCommandOptions, BuildResult, CommandSpec, LingoCommandCtx};
 
-
+use crate::backends::{BatchLingoCommand, BuildCommandOptions, CommandSpec, LingoCommandCtx};
 use crate::package::{Config, ConfigFile};
+use crate::util::errors::BuildResult;
 
 pub mod args;
 pub mod backends;
@@ -20,14 +20,22 @@ pub mod package;
 pub(crate) mod util;
 
 fn build(args: &BuildArgs, config: &Config) -> BuildResult {
-    let command = BatchLingoCommand {
-        apps: config.apps.iter().collect(),
-        task: CommandSpec::Build(BuildCommandOptions {
+    run_command(
+        CommandSpec::Build(BuildCommandOptions {
             profile: args.build_profile(),
             compile_target_code: !args.no_compile,
         }),
+        config,
+        args.keep_going,
+    )
+}
+
+fn run_command(task: CommandSpec, config: &Config, fail_at_end: bool) -> BuildResult {
+    let command = BatchLingoCommand {
+        apps: config.apps.iter().collect(),
+        task,
     };
-    let mut ctx = LingoCommandCtx::new(args.keep_going);
+    let mut ctx = LingoCommandCtx::new(fail_at_end);
     backends::execute_command(command, &mut ctx)
 }
 
@@ -79,11 +87,13 @@ fn execute_command(config: Option<Config>, command: ConsoleCommand) -> BuildResu
             build(&build_command_args, &config)?;
             for app in config.apps {
                 let mut command = Command::new(app.executable_path());
-                util::command_line::run_and_capture(&mut command).map(|_| ()).map_err(Box::new)?
+                util::command_line::run_and_capture(&mut command)
+                    .map(|_| ())
+                    .map_err(Box::new)?
             }
             Ok(()) // todo
         }
-        (Some(_config), ConsoleCommand::Clean) => todo!(),
+        (Some(config), ConsoleCommand::Clean) => run_command(CommandSpec::Clean, &config, true),
         _ => todo!(),
     }
 }

@@ -1,7 +1,7 @@
+use crate::backends::BuildProfile;
 use clap::{Args, Parser, Subcommand};
 use serde_derive::{Deserialize, Serialize};
 use std::path::PathBuf;
-use crate::backends::BuildProfile;
 
 #[derive(clap::ValueEnum, Clone, Copy, Debug, Deserialize, Serialize)]
 pub enum TargetLanguage {

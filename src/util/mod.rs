@@ -1,19 +1,13 @@
 use std::path::{Path, PathBuf};
 use std::{fs, io};
 
-
-
 use which::which;
 
-
-
 use crate::lfc::LFCProperties;
-
 
 pub mod analyzer;
 pub mod command_line;
 pub mod errors;
-
 
 /// finds toml file recurisvely
 pub fn find_toml(input_path: &Path) -> Option<PathBuf> {

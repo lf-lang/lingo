@@ -2,14 +2,13 @@ use std::fs;
 
 use std::process::Command;
 
-
-
-
 use crate::util::command_line::run_and_capture;
 use crate::App;
 
-use crate::backends::{BatchBackend, BatchLingoCommand, BuildCommandOptions, BuildProfile, BuildResult, CommandSpec, LingoCommandCtx};
-use std::borrow::Borrow;
+use crate::backends::{
+    BatchBackend, BatchLingoCommand, BuildCommandOptions, BuildProfile, BuildResult, CommandSpec,
+    LingoCommandCtx,
+};
 
 pub struct Cmake;
 
@@ -21,9 +20,16 @@ fn build_single_app(app: &App, options: &BuildCommandOptions) -> BuildResult {
     let mut cmake_command = Command::new("cmake");
     cmake_command.arg(format!(
         "-DCMAKE_BUILD_TYPE={}",
-        if options.profile == BuildProfile::Release { "RELEASE" } else { "DEBUG" }
+        if options.profile == BuildProfile::Release {
+            "RELEASE"
+        } else {
+            "DEBUG"
+        }
     ));
-    cmake_command.arg(format!("-DCMAKE_INSTALL_PREFIX={}", app.output_root.display()));
+    cmake_command.arg(format!(
+        "-DCMAKE_INSTALL_PREFIX={}",
+        app.output_root.display()
+    ));
     cmake_command.arg(format!("-DCMAKE_INSTALL_BINDIR=bin"));
     cmake_command.arg(format!("-DREACTOR_CPP_VALIDATE=ON"));
     cmake_command.arg(format!("-DREACTOR_CPP_TRACE=OFF"));
@@ -49,20 +55,19 @@ fn build_single_app(app: &App, options: &BuildCommandOptions) -> BuildResult {
 }
 
 impl BatchBackend for Cmake {
-    fn execute_command(&mut self, command: BatchLingoCommand, ctx: &mut LingoCommandCtx) -> BuildResult {
+    fn execute_command(
+        &mut self,
+        command: BatchLingoCommand,
+        _ctx: &mut LingoCommandCtx,
+    ) -> BuildResult {
         match &command.task {
-            CommandSpec::Build(options) => {
-                for app in &command.apps {
-                    match build_single_app(app, options) {
-                        Err(error) => ctx.notify_failed(app, error.borrow())?,
-                        _ => {}
-                    }
-                }
-                Ok(())
-            }
-            _ => {
-                Ok(())
-            }
+            CommandSpec::Build(options) => command
+                .apps
+                .iter()
+                .map(|&app| build_single_app(app, options))
+                .reduce(crate::util::errors::merge)
+                .unwrap_or(Ok(())),
+            _ => Ok(()),
         }
     }
 }

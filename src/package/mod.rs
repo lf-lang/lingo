@@ -10,8 +10,8 @@ use std::io;
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
 
+use crate::args::BuildSystem::{CMake, Cargo, LFC};
 use git2::Repository;
-use crate::args::BuildSystem::{Cargo, CMake, LFC};
 
 fn is_valid_location_for_project(path: &std::path::Path) -> bool {
     !path.join("src").exists() && !path.join(".git").exists() && !path.join("application").exists()
@@ -112,7 +112,6 @@ impl App {
         p
     }
 }
-
 
 /// Simple or DetailedDependcy
 #[derive(Clone, Deserialize, Serialize)]
