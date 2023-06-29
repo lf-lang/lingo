@@ -2,7 +2,7 @@ use std::fs;
 
 use std::process::Command;
 
-use crate::util::command_line::run_and_capture;
+use crate::util::run_and_capture;
 use crate::App;
 
 use crate::backends::{
@@ -75,15 +75,12 @@ impl BatchBackend for Cmake {
     fn execute_command<'a>(&mut self, command: BatchLingoCommand<'a>) -> BatchBuildResults<'a> {
         let results = command.new_results();
         match command.task {
-            CommandSpec::Build(mut options) => {
-                let do_compile = options.compile_target_code;
-                options.compile_target_code = false;
-                let batch_results = super::lfc::LFC::do_parallel_lfc_codegen(&options, results);
-                if !do_compile {
+            CommandSpec::Build(options) => {
+                let batch_results =
+                    super::lfc::LFC::do_parallel_lfc_codegen(&options, results, false);
+                if !options.compile_target_code {
                     return batch_results;
                 }
-                options.compile_target_code = true;
-
                 batch_results.map(|app| build_single_app(app, &options))
             }
             CommandSpec::Clean => results.par_map(|app| {

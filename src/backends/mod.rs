@@ -123,7 +123,7 @@ impl<'a> BatchBuildResults<'a> {
     /// is only ok if the other is disjoint from this result.
     fn append(&mut self, mut other: BatchBuildResults<'a>) {
         self.results.append(&mut other.results);
-        self.results.sort_by_key(|(app, _)| app.name);
+        self.results.sort_by_key(|(app, _)| &app.name);
     }
 
     fn record_result(&mut self, app: &'a App, result: BuildResult) {

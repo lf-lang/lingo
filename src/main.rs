@@ -90,7 +90,7 @@ fn execute_command(config: Option<&Config>, command: ConsoleCommand) -> CommandR
         (Some(config), ConsoleCommand::Run(build_command_args)) => {
             let res = build(&build_command_args, &config).map(|app| {
                 let mut command = Command::new(app.executable_path());
-                util::command_line::run_and_capture(&mut command)?;
+                util::run_and_capture(&mut command)?;
                 Ok(())
             });
             CommandResult::Batch(res)

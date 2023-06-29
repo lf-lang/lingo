@@ -10,47 +10,45 @@ use crate::backends::{
     BatchBackend, BatchBuildResults, BatchLingoCommand, BuildCommandOptions, CommandSpec,
 };
 use crate::package::App;
-use crate::util::command_line::run_and_capture;
-use crate::util::errors::{BuildResult, LingoError};
+use crate::util::errors::BuildResult;
 
 pub struct LFC;
 
 impl LFC {
-    fn wrap_command_execution(mut command: Command) -> BuildResult {
-        match run_and_capture(&mut command) {
-            Err(e) => Err(Box::new(e)),
-            Ok((status, _, _)) if !status.success() => {
-                Err(Box::new(LingoError::CommandFailed(command, status)))
-            }
-            _ => Ok(()),
-        }
-    }
-
+    /// Do codegen for all apps in the batch result in parallel.
     pub fn do_parallel_lfc_codegen<'a, 'b>(
         options: &'b BuildCommandOptions,
         results: BatchBuildResults<'a>,
+        compile_target_code: bool,
     ) -> BatchBuildResults<'a> {
-        results.par_map(|app| LFC::do_lfc_codegen(app, options))
+        results.par_map(|app| LFC::do_lfc_codegen(app, options, compile_target_code))
     }
 
-    pub fn do_lfc_codegen(app: &App, options: &BuildCommandOptions) -> BuildResult {
+    /// Do codegen for a single app.
+    fn do_lfc_codegen(
+        app: &App,
+        options: &BuildCommandOptions,
+        compile_target_code: bool,
+    ) -> BuildResult {
         fs::create_dir_all(&app.output_root)?;
 
         let mut lfc_command = Command::new(&options.lfc_exec_path);
         lfc_command.arg(format!("--json={}", LfcJsonArgs::new(app)));
-        if !options.compile_target_code {
+        if !compile_target_code {
             lfc_command.arg("--no-compile");
         }
-        LFC::wrap_command_execution(lfc_command)
+        crate::util::execute_command_to_build_result(lfc_command)
     }
 }
 
 impl BatchBackend for LFC {
     fn execute_command<'a>(&mut self, command: BatchLingoCommand<'a>) -> BatchBuildResults<'a> {
         match &command.task {
-            CommandSpec::Build(options) => {
-                LFC::do_parallel_lfc_codegen(options, command.new_results())
-            }
+            CommandSpec::Build(options) => LFC::do_parallel_lfc_codegen(
+                options,
+                command.new_results(),
+                options.compile_target_code,
+            ),
             CommandSpec::Update => todo!(),
             CommandSpec::Clean => command.new_results().par_map(|app| {
                 fs::remove_dir_all(app.src_gen_dir())?;

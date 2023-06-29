@@ -4,8 +4,10 @@ use std::{fs, io};
 use which::which;
 
 pub mod analyzer;
-pub mod command_line;
+mod command_line;
 pub mod errors;
+
+pub use command_line::*;
 
 /// finds toml file recurisvely
 pub fn find_toml(input_path: &Path) -> Option<PathBuf> {
