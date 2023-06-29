@@ -6,12 +6,12 @@ use serde_derive::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 use std::fs::{read_to_string, remove_dir_all, remove_file, write};
-use std::io;
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
+use std::{env, io};
 
 use crate::args::BuildSystem::{CMake, Cargo, LFC};
-use crate::args::Platform::Native;
+use crate::util::errors::{BuildResult, LingoError};
 use git2::Repository;
 
 fn is_valid_location_for_project(path: &std::path::Path) -> bool {
@@ -48,15 +48,6 @@ pub struct Config {
     /// list of apps defined inside this package
     #[serde(rename = "app")]
     pub apps: Vec<App>,
-}
-
-impl Config {
-    pub fn filter_apps(&mut self, names: &Vec<String>) {
-        if !names.is_empty() {
-            // todo validate that names are actual apps
-            self.apps.retain(|app| names.contains(&app.name));
-        }
-    }
 }
 
 /// Schema of the configuration parsed from the Lingo.toml
@@ -206,48 +197,49 @@ impl ConfigFile {
     }
 
     // Sets up a standard LF project for "native" development and deployment
-    pub fn setup_native(&self) {
-        std::fs::create_dir_all("./src").expect("Cannot create target directory");
+    pub fn setup_native(&self) -> BuildResult {
+        std::fs::create_dir_all("./src")?;
         let hello_world_code: &'static str = match self.apps[0].target {
             TargetLanguage::Cpp => include_str!("../../defaults/HelloCpp.lf"),
             TargetLanguage::C => include_str!("../../defaults/HelloC.lf"),
             _ => panic!("Target langauge not supported yet"), // FIXME: Add examples for other programs
         };
 
-        write(Path::new("./src/Main.lf"), hello_world_code).expect("cannot write Main.lf file!");
+        write(Path::new("./src/Main.lf"), hello_world_code)?;
+        Ok(())
     }
 
     // Sets up a LF project with Zephyr as the target platform.
-    pub fn setup_zephyr(&self) {
+    pub fn setup_zephyr(&self) -> BuildResult {
         // Clone lf-west-template into a temporary directory
         let tmp_path = Path::new("zephyr_tmp");
         if tmp_path.exists() {
-            remove_dir_all(tmp_path).expect("Could not remove temporarily cloned repository");
+            remove_dir_all(tmp_path)?;
         }
         let url = "https://github.com/lf-lang/lf-west-template";
-        let _repo = match Repository::clone(url, tmp_path) {
-            Ok(repo) => repo,
-            Err(e) => panic!("failed to clone: {}", e), // FIXME: How to handle errors?
-        };
+        Repository::clone(url, tmp_path)?;
 
         // Copy the cloned template repo into the project directory
-        copy_recursively(tmp_path, Path::new(".")).expect("Could not copy cloned repo");
+        copy_recursively(tmp_path, Path::new("."))?;
 
         // Remove .git, .gitignore ad temporary folder
-        remove_file(".gitignore").expect("Could not remove .gitignore");
-        remove_dir_all(Path::new(".git")).expect("Could not remove .git directory");
-        remove_dir_all(tmp_path).expect("Could not remove temporarily cloned repository");
+        remove_file(".gitignore")?;
+        remove_dir_all(Path::new(".git"))?;
+        remove_dir_all(tmp_path)?;
+        Ok(())
     }
 
-    pub fn setup_example(&self) {
+    pub fn setup_example(&self) -> BuildResult {
         if is_valid_location_for_project(Path::new(".")) {
             match self.apps[0].platform {
                 Some(Platform::Native) => self.setup_native(),
                 Some(Platform::Zephyr) => self.setup_zephyr(),
-                _ => {}
+                _ => Ok(()),
             }
         } else {
-            panic!("Failed to initialize project, invalid location"); // FIXME: Handle properly
+            Err(Box::new(LingoError::InvalidProjectLocation(
+                env::current_dir().unwrap(),
+            )))
         }
     }
 
@@ -272,7 +264,7 @@ impl ConfigFile {
                         abs
                     },
                     target: app.target,
-                    platform: app.platform.unwrap_or(Native),
+                    platform: app.platform.unwrap_or(Platform::Native),
                     dependencies: app.dependencies,
                     properties: app.properties,
                 })

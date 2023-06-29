@@ -69,7 +69,10 @@ fn validate(config: &mut Option<Config>, command: &ConsoleCommand) -> BuildResul
             if !unknown_names.is_empty() {
                 return Err(Box::new(LingoError::UnknownAppNames(unknown_names)));
             }
-            config.filter_apps(&build.apps);
+            // Now remove the apps that were not selected by the CLI
+            if !build.apps.is_empty() {
+                config.apps.retain(|app| build.apps.contains(&app.name));
+            }
             Ok(())
         }
         _ => Ok(()),
@@ -105,8 +108,7 @@ fn execute_command(config: Option<&Config>, command: ConsoleCommand) -> CommandR
 fn do_init(init_config: InitArgs) -> BuildResult {
     let initial_config = ConfigFile::new_for_init_task(init_config)?;
     initial_config.write(Path::new("./Lingo.toml"))?;
-    initial_config.setup_example();
-    Ok(())
+    initial_config.setup_example()
 }
 
 fn build<'a>(args: &BuildArgs, config: &'a Config) -> BatchBuildResults<'a> {

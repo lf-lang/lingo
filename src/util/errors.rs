@@ -1,5 +1,6 @@
 use std::error::Error;
 use std::fmt::{Display, Formatter};
+use std::path::PathBuf;
 use std::process::{Command, ExitStatus};
 
 type AnyError = dyn Error + Send + Sync;
@@ -10,6 +11,7 @@ pub enum LingoError {
     Composite(Vec<Box<AnyError>>),
     CommandFailed(Command, ExitStatus),
     UnknownAppNames(Vec<String>),
+    InvalidProjectLocation(PathBuf),
 }
 
 /// Merge two build results into one, collecting errors.
@@ -54,6 +56,9 @@ impl Display for LingoError {
             }
             LingoError::UnknownAppNames(names) => {
                 write!(f, "Unknown app names: {}", names.join(", "))
+            }
+            LingoError::InvalidProjectLocation(path) => {
+                write!(f, "Cannot initialize repository in {}", path.display())
             }
         }
     }
