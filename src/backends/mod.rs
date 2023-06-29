@@ -1,11 +1,10 @@
 use std::collections::HashMap;
 use std::path::PathBuf;
 
-
 use rayon::prelude::*;
 
+use crate::util::errors::BuildResult;
 use crate::{args::BuildSystem, package::App};
-use crate::util::errors::{BuildResult};
 
 pub mod cmake;
 pub mod lfc;
@@ -94,19 +93,20 @@ pub struct BatchBuildResults<'a> {
     results: Vec<(&'a App, BuildResult)>,
 }
 
-
 impl<'a> BatchBuildResults<'a> {
     fn new() -> Self {
-        Self { results: Vec::new() }
+        Self {
+            results: Vec::new(),
+        }
     }
 
     fn for_apps(apps: &[&'a App]) -> Self {
         Self {
-            results: apps.iter().map(|&a| (a, Ok(()))).collect()
+            results: apps.iter().map(|&a| (a, Ok(()))).collect(),
         }
     }
 
-    pub fn print_errs(&self) {
+    pub fn print_results(&self) {
         for (app, b) in &self.results {
             match b {
                 Ok(()) => {
@@ -119,39 +119,51 @@ impl<'a> BatchBuildResults<'a> {
         }
     }
 
+    /// Absorb some results into this vector. Apps are not deduplicated, so this
+    /// is only ok if the other is disjoint from this result.
     fn append(&mut self, mut other: BatchBuildResults<'a>) {
-        self.results.append(&mut other.results)
+        self.results.append(&mut other.results);
+        self.results.sort_by_key(|(app, _)| app.name);
     }
 
-    /// Merging two results from parallel tasks will require a clone anyway.
     fn record_result(&mut self, app: &'a App, result: BuildResult) {
         self.results.push((app, (result)));
     }
 
-    /// Map results sequentially
-    pub fn map<F, R>(mut self, f: F) -> BatchBuildResults<'a> where F: Fn(&'a App) -> R, R: Into<BuildResult> {
-        self.results.iter_mut().for_each(|(app, res)| {
-            match res {
-                Ok(()) => {
-                    *res = f(app).into();
-                }
-                _ => {}
+    // Note: the duplication of the bodies of the following functions is benign, and
+    // allows the sequential map to be bounded more loosely than if we were to extract
+    // a function to get rid of the dup.
+
+    /// Map results sequentially. Apps that already have a failing result recorded
+    /// are not fed to the mapping function.
+    pub fn map<F, R>(mut self, f: F) -> BatchBuildResults<'a>
+    where
+        F: Fn(&'a App) -> R,
+        R: Into<BuildResult>,
+    {
+        self.results.iter_mut().for_each(|(app, res)| match res {
+            Ok(()) => {
+                *res = f(app).into();
             }
+            _ => {}
         });
         self
     }
 
-    /// Map results in parallel
-    pub fn par_map<F>(mut self, f: F) -> BatchBuildResults<'a> where F: Fn(&'a App) -> BuildResult + Send + Sync {
-        self.results.par_iter_mut().for_each(|(app, res)| {
-            match res {
+    /// Map results in parallel. Apps that already have a failing result recorded
+    /// are not fed to the mapping function.
+    pub fn par_map<F>(mut self, f: F) -> BatchBuildResults<'a>
+    where
+        F: Fn(&'a App) -> BuildResult + Send + Sync,
+    {
+        self.results
+            .par_iter_mut()
+            .for_each(|(app, res)| match res {
                 Ok(()) => {
                     *res = f(app);
                 }
                 _ => {}
-            }
-        });
+            });
         self
     }
 }
-

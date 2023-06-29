@@ -5,9 +5,9 @@ use std::{env, io};
 
 use clap::Parser;
 
+use crate::args::InitArgs;
 use args::{BuildArgs, Command as ConsoleCommand, CommandLineArgs};
 use package::App;
-use crate::args::InitArgs;
 
 use crate::backends::{BatchBuildResults, BatchLingoCommand, BuildCommandOptions, CommandSpec};
 use crate::package::{Config, ConfigFile};
@@ -15,7 +15,6 @@ use crate::util::errors::{BuildResult, LingoError};
 
 pub mod args;
 pub mod backends;
-pub mod lfc;
 pub mod package;
 pub(crate) mod util;
 
@@ -43,12 +42,8 @@ fn main() {
     let result = execute_command(wrapped_config.as_ref(), args.command);
 
     match result {
-        CommandResult::Batch(_) => {
-            todo!()
-        }
-        CommandResult::Single(res) => {
-            print_res(res)
-        }
+        CommandResult::Batch(res) => res.print_results(),
+        CommandResult::Single(res) => print_res(res),
     }
 }
 
@@ -83,9 +78,7 @@ fn validate(config: &mut Option<Config>, command: &ConsoleCommand) -> BuildResul
 
 fn execute_command(config: Option<&Config>, command: ConsoleCommand) -> CommandResult {
     match (config, command) {
-        (_, ConsoleCommand::Init(init_config)) => {
-            CommandResult::Single(do_init(init_config))
-        }
+        (_, ConsoleCommand::Init(init_config)) => CommandResult::Single(do_init(init_config)),
         (None, _) => CommandResult::Single(Err(Box::new(io::Error::new(
             ErrorKind::NotFound,
             "Error: Missing Lingo.toml file",
@@ -95,16 +88,16 @@ fn execute_command(config: Option<&Config>, command: ConsoleCommand) -> CommandR
             CommandResult::Batch(build(&build_command_args, &config))
         }
         (Some(config), ConsoleCommand::Run(build_command_args)) => {
-            let res =
-                build(&build_command_args, &config)
-                    .map(|app| {
-                        let mut command = Command::new(app.executable_path());
-                        util::command_line::run_and_capture(&mut command)?;
-                        Ok(())
-                    });
+            let res = build(&build_command_args, &config).map(|app| {
+                let mut command = Command::new(app.executable_path());
+                util::command_line::run_and_capture(&mut command)?;
+                Ok(())
+            });
             CommandResult::Batch(res)
         }
-        (Some(config), ConsoleCommand::Clean) => CommandResult::Batch(run_command(CommandSpec::Clean, &config, true)),
+        (Some(config), ConsoleCommand::Clean) => {
+            CommandResult::Batch(run_command(CommandSpec::Clean, &config, true))
+        }
         _ => todo!(),
     }
 }

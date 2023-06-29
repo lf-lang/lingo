@@ -5,8 +5,10 @@ use std::process::Command;
 use crate::util::command_line::run_and_capture;
 use crate::App;
 
-
-use crate::backends::{BatchBackend, BatchBuildResults, BatchLingoCommand, BuildCommandOptions, BuildProfile, BuildResult, CommandSpec};
+use crate::backends::{
+    BatchBackend, BatchBuildResults, BatchLingoCommand, BuildCommandOptions, BuildProfile,
+    BuildResult, CommandSpec,
+};
 
 pub struct Cmake;
 
@@ -84,12 +86,10 @@ impl BatchBackend for Cmake {
 
                 batch_results.map(|app| build_single_app(app, &options))
             }
-            CommandSpec::Clean => {
-                results.par_map(|app| {
-                    crate::util::default_build_clean(&app.output_root)?;
-                    Ok(())
-                })
-            }
+            CommandSpec::Clean => results.par_map(|app| {
+                crate::util::default_build_clean(&app.output_root)?;
+                Ok(())
+            }),
             _ => todo!(),
         }
     }
