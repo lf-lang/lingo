@@ -7,8 +7,9 @@ use clap::Parser;
 
 use args::{BuildArgs, Command as ConsoleCommand, CommandLineArgs};
 use package::App;
+use crate::args::InitArgs;
 
-use crate::backends::{BatchLingoCommand, BuildCommandOptions, CommandSpec};
+use crate::backends::{BatchBuildResults, BatchLingoCommand, BuildCommandOptions, CommandSpec};
 use crate::package::{Config, ConfigFile};
 use crate::util::errors::{BuildResult, LingoError};
 
@@ -34,9 +35,24 @@ fn main() {
             .map(|cf| cf.to_config(path.parent().unwrap()))
     });
 
-    let result: BuildResult = validate(&mut wrapped_config, &args.command)
-        .and_then(|()| execute_command(wrapped_config.as_ref(), args.command));
+    let result: BuildResult = validate(&mut wrapped_config, &args.command);
+    if result.is_err() {
+        print_res(result)
+    }
 
+    let result = execute_command(wrapped_config.as_ref(), args.command);
+
+    match result {
+        CommandResult::Batch(_) => {
+            todo!()
+        }
+        CommandResult::Single(res) => {
+            print_res(res)
+        }
+    }
+}
+
+fn print_res(result: BuildResult) {
     match result {
         Ok(_) => {}
         Err(errs) => {
@@ -65,53 +81,62 @@ fn validate(config: &mut Option<Config>, command: &ConsoleCommand) -> BuildResul
     }
 }
 
-fn execute_command(config: Option<&Config>, command: ConsoleCommand) -> BuildResult {
+fn execute_command(config: Option<&Config>, command: ConsoleCommand) -> CommandResult {
     match (config, command) {
         (_, ConsoleCommand::Init(init_config)) => {
-            let initial_config = ConfigFile::new_for_init_task(init_config).map_err(Box::new)?;
-            initial_config.write(Path::new("./Lingo.toml"));
-            initial_config.setup_example();
-            Ok(())
+            CommandResult::Single(do_init(init_config))
         }
-        (None, _) => Err(Box::new(io::Error::new(
+        (None, _) => CommandResult::Single(Err(Box::new(io::Error::new(
             ErrorKind::NotFound,
             "Error: Missing Lingo.toml file",
-        ))),
+        )))),
         (Some(config), ConsoleCommand::Build(build_command_args)) => {
             println!("Building ...");
-            build(&build_command_args, &config)
+            CommandResult::Batch(build(&build_command_args, &config))
         }
         (Some(config), ConsoleCommand::Run(build_command_args)) => {
-            build(&build_command_args, &config)?;
-            for app in &config.apps {
-                let mut command = Command::new(app.executable_path());
-                util::command_line::run_and_capture(&mut command)
-                    .map(|_| ())
-                    .map_err(Box::new)?
-            }
-            Ok(()) // todo
+            let res =
+                build(&build_command_args, &config)
+                    .map(|app| {
+                        let mut command = Command::new(app.executable_path());
+                        util::command_line::run_and_capture(&mut command)?;
+                        Ok(())
+                    });
+            CommandResult::Batch(res)
         }
-        (Some(config), ConsoleCommand::Clean) => run_command(CommandSpec::Clean, &config, true),
+        (Some(config), ConsoleCommand::Clean) => CommandResult::Batch(run_command(CommandSpec::Clean, &config, true)),
         _ => todo!(),
     }
 }
 
-fn build(args: &BuildArgs, config: &Config) -> BuildResult {
+fn do_init(init_config: InitArgs) -> BuildResult {
+    let initial_config = ConfigFile::new_for_init_task(init_config)?;
+    initial_config.write(Path::new("./Lingo.toml"))?;
+    initial_config.setup_example();
+    Ok(())
+}
+
+fn build<'a>(args: &BuildArgs, config: &'a Config) -> BatchBuildResults<'a> {
     run_command(
         CommandSpec::Build(BuildCommandOptions {
             profile: args.build_profile(),
             compile_target_code: !args.no_compile,
-            lfc_exec_path: util::find_lfc_exec(args)?,
+            lfc_exec_path: util::find_lfc_exec(args).expect("TODO replace me"),
         }),
         config,
         args.keep_going,
     )
 }
 
-fn run_command(task: CommandSpec, config: &Config, _fail_at_end: bool) -> BuildResult {
+fn run_command(task: CommandSpec, config: &Config, _fail_at_end: bool) -> BatchBuildResults {
     let command = BatchLingoCommand {
         apps: config.apps.iter().collect(),
         task,
     };
     backends::execute_command(command)
+}
+
+enum CommandResult<'a> {
+    Batch(BatchBuildResults<'a>),
+    Single(BuildResult),
 }

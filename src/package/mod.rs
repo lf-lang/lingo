@@ -193,9 +193,9 @@ impl ConfigFile {
         Ok(result)
     }
 
-    pub fn write(&self, path: &Path) {
+    pub fn write(&self, path: &Path) -> io::Result<()> {
         let toml_string = toml::to_string(&self).unwrap();
-        write(path, toml_string).unwrap_or_else(|_| panic!("cannot write toml file {:?}", &path));
+        write(path, toml_string)
     }
 
     pub fn from(path: &Path) -> io::Result<ConfigFile> {

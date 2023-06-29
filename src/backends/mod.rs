@@ -1,14 +1,16 @@
 use std::collections::HashMap;
-
 use std::path::PathBuf;
 
-use crate::util::errors::{merge, BuildResult};
+
+use rayon::prelude::*;
+
 use crate::{args::BuildSystem, package::App};
+use crate::util::errors::{BuildResult};
 
 pub mod cmake;
 pub mod lfc;
 
-pub fn execute_command(command: BatchLingoCommand) -> BuildResult {
+pub fn execute_command(command: BatchLingoCommand) -> BatchBuildResults {
     // Group apps by build system
     let mut by_build_system = HashMap::<BuildSystem, Vec<&App>>::new();
     for &app in &command.apps {
@@ -18,15 +20,15 @@ pub fn execute_command(command: BatchLingoCommand) -> BuildResult {
             .push(app);
     }
 
-    let mut result = Ok(());
+    let mut result = BatchBuildResults::new();
     for (bs, apps) in by_build_system {
         let command = command.with_apps(apps);
         let sub_res = match bs {
             BuildSystem::LFC => lfc::LFC.execute_command(command),
             BuildSystem::CMake => cmake::Cmake.execute_command(command),
-            BuildSystem::Cargo => Ok(()),
+            BuildSystem::Cargo => todo!(),
         };
-        result = merge(result, sub_res);
+        result.append(sub_res);
     }
     result
 }
@@ -75,10 +77,81 @@ impl<'a> BatchLingoCommand<'a> {
             task: self.task.clone(),
         }
     }
+
+    pub fn new_results(&self) -> BatchBuildResults<'a> {
+        BatchBuildResults::for_apps(&self.apps)
+    }
 }
 
 /// trait that all different build backends need to implement
 pub trait BatchBackend {
     /// Build all apps, possibly in parallel.
-    fn execute_command(&mut self, command: BatchLingoCommand) -> BuildResult;
+    fn execute_command<'a>(&mut self, command: BatchLingoCommand<'a>) -> BatchBuildResults<'a>;
 }
+
+/// Collects build results by app.
+pub struct BatchBuildResults<'a> {
+    results: Vec<(&'a App, BuildResult)>,
+}
+
+
+impl<'a> BatchBuildResults<'a> {
+    fn new() -> Self {
+        Self { results: Vec::new() }
+    }
+
+    fn for_apps(apps: &[&'a App]) -> Self {
+        Self {
+            results: apps.iter().map(|&a| (a, Ok(()))).collect()
+        }
+    }
+
+    pub fn print_errs(&self) {
+        for (app, b) in &self.results {
+            match b {
+                Ok(()) => {
+                    println!("- {}: Success", &app.name);
+                }
+                Err(e) => {
+                    println!("- {}: Error: {}", &app.name, e);
+                }
+            }
+        }
+    }
+
+    fn append(&mut self, mut other: BatchBuildResults<'a>) {
+        self.results.append(&mut other.results)
+    }
+
+    /// Merging two results from parallel tasks will require a clone anyway.
+    fn record_result(&mut self, app: &'a App, result: BuildResult) {
+        self.results.push((app, (result)));
+    }
+
+    /// Map results sequentially
+    pub fn map<F, R>(mut self, f: F) -> BatchBuildResults<'a> where F: Fn(&'a App) -> R, R: Into<BuildResult> {
+        self.results.iter_mut().for_each(|(app, res)| {
+            match res {
+                Ok(()) => {
+                    *res = f(app).into();
+                }
+                _ => {}
+            }
+        });
+        self
+    }
+
+    /// Map results in parallel
+    pub fn par_map<F>(mut self, f: F) -> BatchBuildResults<'a> where F: Fn(&'a App) -> BuildResult + Send + Sync {
+        self.results.par_iter_mut().for_each(|(app, res)| {
+            match res {
+                Ok(()) => {
+                    *res = f(app);
+                }
+                _ => {}
+            }
+        });
+        self
+    }
+}
+
