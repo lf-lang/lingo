@@ -22,8 +22,7 @@ impl Backend for Cmake {
     }
 
     fn build(&self, config: &BuildArgs) -> bool {
-        let create_dir =
-            fs::create_dir_all(format!("{}/build", self.lfc.out.display())).is_ok();
+        let create_dir = fs::create_dir_all(format!("{}/build", self.lfc.out.display())).is_ok();
 
         // cmake generation
         let mut cmake_command = Command::new("cmake");
