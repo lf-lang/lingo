@@ -5,7 +5,7 @@ use std::{env, io};
 
 use clap::Parser;
 
-use args::{BuildArgs, Command as ConsoleCommand, CommandLineArgs};
+use args::{BuildArgs, Command as ConsoleCommand, CommandLineArgs, Platform};
 use package::App;
 
 use crate::lfc::LFCProperties;
