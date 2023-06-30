@@ -15,7 +15,7 @@ use std::process::Command;
 fn build(args: &BuildArgs, config: &package::Config) {
     let build_target = |app: &App| -> bool {
         println!("--- Building app `{0}`", app.name);
-        
+
         match app.platform {
             Platform::Zephyr => {
                 println!("--- Skipping app `{0}` which is Zephyr-based. Use `west lf-build` to build instead", app.name);
@@ -52,8 +52,6 @@ fn build(args: &BuildArgs, config: &package::Config) {
                 true
             }
         }
-
-
     };
     util::invoke_on_selected(&args.apps, config.apps.clone(), build_target);
 }

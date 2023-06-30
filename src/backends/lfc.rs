@@ -50,7 +50,10 @@ impl Backend for LFC {
     }
 
     fn clean(&self) -> bool {
-        println!("--- Lingo removing build artifacts in {:?}", env::current_dir());
+        println!(
+            "--- Lingo removing build artifacts in {:?}",
+            env::current_dir()
+        );
         // just removes all the lingua-franca build artifacts
         fs::remove_dir_all("./bin").is_ok()
             && fs::remove_dir_all("./include").is_ok()
