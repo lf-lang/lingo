@@ -27,7 +27,7 @@ fn build(args: &BuildArgs, config: &package::Config) {
 
         if let Err(e) = code_generator.clone().generate_code(app) {
             //TODO: optimize
-            eprintln!("cannot generate code {:?}", e);
+            eprintln!("--- Cannot generate code {:?}", e);
             return false;
         }
 
@@ -38,7 +38,7 @@ fn build(args: &BuildArgs, config: &package::Config) {
         );
 
         if !backend.build(args) {
-            println!("error has occured!");
+            println!("--- An error has occured!");
             return false;
         }
         true
@@ -74,7 +74,6 @@ fn main() {
             let mut working_path = lingo_path.unwrap();
             working_path.pop();
             let config = file_config.to_config(working_path);
-            println!("building ...");
             build(&build_command_args, &config)
         }
         (Some(file_config), ConsoleCommand::Run(build_command_args)) => {
