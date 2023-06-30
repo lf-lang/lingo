@@ -25,7 +25,7 @@ impl<'a> Backend<'a> for LFC<'a> {
         // FIXME: What is this supposed to do? `lfc` does not have n `--output` argument
         //  also. Why isnt the lfc from the CLI `-l` used.
         let mut command = Command::new("lfc");
-        command.arg("--output");
+        command.arg("--output-path");
         command.arg("./");
         command.arg(&self.target.main_reactor);
         run_and_capture(&mut command).map(|_| ())
