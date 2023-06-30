@@ -19,7 +19,7 @@ impl<'a> Backend<'a> for LFC<'a> {
 
     fn build(&self, _config: &BuildArgs) -> io::Result<()> {
         println!(
-            "building main reactor: {}",
+            "--- Building main reactor: {}",
             self.target.main_reactor.display()
         );
         // FIXME: What is this supposed to do? `lfc` does not have n `--output` argument
