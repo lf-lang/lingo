@@ -3,12 +3,15 @@ use std::fmt::{Display, Formatter};
 use std::path::PathBuf;
 use std::process::{Command, ExitStatus};
 
-type AnyError = dyn Error + Send + Sync;
+use std::sync::Arc;
+
+pub type AnyError = dyn Error + Send + Sync;
 pub type BuildResult = Result<(), Box<AnyError>>;
 
 #[derive(Debug)]
 pub enum LingoError {
     Composite(Vec<Box<AnyError>>),
+    Shared(Arc<AnyError>),
     CommandFailed(Command, ExitStatus),
     UnknownAppNames(Vec<String>),
     InvalidProjectLocation(PathBuf),
@@ -50,6 +53,9 @@ impl Display for LingoError {
                     write!(f, "{}\n", error)?
                 }
                 Ok(())
+            }
+            LingoError::Shared(err) => {
+                write!(f, "{}", err)
             }
             LingoError::CommandFailed(command, status) => {
                 write!(f, "Command exited with status {}: {:?}", status, command)

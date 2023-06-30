@@ -1,9 +1,11 @@
 use std::collections::HashMap;
 use std::path::PathBuf;
 
+use std::sync::Arc;
+
 use rayon::prelude::*;
 
-use crate::util::errors::BuildResult;
+use crate::util::errors::{AnyError, BuildResult, LingoError};
 use crate::{args::BuildSystem, package::App};
 
 pub mod cmake;
@@ -164,6 +166,30 @@ impl<'a> BatchBuildResults<'a> {
                 }
                 _ => {}
             });
+        self
+    }
+
+    pub fn gather<F>(mut self, f: F) -> BatchBuildResults<'a>
+    where
+        F: Fn(&Vec<&'a App>) -> BuildResult,
+    {
+        let vec: Vec<&'a App> = self
+            .results
+            .iter()
+            .filter_map(|&(app, ref res)| res.as_ref().ok().map(|()| app))
+            .collect();
+        match f(&vec) {
+            Ok(()) => { /* Do nothing, everything is already ok. */ }
+            Err(e) => {
+                // Mark all as failed for the same reason.
+                let shared: Arc<AnyError> = e.into();
+                for (_app, res) in &mut self.results {
+                    if let Ok(()) = res {
+                        *res = Err(Box::new(LingoError::Shared(shared.clone())));
+                    }
+                }
+            }
+        }
         self
     }
 }
