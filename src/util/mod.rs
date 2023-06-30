@@ -15,7 +15,7 @@ where
         sources.retain(|input: &App| apps.contains(&input.name));
     }
 
-    // evaluate f on everyelement inside sources and then compute the logical conjuction
+    // evaluate f on every element inside sources and then compute the logical conjuction
     sources
         .iter()
         .map(f)
