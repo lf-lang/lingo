@@ -49,18 +49,16 @@ pub struct MainReactorSpec {
 /// TODO ideally use a language server service to find this out
 pub fn find_main_reactors(path: &Path) -> io::Result<Vec<MainReactorSpec>> {
     fn acc_main_reactors(path: &mut PathBuf, result: &mut Vec<MainReactorSpec>) -> io::Result<()> {
-        for result_file in std::fs::read_dir(&path)? {
-            if let Ok(entry) = result_file {
-                path.push(entry.file_name());
-                if path.is_dir() {
-                    acc_main_reactors(path, result)?;
-                } else if path.is_file() {
-                    if let Some(main_reactor) = search_inside_file(&path)? {
-                        result.push(main_reactor);
-                    }
+        for entry in (std::fs::read_dir(&path)?).flatten() {
+            path.push(entry.file_name());
+            if path.is_dir() {
+                acc_main_reactors(path, result)?;
+            } else if path.is_file() {
+                if let Some(main_reactor) = search_inside_file(path)? {
+                    result.push(main_reactor);
                 }
-                path.pop();
             }
+            path.pop();
         }
         Ok(())
     }

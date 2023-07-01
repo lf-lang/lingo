@@ -19,7 +19,7 @@ impl<'a> Backend<'a> for Cmake<'a> {
     }
 
     fn build(&self, config: &BuildArgs) -> io::Result<()> {
-        fs::create_dir_all(format!("{}/build", self.lfc.out.display().to_string()))?;
+        fs::create_dir_all(format!("{}/build", self.lfc.out.display()))?;
 
         // cmake generation
         let mut cmake_command = Command::new("cmake");
@@ -36,21 +36,21 @@ impl<'a> Backend<'a> for Cmake<'a> {
             "-DLF_SRC_PKG_PATH={}",
             self.app.root_path.display()
         ));
-        cmake_command.arg(format!("{}/src-gen", self.lfc.out.display().to_string()));
-        cmake_command.arg(format!("-B {}/build", self.lfc.out.display().to_string()));
-        cmake_command.current_dir(format!("{}/build", self.lfc.out.display().to_string()));
+        cmake_command.arg(format!("{}/src-gen", self.lfc.out.display()));
+        cmake_command.arg(format!("-B {}/build", self.lfc.out.display()));
+        cmake_command.current_dir(format!("{}/build", self.lfc.out.display()));
         run_and_capture(&mut cmake_command)?;
 
         // compiling
         let mut cmake_build_command = Command::new("cmake");
-        cmake_build_command.current_dir(format!("{}/build", self.lfc.out.display().to_string()));
+        cmake_build_command.current_dir(format!("{}/build", self.lfc.out.display()));
         cmake_build_command.arg("--build");
         cmake_build_command.arg("./");
         run_and_capture(&mut cmake_build_command)?;
 
         // installing
         let mut cmake_install_command = Command::new("cmake");
-        cmake_install_command.current_dir(format!("{}/build", self.lfc.out.display().to_string()));
+        cmake_install_command.current_dir(format!("{}/build", self.lfc.out.display()));
         cmake_install_command.arg("--install");
         cmake_install_command.arg("./");
         run_and_capture(&mut cmake_install_command)?;

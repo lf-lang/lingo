@@ -14,7 +14,7 @@ pub mod command_line;
 /// the regex.
 pub fn invoke_on_selected<F>(
     apps: &Vec<String>,
-    sources: &Vec<App>,
+    sources: &[App],
     f: F,
 ) -> Result<(), Vec<io::Error>>
 where
