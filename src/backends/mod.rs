@@ -11,22 +11,22 @@ use crate::{args::BuildSystem, package::App};
 pub mod cmake;
 pub mod lfc;
 
-pub fn execute_command(command: BatchLingoCommand) -> BatchBuildResults {
+pub fn execute_command<'a>(command: &CommandSpec, apps: &[&'a App]) -> BatchBuildResults<'a> {
     // Group apps by build system
     let mut by_build_system = HashMap::<BuildSystem, Vec<&App>>::new();
-    for &app in &command.apps {
+    for &app in apps {
         by_build_system
             .entry(app.build_system())
             .or_default()
             .push(app);
     }
 
-    let mut result = command.new_results();
+    let mut result = BatchBuildResults::new();
     for (bs, apps) in by_build_system {
-        let command = command.with_apps(apps);
-        let sub_res = match bs {
-            BuildSystem::LFC => lfc::LFC.execute_command(command),
-            BuildSystem::CMake => cmake::Cmake.execute_command(command),
+        let mut sub_res = BatchBuildResults::for_apps(&apps);
+        match bs {
+            BuildSystem::LFC => lfc::LFC.execute_command(command, &mut sub_res),
+            BuildSystem::CMake => cmake::Cmake.execute_command(command, &mut sub_res),
             BuildSystem::Cargo => todo!(),
         };
         result.append(sub_res);
@@ -91,7 +91,7 @@ impl<'a> BatchLingoCommand<'a> {
 /// trait that all different build backends need to implement
 pub trait BatchBackend {
     /// Build all apps, possibly in parallel.
-    fn execute_command<'a>(&mut self, command: BatchLingoCommand<'a>) -> BatchBuildResults<'a>;
+    fn execute_command<'a>(&mut self, command: &CommandSpec, results: &mut BatchBuildResults<'a>);
 }
 
 /// Collects build results by app.
@@ -142,10 +142,10 @@ impl<'a> BatchBuildResults<'a> {
 
     /// Map results sequentially. Apps that already have a failing result recorded
     /// are not fed to the mapping function.
-    pub fn map<F, R>(mut self, f: F) -> BatchBuildResults<'a>
-    where
-        F: Fn(&'a App) -> R,
-        R: Into<BuildResult>,
+    pub fn map<F, R>(&mut self, f: F) -> &mut Self
+        where
+            F: Fn(&'a App) -> R,
+            R: Into<BuildResult>,
     {
         self.results.iter_mut().for_each(|(app, res)| match res {
             Ok(()) => {
@@ -158,9 +158,9 @@ impl<'a> BatchBuildResults<'a> {
 
     /// Map results in parallel. Apps that already have a failing result recorded
     /// are not fed to the mapping function.
-    pub fn par_map<F>(mut self, f: F) -> BatchBuildResults<'a>
-    where
-        F: Fn(&'a App) -> BuildResult + Send + Sync,
+    pub fn par_map<F>(&mut self, f: F) -> &mut Self
+        where
+            F: Fn(&'a App) -> BuildResult + Send + Sync,
     {
         self.results
             .par_iter_mut()
@@ -173,9 +173,9 @@ impl<'a> BatchBuildResults<'a> {
         self
     }
 
-    pub fn gather<F>(mut self, f: F) -> BatchBuildResults<'a>
-    where
-        F: Fn(&Vec<&'a App>) -> BuildResult,
+    pub fn gather<F>(&mut self, f: F) -> &mut Self
+        where
+            F: Fn(&Vec<&'a App>) -> BuildResult,
     {
         let vec: Vec<&'a App> = self
             .results

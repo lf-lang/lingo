@@ -43,14 +43,14 @@ fn gen_cmake_files(app: &App, options: &BuildCommandOptions) -> BuildResult {
 }
 
 fn do_cmake_build<'a>(
-    results: BatchBuildResults<'a>,
+    results: &mut BatchBuildResults<'a>,
     options: &BuildCommandOptions,
-) -> BatchBuildResults<'a> {
-    let batch_results = super::lfc::LFC::do_parallel_lfc_codegen(options, results, false);
+) {
+    super::lfc::LFC::do_parallel_lfc_codegen(options, results, false);
     if !options.compile_target_code {
-        return batch_results;
+        return;
     }
-    batch_results
+    results
         // generate all CMake files ahead of time
         .map(|app| gen_cmake_files(app, options))
         // Run cmake to build everything.
@@ -85,17 +85,19 @@ fn do_cmake_build<'a>(
             let bin_dir = app.output_root.join("bin");
             fs::rename(bin_dir.join(cmake_binary_name), bin_dir.join(&app.name))?;
             Ok(())
-        })
+        });
 }
 
 impl BatchBackend for Cmake {
-    fn execute_command<'a>(&mut self, command: BatchLingoCommand<'a>) -> BatchBuildResults<'a> {
-        match &command.task {
-            CommandSpec::Build(options) => do_cmake_build(command.new_results(), options),
-            CommandSpec::Clean => command.new_results().par_map(|app| {
-                crate::util::default_build_clean(&app.output_root)?;
-                Ok(())
-            }),
+    fn execute_command<'a>(&mut self, command: &CommandSpec, results: &mut BatchBuildResults<'a>) {
+        match command {
+            CommandSpec::Build(options) => do_cmake_build(results, options),
+            CommandSpec::Clean => {
+                results.par_map(|app| {
+                    crate::util::default_build_clean(&app.output_root)?;
+                    Ok(())
+                });
+            }
             _ => todo!(),
         }
     }

@@ -16,12 +16,12 @@ pub struct LFC;
 
 impl LFC {
     /// Do codegen for all apps in the batch result in parallel.
-    pub fn do_parallel_lfc_codegen<'a, 'b>(
-        options: &'b BuildCommandOptions,
-        results: BatchBuildResults<'a>,
+    pub fn do_parallel_lfc_codegen(
+        options: &BuildCommandOptions,
+        results: &mut BatchBuildResults,
         compile_target_code: bool,
-    ) -> BatchBuildResults<'a> {
-        results.par_map(|app| LFC::do_lfc_codegen(app, options, compile_target_code))
+    ) {
+        results.par_map(|app| LFC::do_lfc_codegen(app, options, compile_target_code));
     }
 
     /// Do codegen for a single app.
@@ -42,18 +42,20 @@ impl LFC {
 }
 
 impl BatchBackend for LFC {
-    fn execute_command<'a>(&mut self, command: BatchLingoCommand<'a>) -> BatchBuildResults<'a> {
-        match &command.task {
+    fn execute_command<'a>(&mut self, command: &CommandSpec, results: &mut BatchBuildResults<'a>) {
+        match command {
             CommandSpec::Build(options) => LFC::do_parallel_lfc_codegen(
                 options,
-                command.new_results(),
+                results,
                 options.compile_target_code,
             ),
             CommandSpec::Update => todo!(),
-            CommandSpec::Clean => command.new_results().par_map(|app| {
-                fs::remove_dir_all(app.src_gen_dir())?;
-                Ok(())
-            }),
+            CommandSpec::Clean => {
+                results.par_map(|app| {
+                    fs::remove_dir_all(app.src_gen_dir())?;
+                    Ok(())
+                });
+            },
         }
     }
 }

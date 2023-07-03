@@ -91,7 +91,8 @@ fn execute_command(config: Option<&Config>, command: ConsoleCommand) -> CommandR
             CommandResult::Batch(build(&build_command_args, &config))
         }
         (Some(config), ConsoleCommand::Run(build_command_args)) => {
-            let res = build(&build_command_args, &config).map(|app| {
+            let mut res = build(&build_command_args, &config);
+            res.map(|app| {
                 let mut command = Command::new(app.executable_path());
                 util::run_and_capture(&mut command)?;
                 Ok(())
@@ -125,11 +126,8 @@ fn build<'a>(args: &BuildArgs, config: &'a Config) -> BatchBuildResults<'a> {
 }
 
 fn run_command(task: CommandSpec, config: &Config, _fail_at_end: bool) -> BatchBuildResults {
-    let command = BatchLingoCommand {
-        apps: config.apps.iter().collect(),
-        task,
-    };
-    backends::execute_command(command)
+    let apps = config.apps.iter().collect::<Vec<_>>();
+    backends::execute_command(&task, &apps)
 }
 
 enum CommandResult<'a> {
