@@ -21,7 +21,7 @@ pub fn execute_command(command: BatchLingoCommand) -> BatchBuildResults {
             .push(app);
     }
 
-    let mut result = BatchBuildResults::new();
+    let mut result = command.new_results();
     for (bs, apps) in by_build_system {
         let command = command.with_apps(apps);
         let sub_res = match bs {
@@ -50,6 +50,10 @@ pub struct BuildCommandOptions {
     pub compile_target_code: bool,
     /// Path to the LFC executable.
     pub lfc_exec_path: PathBuf,
+    /// Max threads to use for compilation. A value of zero means
+    /// that the number will be automatically determined.
+    /// A value of one effectively disables parallel builds.
+    pub max_threads: usize
 }
 
 /// Description of a lingo command
