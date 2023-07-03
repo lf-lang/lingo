@@ -1,20 +1,23 @@
 use clap::{Args, Parser, Subcommand};
 use serde_derive::{Deserialize, Serialize};
+use std::path::PathBuf;
 
-#[derive(clap::ValueEnum, Clone, Debug, Deserialize, Serialize)]
+#[derive(clap::ValueEnum, Clone, Copy, Debug, Deserialize, Serialize)]
 pub enum TargetLanguage {
     C,
     Cpp,
     Rust,
+    TypeScript,
+    Python,
 }
 
-#[derive(clap::ValueEnum, Clone, Debug, Deserialize, Serialize)]
+#[derive(clap::ValueEnum, Clone, Copy, Debug, Deserialize, Serialize)]
 pub enum Platform {
     Native,
     Zephyr,
 }
 
-#[derive(clap::ValueEnum, Clone, Debug, Deserialize, Serialize)]
+#[derive(clap::ValueEnum, Clone, Copy, Debug, Deserialize, Serialize)]
 pub enum BuildSystem {
     LFC,
     CMake,
@@ -37,7 +40,7 @@ pub struct BuildArgs {
 
     /// tell lingo where the lfc toolchain can be found
     #[clap(long)]
-    pub lfc: Option<String>,
+    pub lfc: Option<PathBuf>,
 
     /// skips building aka invoking the build system so it only generates code
     #[clap(short, long, action)]
@@ -58,11 +61,7 @@ pub struct BuildArgs {
 
 impl ToString for TargetLanguage {
     fn to_string(&self) -> String {
-        match self {
-            TargetLanguage::C => "C".to_string(),
-            TargetLanguage::Cpp => "Cpp".to_string(),
-            TargetLanguage::Rust => "Rust".to_string(),
-        }
+        format!("{:?}", self)
     }
 }
 
@@ -73,6 +72,17 @@ pub struct InitArgs {
 
     #[clap(value_enum, short, long)]
     pub platform: Option<Platform>,
+}
+impl InitArgs {
+    pub fn get_target_language(&self) -> TargetLanguage {
+        self.language.unwrap_or({
+            // Target language for Zephyr is C, else Cpp.
+            match self.platform {
+                Some(Platform::Zephyr) => TargetLanguage::C,
+                _ => TargetLanguage::Cpp,
+            }
+        })
+    }
 }
 
 #[derive(Subcommand, Debug)]

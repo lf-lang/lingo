@@ -4,7 +4,10 @@ use crate::util::{analyzer, copy_recursively};
 use serde_derive::{Deserialize, Serialize};
 
 use std::collections::HashMap;
+
 use std::fs::{read_to_string, remove_dir_all, remove_file, write};
+use std::io;
+use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
 
 use git2::Repository;
@@ -52,7 +55,7 @@ pub struct AppFile {
     pub name: Option<String>,
 
     /// if not specified will default to main.lf
-    pub main_reactor: Option<String>,
+    pub main_reactor: Option<PathBuf>,
 
     /// target of the app
     pub target: TargetLanguage,
@@ -66,11 +69,14 @@ pub struct AppFile {
 
 #[derive(Clone, Deserialize, Serialize)]
 pub struct App {
-    /// where the Lingo.toml is located in the filesystem
+    /// Absolute path to the directory where the Lingo.toml file is located.
     pub root_path: PathBuf,
 
+    /// Name of the app (and the final binary).
     pub name: String,
-    pub main_reactor: String,
+
+    /// Absolute path to the main reactor file.
+    pub main_reactor: PathBuf,
     pub target: TargetLanguage,
     pub platform: Platform,
 
@@ -108,14 +114,33 @@ pub struct PackageDescription {
 }
 
 impl ConfigFile {
-    pub fn new(init_args: InitArgs) -> ConfigFile {
-        let _main_reactor = if !std::path::Path::new("./src").exists() {
-            vec![String::from("Main")]
-        } else {
-            analyzer::search(Path::new("./src"))
-        };
+    // FIXME: The default should be that it searches the `src` directory for a main reactor
+    const DEFAULT_MAIN_REACTOR_RELPATH: &'static str = "src/Main.lf";
 
-        ConfigFile {
+    pub fn new_for_init_task(init_args: InitArgs) -> io::Result<ConfigFile> {
+        let src_path = Path::new("./src");
+        let main_reactors = if src_path.exists() {
+            analyzer::find_main_reactors(src_path)?
+        } else {
+            vec![analyzer::MainReactorSpec {
+                name: "Main".into(),
+                path: src_path.join("Main.lf"),
+                target: init_args.get_target_language(),
+            }]
+        };
+        let app_specs = main_reactors
+            .into_iter()
+            .map(|spec| AppFile {
+                name: Some(spec.name),
+                main_reactor: Some(spec.path),
+                target: spec.target,
+                platform: init_args.platform.unwrap_or(Platform::Native),
+                dependencies: HashMap::new(),
+                properties: HashMap::new(),
+            })
+            .collect::<Vec<_>>();
+
+        let result = ConfigFile {
             package: PackageDescription {
                 name: std::env::current_dir()
                     .expect("error while reading current directory")
@@ -132,21 +157,9 @@ impl ConfigFile {
                 homepage: None,
             },
             properties: HashMap::new(),
-            apps: vec![AppFile {
-                name: None,
-                main_reactor: None,
-                target: init_args.language.unwrap_or({
-                    // Target langauge for Zephyr is C, else Cpp.
-                    match init_args.platform {
-                        Some(Platform::Zephyr) => TargetLanguage::C,
-                        _ => TargetLanguage::Cpp,
-                    }
-                }),
-                platform: init_args.platform.unwrap_or(Platform::Native),
-                dependencies: HashMap::new(),
-                properties: HashMap::new(),
-            }],
-        }
+            apps: app_specs,
+        };
+        Ok(result)
     }
 
     pub fn write(&self, path: &Path) {
@@ -154,16 +167,11 @@ impl ConfigFile {
         write(path, toml_string).unwrap_or_else(|_| panic!("cannot write toml file {:?}", &path));
     }
 
-    pub fn from(path: &Path) -> Option<ConfigFile> {
-        match read_to_string(path) {
-            Ok(content) => toml::from_str(&content)
-                .map_err(|e| println!("the Lingo.toml has an invalid format! Error: {:?}", e))
-                .ok(),
-            Err(_) => {
-                println!("cannot read Lingo.toml does it exist?");
-                None
-            }
-        }
+    pub fn from(path: &Path) -> io::Result<ConfigFile> {
+        read_to_string(path).and_then(|contents| {
+            toml::from_str(&contents)
+                .map_err(|e| io::Error::new(ErrorKind::InvalidData, format!("{}", e)))
+        })
     }
 
     // Sets up a standard LF project for "native" development and deployment
@@ -207,30 +215,36 @@ impl ConfigFile {
                 Platform::Zephyr => self.setup_zephyr(),
             }
         } else {
-            panic!("Failed to initilize project, invalid location"); // FIXME: Handle properly
+            panic!("Failed to initialize project, invalid location"); // FIXME: Handle properly
         }
     }
 
-    pub fn to_config(mut self, path: PathBuf) -> Config {
+    /// The `path` is the path to the directory containing the Lingo.toml file.
+    pub fn to_config(self, path: &Path) -> Config {
+        let package_name = &self.package.name;
         Config {
-            package: self.package.clone(),
             properties: self.properties,
             apps: self
                 .apps
-                .iter_mut()
+                .into_iter()
                 .map(|app| App {
-                    root_path: path.clone(),
-                    name: app.name.as_ref().unwrap_or(&self.package.name).clone(),
-                    main_reactor: app
-                        .main_reactor
-                        .clone()
-                        .unwrap_or("src/Main.lf".to_string()), // FIXME: The default should be that it searches the `src` directory for a main reactor
-                    target: app.target.clone(),
-                    platform: app.platform.clone(),
-                    dependencies: app.dependencies.clone(),
-                    properties: app.properties.clone(),
+                    root_path: path.to_path_buf(),
+                    name: app.name.unwrap_or(package_name.clone()),
+                    main_reactor: {
+                        let mut abs = path.to_path_buf();
+                        abs.push(
+                            app.main_reactor
+                                .unwrap_or(Self::DEFAULT_MAIN_REACTOR_RELPATH.into()),
+                        );
+                        abs
+                    },
+                    target: app.target,
+                    platform: app.platform,
+                    dependencies: app.dependencies,
+                    properties: app.properties,
                 })
                 .collect(),
+            package: self.package,
         }
     }
 }
