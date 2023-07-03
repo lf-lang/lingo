@@ -68,7 +68,7 @@ pub enum CommandSpec {
 /// Implemented by specific build strategies, eg for specific build tools.
 pub trait BatchBackend {
     /// Build all apps, possibly in parallel.
-    fn execute_command<'a>(&mut self, command: &CommandSpec, results: &mut BatchBuildResults<'a>);
+    fn execute_command(&mut self, command: &CommandSpec, results: &mut BatchBuildResults);
 }
 
 /// Collects build results by app.
@@ -124,11 +124,10 @@ impl<'a> BatchBuildResults<'a> {
         F: Fn(&'a App) -> R,
         R: Into<BuildResult>,
     {
-        self.results.iter_mut().for_each(|(app, res)| match res {
-            Ok(()) => {
+        self.results.iter_mut().for_each(|(app, res)| {
+            if let Ok(()) = res {
                 *res = f(app).into();
             }
-            _ => {}
         });
         self
     }
@@ -139,14 +138,11 @@ impl<'a> BatchBuildResults<'a> {
     where
         F: Fn(&'a App) -> BuildResult + Send + Sync,
     {
-        self.results
-            .par_iter_mut()
-            .for_each(|(app, res)| match res {
-                Ok(()) => {
-                    *res = f(app);
-                }
-                _ => {}
-            });
+        self.results.par_iter_mut().for_each(|(app, res)| {
+            if let Ok(()) = res {
+                *res = f(app);
+            }
+        });
         self
     }
 

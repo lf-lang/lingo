@@ -40,7 +40,7 @@ impl LFC {
 }
 
 impl BatchBackend for LFC {
-    fn execute_command<'a>(&mut self, command: &CommandSpec, results: &mut BatchBuildResults<'a>) {
+    fn execute_command(&mut self, command: &CommandSpec, results: &mut BatchBuildResults) {
         match command {
             CommandSpec::Build(options) => {
                 LFC::do_parallel_lfc_codegen(options, results, options.compile_target_code)

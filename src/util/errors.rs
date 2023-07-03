@@ -29,7 +29,7 @@ pub fn merge(b1: BuildResult, b2: BuildResult) -> BuildResult {
             ) {
                 (Some(LingoError::Composite(vec)), Some(LingoError::Composite(vec2))) => {
                     vec.append(vec2);
-                    return Err(e1);
+                    Err(e1)
                 }
                 (Some(LingoError::Composite(vec)), _) => {
                     vec.push(e2);
@@ -50,7 +50,7 @@ impl Display for LingoError {
         match self {
             LingoError::Composite(errors) => {
                 for error in errors {
-                    write!(f, "{}\n", error)?
+                    writeln!(f, "{}", error)?
                 }
                 Ok(())
             }

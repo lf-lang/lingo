@@ -29,10 +29,10 @@ fn gen_cmake_files(app: &App, options: &BuildCommandOptions) -> BuildResult {
         "-DCMAKE_INSTALL_PREFIX={}",
         app.output_root.display()
     ));
-    cmake.arg(format!("-DCMAKE_INSTALL_BINDIR=bin"));
-    cmake.arg(format!("-DREACTOR_CPP_VALIDATE=ON"));
-    cmake.arg(format!("-DREACTOR_CPP_TRACE=OFF"));
-    cmake.arg(format!("-DREACTOR_CPP_LOG_LEVEL=3"));
+    cmake.arg("-DCMAKE_INSTALL_BINDIR=bin");
+    cmake.arg("-DREACTOR_CPP_VALIDATE=ON");
+    cmake.arg("-DREACTOR_CPP_TRACE=OFF");
+    cmake.arg("-DREACTOR_CPP_LOG_LEVEL=3");
     cmake.arg(format!("-DLF_SRC_PKG_PATH={}", app.root_path.display()));
     cmake.arg(app.src_gen_dir());
     cmake.arg(format!("-B {}", build_dir.display()));
@@ -41,7 +41,7 @@ fn gen_cmake_files(app: &App, options: &BuildCommandOptions) -> BuildResult {
     execute_command_to_build_result(cmake)
 }
 
-fn do_cmake_build<'a>(results: &mut BatchBuildResults<'a>, options: &BuildCommandOptions) {
+fn do_cmake_build(results: &mut BatchBuildResults, options: &BuildCommandOptions) {
     super::lfc::LFC::do_parallel_lfc_codegen(options, results, false);
     if !options.compile_target_code {
         return;
@@ -85,7 +85,7 @@ fn do_cmake_build<'a>(results: &mut BatchBuildResults<'a>, options: &BuildComman
 }
 
 impl BatchBackend for Cmake {
-    fn execute_command<'a>(&mut self, command: &CommandSpec, results: &mut BatchBuildResults<'a>) {
+    fn execute_command(&mut self, command: &CommandSpec, results: &mut BatchBuildResults) {
         match command {
             CommandSpec::Build(options) => do_cmake_build(results, options),
             CommandSpec::Clean => {

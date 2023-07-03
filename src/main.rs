@@ -64,7 +64,7 @@ fn validate(config: &mut Option<Config>, command: &ConsoleCommand) -> BuildResul
                 .apps
                 .iter()
                 .filter(|&name| !config.apps.iter().any(|app| &app.name == name))
-                .map(|s| s.clone())
+                .cloned()
                 .collect::<Vec<_>>();
             if !unknown_names.is_empty() {
                 return Err(Box::new(LingoError::UnknownAppNames(unknown_names)));
@@ -88,10 +88,10 @@ fn execute_command(config: Option<&Config>, command: ConsoleCommand) -> CommandR
         )))),
         (Some(config), ConsoleCommand::Build(build_command_args)) => {
             println!("Building ...");
-            CommandResult::Batch(build(&build_command_args, &config))
+            CommandResult::Batch(build(&build_command_args, config))
         }
         (Some(config), ConsoleCommand::Run(build_command_args)) => {
-            let mut res = build(&build_command_args, &config);
+            let mut res = build(&build_command_args, config);
             res.map(|app| {
                 let mut command = Command::new(app.executable_path());
                 util::run_and_capture(&mut command)?;
@@ -100,7 +100,7 @@ fn execute_command(config: Option<&Config>, command: ConsoleCommand) -> CommandR
             CommandResult::Batch(res)
         }
         (Some(config), ConsoleCommand::Clean) => {
-            CommandResult::Batch(run_command(CommandSpec::Clean, &config, true))
+            CommandResult::Batch(run_command(CommandSpec::Clean, config, true))
         }
         _ => todo!(),
     }
