@@ -11,7 +11,7 @@ pub enum TargetLanguage {
     Python,
 }
 
-#[derive(clap::ValueEnum, Clone, Copy, Debug, Deserialize, Serialize)]
+#[derive(clap::ValueEnum, Clone, Copy, Debug, Deserialize, Serialize, PartialEq)]
 pub enum Platform {
     Native,
     Zephyr,

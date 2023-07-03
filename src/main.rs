@@ -20,6 +20,12 @@ pub(crate) mod util;
 
 fn build(args: &BuildArgs, config: &Config) -> Result<(), Vec<io::Error>> {
     util::invoke_on_selected(&args.apps, &config.apps, |app: &App| {
+
+        // TODO: Support using lingo as a thin wrapper around west
+        if app.platform == Platform::Zephyr {
+            return Err(io::Error::new(ErrorKind::Unsupported, "Error: Use `west lf-build` to build and run Zephyr programs."))
+        }
+
         // TODO remove LFCProperties?
         let lfc_props = LFCProperties::new(
             app.main_reactor.clone(),
