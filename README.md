@@ -2,14 +2,14 @@
 **Contact:** <tassilo-tanneberger@tu-dresden.de>
 
 Lingo is a one-stop build tool for the Lingua Franca project. 
-Lingo will manages dependencies, configure build scripts and will potentially cross-compile for embedded platforms.
+Lingo will manage dependencies, configure build scripts and will potentially cross-compile for embedded platforms.
 
 
 ## Getting started
 Lingo is a Rust project and is built with cargo. To install it simply run
 `cargo install --path .`
 
-## The command line interfac
+## The command line interface
 
 ```
 lingua-franca package manager and build tool 0.1.2
@@ -20,17 +20,17 @@ USAGE:
     lingo [OPTIONS] <SUBCOMMAND>
 
 OPTIONS:
-    -b, --backend <BACKEND>    force lingo to use the specified backend [default: cli]
+    -b, --backend <BACKEND>    Force lingo to use the specified backend [default: cli]
     -h, --help                 Print help information
     -V, --version              Print version information
 
 SUBCOMMANDS:
-    build     compiling one or multiple binaries in a lingua-franca package
-    clean     removes build artifacts
+    build     Compile the current package
+    clean     Remove build artifacts from the package
     help      Print this message or the help of the given subcommand(s)
-    init      initializing a lingua-franca project
-    run       builds and runs binaries
-    update    Updates the dependencies and potentially build tools
+    init      Initialize a new package
+    run       Build and run a main program in the package
+    update    Update all the dependencies in the package
 ```
 
 ## The toml-based package configurations
