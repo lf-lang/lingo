@@ -1,4 +1,4 @@
-# Lingo - A build tool for Lingua Franca program
+# Lingo - A build tool for Lingua Franca programs
 **Contact:** <tassilo-tanneberger@tu-dresden.de>
 
 Lingo is a one-stop build tool for the Lingua Franca project. 
@@ -25,7 +25,7 @@ OPTIONS:
     -V, --version              Print version information
 
 SUBCOMMANDS:
-    build     compiling one ore multiple binaries in a lingua-franca package
+    build     compiling one or multiple binaries in a lingua-franca package
     clean     removes build artifacts
     help      Print this message or the help of the given subcommand(s)
     init      initializing a lingua-franca project
