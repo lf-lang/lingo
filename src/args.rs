@@ -11,7 +11,7 @@ pub enum TargetLanguage {
     Python,
 }
 
-#[derive(clap::ValueEnum, Clone, Copy, Debug, Deserialize, Serialize)]
+#[derive(clap::ValueEnum, Clone, Copy, Debug, Deserialize, Serialize, PartialEq)]
 pub enum Platform {
     Native,
     Zephyr,
@@ -75,7 +75,7 @@ pub struct InitArgs {
 }
 impl InitArgs {
     pub fn get_target_language(&self) -> TargetLanguage {
-        self.language.unwrap_or({
+        self.language.unwrap_or_else(|| {
             // Target language for Zephyr is C, else Cpp.
             match self.platform {
                 Some(Platform::Zephyr) => TargetLanguage::C,

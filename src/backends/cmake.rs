@@ -28,10 +28,10 @@ impl<'a> Backend<'a> for Cmake<'a> {
             if config.release { "RELEASE" } else { "DEBUG" }
         ));
         cmake_command.arg(format!("-DCMAKE_INSTALL_PREFIX={}", self.lfc.out.display()));
-        cmake_command.arg(format!("-DCMAKE_INSTALL_BINDIR=bin"));
-        cmake_command.arg(format!("-DREACTOR_CPP_VALIDATE=ON"));
-        cmake_command.arg(format!("-DREACTOR_CPP_TRACE=OFF"));
-        cmake_command.arg(format!("-DREACTOR_CPP_LOG_LEVEL=3"));
+        cmake_command.arg("-DCMAKE_INSTALL_BINDIR=bin");
+        cmake_command.arg("-DREACTOR_CPP_VALIDATE=ON");
+        cmake_command.arg("-DREACTOR_CPP_TRACE=OFF");
+        cmake_command.arg("-DREACTOR_CPP_LOG_LEVEL=3");
         cmake_command.arg(format!(
             "-DLF_SRC_PKG_PATH={}",
             self.app.root_path.display()
