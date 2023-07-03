@@ -9,7 +9,7 @@ use crate::args::InitArgs;
 use args::{BuildArgs, Command as ConsoleCommand, CommandLineArgs};
 use package::App;
 
-use crate::backends::{BatchBuildResults, BatchLingoCommand, BuildCommandOptions, CommandSpec};
+use crate::backends::{BatchBuildResults, BuildCommandOptions, CommandSpec};
 use crate::package::{Config, ConfigFile};
 use crate::util::errors::{BuildResult, LingoError};
 
@@ -118,7 +118,7 @@ fn build<'a>(args: &BuildArgs, config: &'a Config) -> BatchBuildResults<'a> {
             profile: args.build_profile(),
             compile_target_code: !args.no_compile,
             lfc_exec_path: util::find_lfc_exec(args).expect("TODO replace me"),
-            max_threads: args.threads
+            max_threads: args.threads,
         }),
         config,
         args.keep_going,

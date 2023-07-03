@@ -7,8 +7,7 @@ use crate::util::execute_command_to_build_result;
 use crate::App;
 
 use crate::backends::{
-    BatchBackend, BatchBuildResults, BatchLingoCommand, BuildCommandOptions, BuildProfile,
-    BuildResult, CommandSpec,
+    BatchBackend, BatchBuildResults, BuildCommandOptions, BuildProfile, BuildResult, CommandSpec,
 };
 
 pub struct Cmake;
@@ -42,10 +41,7 @@ fn gen_cmake_files(app: &App, options: &BuildCommandOptions) -> BuildResult {
     execute_command_to_build_result(cmake)
 }
 
-fn do_cmake_build<'a>(
-    results: &mut BatchBuildResults<'a>,
-    options: &BuildCommandOptions,
-) {
+fn do_cmake_build<'a>(results: &mut BatchBuildResults<'a>, options: &BuildCommandOptions) {
     super::lfc::LFC::do_parallel_lfc_codegen(options, results, false);
     if !options.compile_target_code {
         return;

@@ -6,9 +6,7 @@ use std::process::Command;
 
 use serde_derive::Serialize;
 
-use crate::backends::{
-    BatchBackend, BatchBuildResults, BatchLingoCommand, BuildCommandOptions, CommandSpec,
-};
+use crate::backends::{BatchBackend, BatchBuildResults, BuildCommandOptions, CommandSpec};
 use crate::package::App;
 use crate::util::errors::BuildResult;
 
@@ -33,7 +31,7 @@ impl LFC {
         fs::create_dir_all(&app.output_root)?;
 
         let mut lfc_command = Command::new(&options.lfc_exec_path);
-        lfc_command.arg(format!("--json={}", LfcJsonArgs::new(app)));
+        lfc_command.arg(format!("--json='{}'", LfcJsonArgs::new(app)));
         if !compile_target_code {
             lfc_command.arg("--no-compile");
         }
@@ -44,18 +42,16 @@ impl LFC {
 impl BatchBackend for LFC {
     fn execute_command<'a>(&mut self, command: &CommandSpec, results: &mut BatchBuildResults<'a>) {
         match command {
-            CommandSpec::Build(options) => LFC::do_parallel_lfc_codegen(
-                options,
-                results,
-                options.compile_target_code,
-            ),
+            CommandSpec::Build(options) => {
+                LFC::do_parallel_lfc_codegen(options, results, options.compile_target_code)
+            }
             CommandSpec::Update => todo!(),
             CommandSpec::Clean => {
                 results.par_map(|app| {
                     fs::remove_dir_all(app.src_gen_dir())?;
                     Ok(())
                 });
-            },
+            }
         }
     }
 }

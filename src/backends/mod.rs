@@ -42,7 +42,6 @@ pub enum BuildProfile {
     Debug,
 }
 
-#[derive(Clone)]
 pub struct BuildCommandOptions {
     /// Build profile, mostly relevant for target compilation.
     pub profile: BuildProfile,
@@ -53,11 +52,10 @@ pub struct BuildCommandOptions {
     /// Max threads to use for compilation. A value of zero means
     /// that the number will be automatically determined.
     /// A value of one effectively disables parallel builds.
-    pub max_threads: usize
+    pub max_threads: usize,
 }
 
 /// Description of a lingo command
-#[derive(Clone)]
 pub enum CommandSpec {
     /// Compile generated code with the target compiler.
     Build(BuildCommandOptions),
@@ -67,28 +65,7 @@ pub enum CommandSpec {
     Clean,
 }
 
-/// Batch of apps to process, possibly in parallel.
-pub struct BatchLingoCommand<'a> {
-    /// List of apps to build.
-    pub apps: Vec<&'a App>,
-    /// Action to take.
-    pub task: CommandSpec,
-}
-
-impl<'a> BatchLingoCommand<'a> {
-    fn with_apps<'b>(&self, apps: Vec<&'b App>) -> BatchLingoCommand<'b> {
-        BatchLingoCommand {
-            apps,
-            task: self.task.clone(),
-        }
-    }
-
-    pub fn new_results(&self) -> BatchBuildResults<'a> {
-        BatchBuildResults::for_apps(&self.apps)
-    }
-}
-
-/// trait that all different build backends need to implement
+/// Implemented by specific build strategies, eg for specific build tools.
 pub trait BatchBackend {
     /// Build all apps, possibly in parallel.
     fn execute_command<'a>(&mut self, command: &CommandSpec, results: &mut BatchBuildResults<'a>);
@@ -100,18 +77,22 @@ pub struct BatchBuildResults<'a> {
 }
 
 impl<'a> BatchBuildResults<'a> {
+    /// Create an empty result, only for use with `append`.
     fn new() -> Self {
         Self {
             results: Vec::new(),
         }
     }
 
+    /// Create a result with an entry for each app. This can
+    /// then be used by combinators like map and such.
     fn for_apps(apps: &[&'a App]) -> Self {
         Self {
             results: apps.iter().map(|&a| (a, Ok(()))).collect(),
         }
     }
 
+    /// Print this result collection to standard output.
     pub fn print_results(&self) {
         for (app, b) in &self.results {
             match b {
@@ -132,10 +113,6 @@ impl<'a> BatchBuildResults<'a> {
         self.results.sort_by_key(|(app, _)| &app.name);
     }
 
-    fn record_result(&mut self, app: &'a App, result: BuildResult) {
-        self.results.push((app, (result)));
-    }
-
     // Note: the duplication of the bodies of the following functions is benign, and
     // allows the sequential map to be bounded more loosely than if we were to extract
     // a function to get rid of the dup.
@@ -143,9 +120,9 @@ impl<'a> BatchBuildResults<'a> {
     /// Map results sequentially. Apps that already have a failing result recorded
     /// are not fed to the mapping function.
     pub fn map<F, R>(&mut self, f: F) -> &mut Self
-        where
-            F: Fn(&'a App) -> R,
-            R: Into<BuildResult>,
+    where
+        F: Fn(&'a App) -> R,
+        R: Into<BuildResult>,
     {
         self.results.iter_mut().for_each(|(app, res)| match res {
             Ok(()) => {
@@ -159,8 +136,8 @@ impl<'a> BatchBuildResults<'a> {
     /// Map results in parallel. Apps that already have a failing result recorded
     /// are not fed to the mapping function.
     pub fn par_map<F>(&mut self, f: F) -> &mut Self
-        where
-            F: Fn(&'a App) -> BuildResult + Send + Sync,
+    where
+        F: Fn(&'a App) -> BuildResult + Send + Sync,
     {
         self.results
             .par_iter_mut()
@@ -174,8 +151,8 @@ impl<'a> BatchBuildResults<'a> {
     }
 
     pub fn gather<F>(&mut self, f: F) -> &mut Self
-        where
-            F: Fn(&Vec<&'a App>) -> BuildResult,
+    where
+        F: Fn(&Vec<&'a App>) -> BuildResult,
     {
         let vec: Vec<&'a App> = self
             .results

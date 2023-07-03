@@ -63,7 +63,6 @@ pub struct BuildArgs {
     /// Number of threads to use for parallel builds. Zero means it will be determined automatically.
     #[clap(short, long, default_value_t = 0)]
     pub threads: usize,
-
 }
 
 impl BuildArgs {
