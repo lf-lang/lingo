@@ -64,7 +64,7 @@ tarfetcher = {version = "0.4.2"}
 # replacement for target properties
 [[app.properties]]
 cmake-include = "./my-cmake.cmake"
-logging = true
+logging = "info"
 
 # second binary
 [[app]]
