@@ -156,17 +156,21 @@ impl<'a> BatchBuildResults<'a> {
         self
     }
 
+    /// Execute a function of all the apps that have not failed.
+    /// The returned result is set to all apps, ie, either they
+    /// all succeed, or they all fail for the same reason.
     pub fn gather<F>(&mut self, f: F) -> &mut Self
     where
-        F: Fn(&Vec<&'a App>) -> BuildResult,
+        F: FnOnce(&Vec<&'a App>) -> BuildResult,
     {
+        // collect all apps that have not yet failed.
         let vec: Vec<&'a App> = self
             .results
             .iter()
             .filter_map(|&(app, ref res)| res.as_ref().ok().map(|()| app))
             .collect();
         match f(&vec) {
-            Ok(()) => { /* Do nothing, everything is already ok. */ }
+            Ok(()) => { /* Do nothing, all apps have succeeded. */ }
             Err(e) => {
                 // Mark all as failed for the same reason.
                 let shared: Arc<AnyError> = e.into();
