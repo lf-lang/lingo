@@ -169,6 +169,9 @@ impl<'a> BatchBuildResults<'a> {
             .iter()
             .filter_map(|&(app, ref res)| res.as_ref().ok().map(|()| app))
             .collect();
+        if vec.is_empty() {
+            return self;
+        }
         match f(&vec) {
             Ok(()) => { /* Do nothing, all apps have succeeded. */ }
             Err(e) => {

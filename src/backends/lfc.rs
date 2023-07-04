@@ -32,7 +32,7 @@ impl LFC {
 
         let mut lfc_command = Command::new(&options.lfc_exec_path);
         lfc_command.arg(format!(
-            "--json='{}'",
+            "--json={}",
             LfcJsonArgs::new(app, compile_target_code)
         ));
         crate::util::execute_command_to_build_result(lfc_command)

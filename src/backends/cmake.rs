@@ -1,4 +1,3 @@
-use std::ffi::OsString;
 use std::fs;
 
 use std::process::Command;
@@ -52,18 +51,17 @@ fn do_cmake_build(results: &mut BatchBuildResults, options: &BuildCommandOptions
         // Run cmake to build everything.
         .gather(|apps| {
             let build_dir = apps[0].output_root.join("build");
-            let target_names: OsString = apps
-                .iter()
-                .map(|&app| app.main_reactor.file_stem().unwrap())
-                .collect::<Vec<_>>()
-                .join(&OsString::from(","));
 
             // compile everything
             let mut cmake = Command::new("cmake");
             cmake.current_dir(&build_dir);
             cmake.args(["--build", "."]);
-            cmake.arg("--target");
-            cmake.arg(target_names);
+            for app in apps {
+                // add one target arg for each app
+                let name = app.main_reactor.file_stem().unwrap();
+                cmake.arg("--target");
+                cmake.arg(name);
+            }
             // note: by parsing CMake stderr we would know which specific targets have failed.
             execute_command_to_build_result(cmake)
         })
