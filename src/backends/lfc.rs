@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 use std::fmt::Display;
-use std::fs;
 use std::path::Path;
 use std::process::Command;
+use std::{fmt, fs};
 
 use serde_derive::Serialize;
 
@@ -31,10 +31,10 @@ impl LFC {
         fs::create_dir_all(&app.output_root)?;
 
         let mut lfc_command = Command::new(&options.lfc_exec_path);
-        lfc_command.arg(format!("--json='{}'", LfcJsonArgs::new(app)));
-        if !compile_target_code {
-            lfc_command.arg("--no-compile");
-        }
+        lfc_command.arg(format!(
+            "--json='{}'",
+            LfcJsonArgs::new(app, compile_target_code)
+        ));
         crate::util::execute_command_to_build_result(lfc_command)
     }
 }
@@ -64,23 +64,43 @@ struct LfcJsonArgs<'a> {
     /// Path to the directory into which build artifacts like
     /// the src-gen and bin directory are generated.
     pub out: &'a Path,
+    /// Other properties, mapped to CLI args by LFC.
     pub properties: &'a HashMap<String, serde_json::Value>,
+    #[serde(skip)]
+    no_compile: bool,
 }
 
 impl<'a> LfcJsonArgs<'a> {
-    pub fn new(app: &'a App) -> Self {
+    pub fn new(app: &'a App, compile_target_code: bool) -> Self {
         Self {
             src: &app.main_reactor,
             out: &app.output_root,
             properties: &app.properties,
+            no_compile: !compile_target_code,
         }
+    }
+
+    fn to_properties(&self) -> serde_json::Result<serde_json::Value> {
+        let mut value = serde_json::to_value(self)?;
+        let properties = value
+            .as_object_mut()
+            .unwrap()
+            .get_mut("properties")
+            .unwrap()
+            .as_object_mut()
+            .unwrap();
+        properties.insert("no-compile".to_string(), self.no_compile.into());
+        Ok(value)
     }
 }
 
 impl<'a> Display for LfcJsonArgs<'a> {
     /// convert lfc properties to string
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        let string = serde_json::to_string(&self).map_err(|_| std::fmt::Error)?;
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let string = self
+            .to_properties()
+            .and_then(|v| serde_json::to_string(&v))
+            .map_err(|_| fmt::Error)?;
         write!(f, "{}", string)
     }
 }

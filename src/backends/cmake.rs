@@ -79,7 +79,7 @@ fn do_cmake_build(results: &mut BatchBuildResults, options: &BuildCommandOptions
             let cmake_binary_name = app.main_reactor.file_stem().unwrap();
             // cleanup: rename executable to match the app name
             let bin_dir = app.output_root.join("bin");
-            fs::rename(bin_dir.join(cmake_binary_name), bin_dir.join(&app.name))?;
+            fs::rename(bin_dir.join(cmake_binary_name), app.executable_path())?;
             Ok(())
         });
 }
