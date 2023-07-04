@@ -5,6 +5,7 @@ use std::sync::Arc;
 
 use rayon::prelude::*;
 
+use crate::args::Platform;
 use crate::util::errors::{AnyError, BuildResult, LingoError};
 use crate::{args::BuildSystem, package::App};
 
@@ -22,9 +23,19 @@ pub fn execute_command<'a>(command: &CommandSpec, apps: &[&'a App]) -> BatchBuil
     }
 
     let mut result = BatchBuildResults::new();
-    for (bs, apps) in by_build_system {
+    for (build_system, apps) in by_build_system {
         let mut sub_res = BatchBuildResults::for_apps(&apps);
-        match bs {
+
+        sub_res.map(|app| {
+            // TODO: Support using lingo as a thin wrapper around west
+            if app.platform == Platform::Zephyr {
+                Err(Box::new(LingoError::UseWestBuildToBuildApp))
+            } else {
+                Ok(())
+            }
+        });
+
+        match build_system {
             BuildSystem::LFC => lfc::LFC.execute_command(command, &mut sub_res),
             BuildSystem::CMake => cmake::Cmake.execute_command(command, &mut sub_res),
             BuildSystem::Cargo => todo!(),
@@ -119,14 +130,13 @@ impl<'a> BatchBuildResults<'a> {
 
     /// Map results sequentially. Apps that already have a failing result recorded
     /// are not fed to the mapping function.
-    pub fn map<F, R>(&mut self, f: F) -> &mut Self
+    pub fn map<F>(&mut self, f: F) -> &mut Self
     where
-        F: Fn(&'a App) -> R,
-        R: Into<BuildResult>,
+        F: Fn(&'a App) -> BuildResult,
     {
         self.results.iter_mut().for_each(|(app, res)| {
             if let Ok(()) = res {
-                *res = f(app).into();
+                *res = f(app);
             }
         });
         self

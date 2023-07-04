@@ -15,6 +15,7 @@ pub enum LingoError {
     CommandFailed(Command, ExitStatus),
     UnknownAppNames(Vec<String>),
     InvalidProjectLocation(PathBuf),
+    UseWestBuildToBuildApp,
 }
 
 /// Merge two build results into one, collecting errors.
@@ -65,6 +66,9 @@ impl Display for LingoError {
             }
             LingoError::InvalidProjectLocation(path) => {
                 write!(f, "Cannot initialize repository in {}", path.display())
+            }
+            LingoError::UseWestBuildToBuildApp => {
+                write!(f, "Use `west lf-build` to build and run Zephyr programs.")
             }
         }
     }
