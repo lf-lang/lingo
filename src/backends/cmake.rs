@@ -1,68 +1,98 @@
 use std::fs;
-use std::io;
+
 use std::process::Command;
 
-use crate::args::BuildArgs;
-use crate::interface::Backend;
-use crate::lfc::LFCProperties;
-use crate::util::command_line::run_and_capture;
+use crate::util::execute_command_to_build_result;
 use crate::App;
 
-pub struct Cmake<'a> {
-    app: &'a App,
-    lfc: &'a LFCProperties,
+use crate::backends::{
+    BatchBackend, BatchBuildResults, BuildCommandOptions, BuildProfile, BuildResult, CommandSpec,
+};
+
+pub struct Cmake;
+
+fn gen_cmake_files(app: &App, options: &BuildCommandOptions) -> BuildResult {
+    let build_dir = app.output_root.join("build");
+    fs::create_dir_all(&build_dir)?;
+
+    let mut cmake = Command::new("cmake");
+    cmake.arg(format!(
+        "-DCMAKE_BUILD_TYPE={}",
+        if options.profile == BuildProfile::Release {
+            "RELEASE"
+        } else {
+            "DEBUG"
+        }
+    ));
+    cmake.arg(format!(
+        "-DCMAKE_INSTALL_PREFIX={}",
+        app.output_root.display()
+    ));
+    cmake.arg("-DCMAKE_INSTALL_BINDIR=bin");
+    cmake.arg("-DREACTOR_CPP_VALIDATE=ON");
+    cmake.arg("-DREACTOR_CPP_TRACE=OFF");
+    cmake.arg("-DREACTOR_CPP_LOG_LEVEL=3");
+    cmake.arg(format!("-DLF_SRC_PKG_PATH={}", app.root_path.display()));
+    cmake.arg(app.src_gen_dir());
+    cmake.arg(format!("-B {}", build_dir.display()));
+    cmake.current_dir(&build_dir);
+
+    execute_command_to_build_result(cmake)
 }
 
-impl<'a> Backend<'a> for Cmake<'a> {
-    fn from_target(app: &'a App, lfc: &'a LFCProperties) -> Self {
-        Cmake { app, lfc }
+fn do_cmake_build(results: &mut BatchBuildResults, options: &BuildCommandOptions) {
+    super::lfc::LFC::do_parallel_lfc_codegen(options, results, false);
+    if !options.compile_target_code {
+        return;
     }
+    results
+        // generate all CMake files ahead of time
+        .map(|app| gen_cmake_files(app, options))
+        // Run cmake to build everything.
+        .gather(|apps| {
+            let build_dir = apps[0].output_root.join("build");
 
-    fn build(&self, config: &BuildArgs) -> io::Result<()> {
-        fs::create_dir_all(format!("{}/build", self.lfc.out.display()))?;
+            // compile everything
+            let mut cmake = Command::new("cmake");
+            cmake.current_dir(&build_dir);
+            cmake.args(["--build", "."]);
+            for app in apps {
+                // add one target arg for each app
+                let name = app.main_reactor.file_stem().unwrap();
+                cmake.arg("--target");
+                cmake.arg(name);
+            }
+            // note: by parsing CMake stderr we would know which specific targets have failed.
+            execute_command_to_build_result(cmake)
+        })
+        .map(|app| {
+            let build_dir = app.output_root.join("build");
+            // installing
+            let mut cmake = Command::new("cmake");
+            cmake.current_dir(&build_dir);
+            cmake.args(["--install", "."]);
+            execute_command_to_build_result(cmake)
+        })
+        .map(|app| {
+            let cmake_binary_name = app.main_reactor.file_stem().unwrap();
+            // cleanup: rename executable to match the app name
+            let bin_dir = app.output_root.join("bin");
+            fs::rename(bin_dir.join(cmake_binary_name), app.executable_path())?;
+            Ok(())
+        });
+}
 
-        // cmake generation
-        let mut cmake_command = Command::new("cmake");
-        cmake_command.arg(format!(
-            "-DCMAKE_BUILD_TYPE={}",
-            if config.release { "RELEASE" } else { "DEBUG" }
-        ));
-        cmake_command.arg(format!("-DCMAKE_INSTALL_PREFIX={}", self.lfc.out.display()));
-        cmake_command.arg("-DCMAKE_INSTALL_BINDIR=bin");
-        cmake_command.arg("-DREACTOR_CPP_VALIDATE=ON");
-        cmake_command.arg("-DREACTOR_CPP_TRACE=OFF");
-        cmake_command.arg("-DREACTOR_CPP_LOG_LEVEL=3");
-        cmake_command.arg(format!(
-            "-DLF_SRC_PKG_PATH={}",
-            self.app.root_path.display()
-        ));
-        cmake_command.arg(format!("{}/src-gen", self.lfc.out.display()));
-        cmake_command.arg(format!("-B {}/build", self.lfc.out.display()));
-        cmake_command.current_dir(format!("{}/build", self.lfc.out.display()));
-        run_and_capture(&mut cmake_command)?;
-
-        // compiling
-        let mut cmake_build_command = Command::new("cmake");
-        cmake_build_command.current_dir(format!("{}/build", self.lfc.out.display()));
-        cmake_build_command.arg("--build");
-        cmake_build_command.arg("./");
-        run_and_capture(&mut cmake_build_command)?;
-
-        // installing
-        let mut cmake_install_command = Command::new("cmake");
-        cmake_install_command.current_dir(format!("{}/build", self.lfc.out.display()));
-        cmake_install_command.arg("--install");
-        cmake_install_command.arg("./");
-        run_and_capture(&mut cmake_install_command)?;
-
-        Ok(())
-    }
-
-    fn update(&self) -> bool {
-        true
-    }
-
-    fn lfc(&self) -> &LFCProperties {
-        self.lfc
+impl BatchBackend for Cmake {
+    fn execute_command(&mut self, command: &CommandSpec, results: &mut BatchBuildResults) {
+        match command {
+            CommandSpec::Build(options) => do_cmake_build(results, options),
+            CommandSpec::Clean => {
+                results.par_map(|app| {
+                    crate::util::default_build_clean(&app.output_root)?;
+                    Ok(())
+                });
+            }
+            _ => todo!(),
+        }
     }
 }

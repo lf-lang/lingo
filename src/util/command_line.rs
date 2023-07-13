@@ -1,6 +1,7 @@
 use std::io::{self, Write};
 use std::process::{Command, ExitStatus, Stdio};
 
+use crate::util::errors::{BuildResult, LingoError};
 use crossbeam::thread;
 
 struct TeeWriter<'a, W0: Write, W1: Write> {
@@ -37,6 +38,7 @@ pub fn run_and_capture(command: &mut Command) -> io::Result<(ExitStatus, Vec<u8>
     // These expects should be guaranteed to be ok because we used piped().
     let mut child_stdout = child.stdout.take().expect("logic error getting stdout");
     let mut child_stderr = child.stderr.take().expect("logic error getting stderr");
+    println!("Running {:?}", command);
 
     thread::scope(|s| {
         let stdout_thread = s.spawn(|_| -> io::Result<Vec<u8>> {
@@ -65,4 +67,14 @@ pub fn run_and_capture(command: &mut Command) -> io::Result<(ExitStatus, Vec<u8>
         Ok((status, stdout_log, stderr_log))
     })
     .expect("stdout/stderr thread panicked")
+}
+
+pub fn execute_command_to_build_result(mut command: Command) -> BuildResult {
+    match run_and_capture(&mut command) {
+        Err(e) => Err(Box::new(e)),
+        Ok((status, _, _)) if !status.success() => {
+            Err(Box::new(LingoError::CommandFailed(command, status)))
+        }
+        _ => Ok(()),
+    }
 }

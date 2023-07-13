@@ -1,3 +1,4 @@
+use crate::backends::BuildProfile;
 use clap::{Args, Parser, Subcommand};
 use serde_derive::{Deserialize, Serialize};
 use std::path::PathBuf;
@@ -17,46 +18,61 @@ pub enum Platform {
     Zephyr,
 }
 
-#[derive(clap::ValueEnum, Clone, Copy, Debug, Deserialize, Serialize)]
+#[derive(clap::ValueEnum, Clone, Copy, Debug, Deserialize, Serialize, Eq, PartialEq, Hash)]
 pub enum BuildSystem {
     LFC,
     CMake,
+    Cargo,
 }
 
 #[derive(Args, Debug)]
 pub struct BuildArgs {
-    /// which build system to use
+    /// Which build system to use
     /// TODO: discuss this
     #[clap(short, long)]
     pub build_system: Option<BuildSystem>,
 
-    /// which target to build
+    /// Which target to build
     #[clap(short, long)]
     pub language: Option<TargetLanguage>,
 
-    /// overwrites any possible board definition in Lingo.toml
+    /// Overwrites any possible board definition in Lingo.toml
     #[clap(long)]
     pub platform: Option<Platform>,
 
-    /// tell lingo where the lfc toolchain can be found
+    /// Tell lingo where the lfc toolchain can be found
     #[clap(long)]
     pub lfc: Option<PathBuf>,
 
-    /// skips building aka invoking the build system so it only generates code
+    /// Skips building aka invoking the build system so it only generates code
     #[clap(short, long, action)]
     pub no_compile: bool,
 
-    /// if one of the apps fails to build dont interrupt the build process
+    /// If one of the apps fails to build dont interrupt the build process
     #[clap(short, long, action)]
     pub keep_going: bool,
 
-    /// compiles the binaries with optimizations turned on and strips debug symbols
+    /// Compiles the binaries with optimizations turned on and strips debug symbols
     #[clap(short, long, action)]
     pub release: bool,
 
-    /// list of apps to build if left empty all apps are built
+    /// List of apps to build if left empty all apps are built
     #[clap(short, long, value_delimiter = ',')]
     pub apps: Vec<String>,
+
+    /// Number of threads to use for parallel builds. Zero means it will be determined automatically.
+    #[clap(short, long, default_value_t = 0)]
+    pub threads: usize,
+}
+
+impl BuildArgs {
+    pub fn build_profile(&self) -> BuildProfile {
+        if self.release {
+            BuildProfile::Release
+        } else {
+            BuildProfile::Debug
+        }
+    }
 }
 
 impl ToString for TargetLanguage {
@@ -75,7 +91,7 @@ pub struct InitArgs {
 }
 impl InitArgs {
     pub fn get_target_language(&self) -> TargetLanguage {
-        self.language.unwrap_or_else(|| {
+        self.language.unwrap_or({
             // Target language for Zephyr is C, else Cpp.
             match self.platform {
                 Some(Platform::Zephyr) => TargetLanguage::C,

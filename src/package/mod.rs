@@ -1,4 +1,4 @@
-use crate::args::{InitArgs, Platform, TargetLanguage};
+use crate::args::{BuildSystem, InitArgs, Platform, TargetLanguage};
 use crate::util::{analyzer, copy_recursively};
 
 use serde_derive::{Deserialize, Serialize};
@@ -6,10 +6,12 @@ use serde_derive::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 use std::fs::{read_to_string, remove_dir_all, remove_file, write};
-use std::io;
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
+use std::{env, io};
 
+use crate::args::BuildSystem::{CMake, Cargo, LFC};
+use crate::util::errors::{BuildResult, LingoError};
 use git2::Repository;
 
 fn is_valid_location_for_project(path: &std::path::Path) -> bool {
@@ -60,7 +62,7 @@ pub struct AppFile {
     /// target of the app
     pub target: TargetLanguage,
 
-    pub platform: Platform,
+    pub platform: Option<Platform>,
 
     pub dependencies: HashMap<String, DetailedDependency>,
 
@@ -74,6 +76,8 @@ pub struct App {
 
     /// Name of the app (and the final binary).
     pub name: String,
+    /// Root directory where to place src-gen and other compilation-specifics stuff.
+    pub output_root: PathBuf,
 
     /// Absolute path to the main reactor file.
     pub main_reactor: PathBuf,
@@ -82,6 +86,24 @@ pub struct App {
 
     pub dependencies: HashMap<String, DetailedDependency>,
     pub properties: HashMap<String, serde_json::Value>,
+}
+
+impl App {
+    pub fn build_system(&self) -> BuildSystem {
+        match self.target {
+            TargetLanguage::Cpp => CMake,
+            TargetLanguage::Rust => Cargo,
+            _ => LFC,
+        }
+    }
+    pub fn src_gen_dir(&self) -> PathBuf {
+        self.output_root.join("src-gen")
+    }
+    pub fn executable_path(&self) -> PathBuf {
+        let mut p = self.output_root.join("bin");
+        p.push(&self.name);
+        p
+    }
 }
 
 /// Simple or DetailedDependcy
@@ -134,7 +156,7 @@ impl ConfigFile {
                 name: Some(spec.name),
                 main_reactor: Some(spec.path),
                 target: spec.target,
-                platform: init_args.platform.unwrap_or(Platform::Native),
+                platform: init_args.platform,
                 dependencies: HashMap::new(),
                 properties: HashMap::new(),
             })
@@ -162,9 +184,9 @@ impl ConfigFile {
         Ok(result)
     }
 
-    pub fn write(&self, path: &Path) {
+    pub fn write(&self, path: &Path) -> io::Result<()> {
         let toml_string = toml::to_string(&self).unwrap();
-        write(path, toml_string).unwrap_or_else(|_| panic!("cannot write toml file {:?}", &path));
+        write(path, toml_string)
     }
 
     pub fn from(path: &Path) -> io::Result<ConfigFile> {
@@ -175,47 +197,49 @@ impl ConfigFile {
     }
 
     // Sets up a standard LF project for "native" development and deployment
-    pub fn setup_native(&self) {
-        std::fs::create_dir_all("./src").expect("Cannot create target directory");
+    pub fn setup_native(&self) -> BuildResult {
+        std::fs::create_dir_all("./src")?;
         let hello_world_code: &'static str = match self.apps[0].target {
             TargetLanguage::Cpp => include_str!("../../defaults/HelloCpp.lf"),
             TargetLanguage::C => include_str!("../../defaults/HelloC.lf"),
             _ => panic!("Target langauge not supported yet"), // FIXME: Add examples for other programs
         };
 
-        write(Path::new("./src/Main.lf"), hello_world_code).expect("cannot write Main.lf file!");
+        write(Path::new("./src/Main.lf"), hello_world_code)?;
+        Ok(())
     }
 
     // Sets up a LF project with Zephyr as the target platform.
-    pub fn setup_zephyr(&self) {
+    pub fn setup_zephyr(&self) -> BuildResult {
         // Clone lf-west-template into a temporary directory
         let tmp_path = Path::new("zephyr_tmp");
         if tmp_path.exists() {
-            remove_dir_all(tmp_path).expect("Could not remove temporarily cloned repository");
+            remove_dir_all(tmp_path)?;
         }
         let url = "https://github.com/lf-lang/lf-west-template";
-        let _repo = match Repository::clone(url, tmp_path) {
-            Ok(repo) => repo,
-            Err(e) => panic!("failed to clone: {}", e), // FIXME: How to handle errors?
-        };
+        Repository::clone(url, tmp_path)?;
 
         // Copy the cloned template repo into the project directory
-        copy_recursively(tmp_path, Path::new(".")).expect("Could not copy cloned repo");
+        copy_recursively(tmp_path, Path::new("."))?;
 
         // Remove .git, .gitignore ad temporary folder
-        remove_file(".gitignore").expect("Could not remove .gitignore");
-        remove_dir_all(Path::new(".git")).expect("Could not remove .git directory");
-        remove_dir_all(tmp_path).expect("Could not remove temporarily cloned repository");
+        remove_file(".gitignore")?;
+        remove_dir_all(Path::new(".git"))?;
+        remove_dir_all(tmp_path)?;
+        Ok(())
     }
 
-    pub fn setup_example(&self) {
+    pub fn setup_example(&self) -> BuildResult {
         if is_valid_location_for_project(Path::new(".")) {
             match self.apps[0].platform {
-                Platform::Native => self.setup_native(),
-                Platform::Zephyr => self.setup_zephyr(),
+                Some(Platform::Native) => self.setup_native(),
+                Some(Platform::Zephyr) => self.setup_zephyr(),
+                _ => Ok(()),
             }
         } else {
-            panic!("Failed to initialize project, invalid location"); // FIXME: Handle properly
+            Err(Box::new(LingoError::InvalidProjectLocation(
+                env::current_dir().unwrap(),
+            )))
         }
     }
 
@@ -230,6 +254,7 @@ impl ConfigFile {
                 .map(|app| App {
                     root_path: path.to_path_buf(),
                     name: app.name.unwrap_or(package_name.clone()),
+                    output_root: path.join("target"),
                     main_reactor: {
                         let mut abs = path.to_path_buf();
                         abs.push(
@@ -239,7 +264,7 @@ impl ConfigFile {
                         abs
                     },
                     target: app.target,
-                    platform: app.platform,
+                    platform: app.platform.unwrap_or(Platform::Native),
                     dependencies: app.dependencies,
                     properties: app.properties,
                 })

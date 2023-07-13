@@ -14,6 +14,7 @@ serde_derive = "*"
 which = "*"
 regex = "1.8.4"
 lazy_static = "1.4.0"
+rayon = "1.7"
 
 toml = {version = "0"}
 crossbeam = "*"
