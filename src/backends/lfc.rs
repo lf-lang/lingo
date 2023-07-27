@@ -91,8 +91,7 @@ impl<'a> LfcJsonArgs<'a> {
             .unwrap();
         // lfc does not support no-compile:false
         if self.no_compile {
-            properties.insert("no-compile".to_string(), 
-                              self.no_compile.into());
+            properties.insert("no-compile".to_string(), self.no_compile.into());
         }
         Ok(value)
     }
