@@ -91,6 +91,7 @@ pub struct App {
 impl App {
     pub fn build_system(&self) -> BuildSystem {
         match self.target {
+            TargetLanguage::C => LFC,
             TargetLanguage::Cpp => CMake,
             TargetLanguage::Rust => Cargo,
             _ => LFC,

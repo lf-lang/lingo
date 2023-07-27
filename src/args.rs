@@ -93,7 +93,8 @@ pub struct InitArgs {
 impl InitArgs {
     pub fn get_target_language(&self) -> TargetLanguage {
         self.language.unwrap_or({
-            // Target language for Zephyr is C, else Cpp.
+            // Target language for Zephyr and RP2040 is C 
+            // Else use Cpp.
             match self.platform {
                 Some(Platform::Zephyr) => TargetLanguage::C,
                 Some(Platform::RP2040) => TargetLanguage::C,
