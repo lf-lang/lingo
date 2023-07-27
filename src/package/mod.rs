@@ -209,24 +209,32 @@ impl ConfigFile {
         Ok(())
     }
 
-    // Sets up a LF project with Zephyr as the target platform.
-    pub fn setup_zephyr(&self) -> BuildResult {
-        // Clone lf-west-template into a temporary directory
-        let tmp_path = Path::new("zephyr_tmp");
+    pub fn setup_template_repo(&self, url: &str) -> BuildResult {
+        let tmp_path = Path::new("tmp");
         if tmp_path.exists() {
             remove_dir_all(tmp_path)?;
         }
-        let url = "https://github.com/lf-lang/lf-west-template";
         Repository::clone(url, tmp_path)?;
-
         // Copy the cloned template repo into the project directory
         copy_recursively(tmp_path, Path::new("."))?;
-
         // Remove .git, .gitignore ad temporary folder
         remove_file(".gitignore")?;
         remove_dir_all(Path::new(".git"))?;
         remove_dir_all(tmp_path)?;
         Ok(())
+    }
+
+    // Sets up a LF project with Zephyr as the target platform.
+    pub fn setup_zephyr(&self) -> BuildResult {
+        let url = "https://github.com/lf-lang/lf-west-template";
+        self.setup_template_repo(url)
+    }
+
+    // Sets up a LF project with RP2040 MCU as the target platform.
+    // Initializes a repo using the lf-pico-template
+    pub fn setup_rp2040(&self) -> BuildResult {
+        let url = "https://github.com/lf-lang/lf-pico-template";
+        self.setup_template_repo(url)
     }
 
     pub fn setup_example(&self) -> BuildResult {

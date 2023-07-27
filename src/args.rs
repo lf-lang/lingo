@@ -16,6 +16,7 @@ pub enum TargetLanguage {
 pub enum Platform {
     Native,
     Zephyr,
+    RP2040,
 }
 
 #[derive(clap::ValueEnum, Clone, Copy, Debug, Deserialize, Serialize, Eq, PartialEq, Hash)]
@@ -95,6 +96,7 @@ impl InitArgs {
             // Target language for Zephyr is C, else Cpp.
             match self.platform {
                 Some(Platform::Zephyr) => TargetLanguage::C,
+                Some(Platform::RP2040) => TargetLanguage::C,
                 _ => TargetLanguage::Cpp,
             }
         })
