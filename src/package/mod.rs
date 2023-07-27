@@ -242,6 +242,7 @@ impl ConfigFile {
             match self.apps[0].platform {
                 Some(Platform::Native) => self.setup_native(),
                 Some(Platform::Zephyr) => self.setup_zephyr(),
+                Some(Platform::RP2040) => self.setup_rp2040(),
                 _ => Ok(()),
             }
         } else {
