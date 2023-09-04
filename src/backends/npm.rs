@@ -6,6 +6,7 @@ use crate::App;
 use crate::util::command_line::run_and_capture;
 use std::env;
 use std::fs;
+use std::path::Path;
 use std::process::Command;
 use which::which;
 
@@ -29,7 +30,7 @@ impl Backend for Npm {
         if which("pnpm").is_ok() {
             cmd = "pnpm";
             prod = "--prod"
-        } else if !which("npm").is_ok() {
+        } else if which("npm").is_err() {
             // error
             return false;
         }
@@ -41,13 +42,23 @@ impl Backend for Npm {
             npm_install.arg(prod);
         }
 
-        npm_install.current_dir(format!("{}", self.lfc.out.display().to_string()));
+        npm_install.current_dir(self.lfc.out.display().to_string());
         let npm_installed = run_and_capture(&mut npm_install).is_ok();
-        let runtime_built: bool = true;
+        let runtime_built: bool;
 
         if cmd.eq("npm") {
-            // FIXME: build reactor-ts when pulling from GitHub instead of NPM
-            
+            // If reactor-ts is pulled from GitHub and building is done using npm,
+            // first build reactor-ts (pnpm does this automatically).
+            println!("Falling back on npm");
+            let mut npm_build = Command::new(cmd);
+            npm_build.arg("run");
+            npm_build.arg("build");
+            let reactor_path = Path::new("/node_modules/@lf_lang/reactor-ts");
+            npm_build.current_dir(reactor_path.display().to_string());
+            runtime_built = run_and_capture(&mut npm_build).is_ok();
+        } else {
+            // pnpm
+            runtime_built = true;
         }
         npm_installed && runtime_built
     }
