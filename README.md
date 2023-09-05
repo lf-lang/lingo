@@ -1,10 +1,39 @@
-# Lingo
-
+# Lingo - A build tool for Lingua Franca programs
 **Contact:** <tassilo-tanneberger@tu-dresden.de>
 
-Lingo is a build tool for lingua-franca project it will manage dependencies 
-configure build scripts and potentially cross compile for microcontrollers.
+Lingo is a one-stop build tool for the Lingua Franca project. 
+Lingo will manage dependencies, configure build scripts and will potentially cross-compile for embedded platforms.
 
+
+## Getting started
+Lingo is a Rust project and is built with cargo. To install it simply run
+`cargo install --path .`
+
+## The command line interface
+
+```
+lingua-franca package manager and build tool 0.1.2
+tassilo.tanneberger@tu-dresden.de
+Build system of lingua-franca projects
+
+USAGE:
+    lingo [OPTIONS] <SUBCOMMAND>
+
+OPTIONS:
+    -b, --backend <BACKEND>    Force lingo to use the specified backend [default: cli]
+    -h, --help                 Print help information
+    -V, --version              Print version information
+
+SUBCOMMANDS:
+    build     Compile the current package
+    clean     Remove build artifacts from the package
+    help      Print this message or the help of the given subcommand(s)
+    init      Initialize a new package
+    run       Build and run a main program in the package
+    update    Update all the dependencies in the package
+```
+
+## The toml-based package configurations
 The Lingo.toml may look something like this.
 
 ```toml
@@ -25,7 +54,7 @@ fast = true
 name = "git-hook"
 target = "cpp"
 main_reactor = "src/Main.lf"
-# main_reactor defaults to src/main.lf
+# main_reactor defaults to src/Main.lf
 
 # dependencies
 [[app.dependencies]]
@@ -35,43 +64,17 @@ tarfetcher = {version = "0.4.2"}
 # replacement for target properties
 [[app.properties]]
 cmake-include = "./my-cmake.cmake"
-logging = true
+logging = "info"
 
 # second binary
 [[app]]
 name = "embedded"
 # main_reactor = "src/SayHello.lf"
-target = "zephyre"
+target = "zephyr"
 
 [[app.dependencies]]
 blink = {version = "0.1.2"}
 
 [[app.properties]]
 no-compile = true
-```
-
-### command line interface
-
-**Installing** is done on the most systems with `cargo install`.
-
-```
-lingua-franca package manager and build tool 0.1.1
-tassilo.tanneberger@tu-dresden.de
-Build system of lingua-franca projects
-
-USAGE:
-    lingo [OPTIONS] <SUBCOMMAND>
-
-OPTIONS:
-    -b, --backend <BACKEND>    force lingo to use the specified backend [default: cli]
-    -h, --help                 Print help information
-    -V, --version              Print version information
-
-SUBCOMMANDS:
-    build     compiling one ore multiple binaries in a lingua-franca package
-    clean     removes build artifacts
-    help      Print this message or the help of the given subcommand(s)
-    init      initializing a lingua-franca project
-    run       builds and runs binaries
-    update    Updates the dependencies and potentially build tools
 ```

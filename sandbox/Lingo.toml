@@ -1,0 +1,42 @@
+[package]
+name = "example_project"
+version = "0.1.0"
+authors = ["tassilo.tannerber@tu-dresden.de"]
+homepage = "https://lf-lang.org"
+license = "Weird Stallman License"
+description = "A little Lingo.toml for people"
+
+# shared properties of all binaries
+[properties]
+fast = true
+
+# first binary in the project
+[[app]]
+name = "git-hook"
+target = "Cpp"
+main_reactor = "src/Main.lf"
+dependencies = {}
+# main_reactor defaults to src/Main.lf
+
+# dependencies
+#[[app.dependencies]]
+#git = {version = "0.3.2"}
+#tarfetcher = {version = "0.4.2"}
+
+# replacement for target properties
+[app.properties]
+logging = "info"
+#cmake-include = "./my-cmake.cmake"
+
+# second binary
+[[app]]
+name = "embedded"
+main_reactor = "src/Main2.lf"
+dependencies = {}
+target = "Cpp"
+
+#[[app.dependencies]]
+#blink = {version = "0.1.2"}
+
+[app.properties]
+no-compile = true

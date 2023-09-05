@@ -1,62 +1,106 @@
-use crate::args::BuildArgs;
-use crate::interface::Backend;
-use crate::lfc::LFCProperties;
-use crate::package::App;
-
-use crate::util::command_line::run_and_capture;
-use std::env;
-use std::fs;
+use std::collections::HashMap;
+use std::fmt::Display;
+use std::path::Path;
 use std::process::Command;
+use std::{fmt, fs};
 
-pub struct LFC {
-    target: App,
+use serde_derive::Serialize;
+
+use crate::backends::{BatchBackend, BatchBuildResults, BuildCommandOptions, CommandSpec};
+use crate::package::App;
+use crate::util::errors::BuildResult;
+
+pub struct LFC;
+
+impl LFC {
+    /// Do codegen for all apps in the batch result in parallel.
+    pub fn do_parallel_lfc_codegen(
+        options: &BuildCommandOptions,
+        results: &mut BatchBuildResults,
+        compile_target_code: bool,
+    ) {
+        results.par_map(|app| LFC::do_lfc_codegen(app, options, compile_target_code));
+    }
+
+    /// Do codegen for a single app.
+    fn do_lfc_codegen(
+        app: &App,
+        options: &BuildCommandOptions,
+        compile_target_code: bool,
+    ) -> BuildResult {
+        fs::create_dir_all(&app.output_root)?;
+
+        let mut lfc_command = Command::new(&options.lfc_exec_path);
+        lfc_command.arg(format!(
+            "--json={}",
+            LfcJsonArgs::new(app, compile_target_code)
+        ));
+        crate::util::execute_command_to_build_result(lfc_command)
+    }
 }
 
-impl Backend for LFC {
-    fn from_target(target: &App, _lfc: &LFCProperties) -> Self {
-        LFC {
-            target: target.clone(),
+impl BatchBackend for LFC {
+    fn execute_command(&mut self, command: &CommandSpec, results: &mut BatchBuildResults) {
+        match command {
+            CommandSpec::Build(options) => {
+                LFC::do_parallel_lfc_codegen(options, results, options.compile_target_code)
+            }
+            CommandSpec::Update => todo!(),
+            CommandSpec::Clean => {
+                results.par_map(|app| {
+                    fs::remove_dir_all(app.src_gen_dir())?;
+                    Ok(())
+                });
+            }
+        }
+    }
+}
+
+/// Formats LFC arguments to JSON.
+#[derive(Serialize, Clone)]
+struct LfcJsonArgs<'a> {
+    /// Path to the LF source file containing the main reactor.
+    pub src: &'a Path,
+    /// Path to the directory into which build artifacts like
+    /// the src-gen and bin directory are generated.
+    pub out: &'a Path,
+    /// Other properties, mapped to CLI args by LFC.
+    pub properties: &'a HashMap<String, serde_json::Value>,
+    #[serde(skip)]
+    no_compile: bool,
+}
+
+impl<'a> LfcJsonArgs<'a> {
+    pub fn new(app: &'a App, compile_target_code: bool) -> Self {
+        Self {
+            src: &app.main_reactor,
+            out: &app.output_root,
+            properties: &app.properties,
+            no_compile: !compile_target_code,
         }
     }
 
-    fn build(&self, _config: &BuildArgs) -> bool {
-        let reactor_copy = self.target.main_reactor.clone();
-
-        let build_lambda = |main_reactor: &String| -> bool {
-            println!("building main reactor: {}", &main_reactor);
-            // FIXME: What is this supposed to do? `lfc` does not have n `--output` argument
-            //  also. Why isnt the lfc from the CLI `-l` used.
-            let mut command = Command::new("lfc");
-            command.arg("--output");
-            command.arg("./");
-            command.arg(format!(
-                "{}/{}",
-                &self.target.root_path.display(),
-                &main_reactor
-            ));
-            run_and_capture(&mut command).is_ok()
-        };
-
-        if !build_lambda(&reactor_copy) {
-            println!("calling lfc returned an error can lfc be found in $PATH ?");
-            return false;
-        }
-
-        true
+    fn to_properties(&self) -> serde_json::Result<serde_json::Value> {
+        let mut value = serde_json::to_value(self)?;
+        let properties = value
+            .as_object_mut()
+            .unwrap()
+            .get_mut("properties")
+            .unwrap()
+            .as_object_mut()
+            .unwrap();
+        properties.insert("no-compile".to_string(), self.no_compile.into());
+        Ok(value)
     }
+}
 
-    fn update(&self) -> bool {
-        true
-    }
-
-    fn clean(&self) -> bool {
-        println!("removing build artifacts in {:?}", env::current_dir());
-        // just removes all the lingua-franca build artifacts
-        fs::remove_dir_all("./bin").is_ok()
-            && fs::remove_dir_all("./include").is_ok()
-            && fs::remove_dir_all("./src-gen").is_ok()
-            && fs::remove_dir_all("./lib64").is_ok()
-            && fs::remove_dir_all("./share").is_ok()
-            && fs::remove_dir_all("./build").is_ok()
+impl<'a> Display for LfcJsonArgs<'a> {
+    /// convert lfc properties to string
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let string = self
+            .to_properties()
+            .and_then(|v| serde_json::to_string(&v))
+            .map_err(|_| fmt::Error)?;
+        write!(f, "{}", string)
     }
 }
