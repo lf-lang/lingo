@@ -156,7 +156,7 @@ impl ConfigFile {
                 name: Some(spec.name),
                 main_reactor: Some(spec.path),
                 target: spec.target,
-                platform: init_args.platform,
+                platform: Some(init_args.platform),
                 dependencies: HashMap::new(),
                 properties: HashMap::new(),
             })
