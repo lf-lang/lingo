@@ -40,6 +40,7 @@ pub fn execute_command<'a>(command: &CommandSpec, apps: &[&'a App]) -> BatchBuil
             BuildSystem::LFC => lfc::LFC.execute_command(command, &mut sub_res),
             BuildSystem::CMake => cmake::Cmake.execute_command(command, &mut sub_res),
             BuildSystem::Cargo => todo!(),
+            BuildSystem::Npm => npm::Npm.execute_command(command, &mut sub_res),
         };
         result.append(sub_res);
     }

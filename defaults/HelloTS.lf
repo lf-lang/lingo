@@ -1,0 +1,7 @@
+target TypeScript;
+
+main reactor Main {
+    reaction (startup)  {=
+        console.log("Hello World");
+    =}
+} 

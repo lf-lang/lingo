@@ -23,6 +23,7 @@ pub enum BuildSystem {
     LFC,
     CMake,
     Cargo,
+    Npm,
 }
 
 #[derive(Args, Debug)]
