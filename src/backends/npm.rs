@@ -31,12 +31,17 @@ fn do_npm_build(results: &mut BatchBuildResults, options: &BuildCommandOptions) 
             execute_command_to_build_result(npm_install)
         })
         .map(|app| {
-            let mut npm_build = Command::new("npm");
-            npm_build.arg("run");
-            npm_build.arg("build");
-            let reactor_path = app.output_root.join("node_modules/@lf_lang/reactor-ts");
-            npm_build.current_dir(reactor_path.display().to_string());
-            execute_command_to_build_result(npm_build)
+            if options.profile == BuildProfile::Debug && cmd == "npm" {
+                // pnpm does this automatically
+                let mut npm_build = Command::new("npm");
+                npm_build.arg("run");
+                npm_build.arg("build");
+                let reactor_path = app.output_root.join("node_modules/@lf_lang/reactor-ts");
+                npm_build.current_dir(reactor_path.display().to_string());
+                execute_command_to_build_result(npm_build)
+            } else {
+                Ok(())
+            }
         });
 }
 
