@@ -1,5 +1,4 @@
 use crate::util::execute_command_to_build_result;
-use std::fs;
 use std::process::Command;
 use which::which;
 
@@ -20,7 +19,7 @@ fn do_npm_build(results: &mut BatchBuildResults, options: &BuildCommandOptions) 
     if which("pnpm").is_ok() {
         cmd = "pnpm";
         prod = "--prod";
-    } 
+    }
     results
         .map(|app| {
             let mut npm_install = Command::new(cmd);
@@ -48,8 +47,7 @@ impl BatchBackend for Npm {
             CommandSpec::Clean => {
                 results.par_map(|app| {
                     crate::util::default_build_clean(&app.output_root)?;
-                    fs::remove_dir_all("./node_modules")?;
-                    fs::remove_dir_all("./dist")?;
+                    crate::util::delete_subdirs(&app.output_root, &["node_modules", "dist"])?;
                     Ok(())
                 });
             }
@@ -57,4 +55,3 @@ impl BatchBackend for Npm {
         }
     }
 }
-
