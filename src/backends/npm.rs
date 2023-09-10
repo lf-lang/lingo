@@ -1,13 +1,12 @@
 use crate::util::execute_command_to_build_result;
 use std::fs;
-use std::path::Path;
 use std::process::Command;
 use which::which;
 
 pub struct Npm;
 
 use crate::backends::{
-    BatchBackend, BatchBuildResults, BuildCommandOptions, BuildProfile, BuildResult, CommandSpec,
+    BatchBackend, BatchBuildResults, BuildCommandOptions, BuildProfile, CommandSpec,
 };
 
 fn do_npm_build(results: &mut BatchBuildResults, options: &BuildCommandOptions) {
@@ -15,28 +14,28 @@ fn do_npm_build(results: &mut BatchBuildResults, options: &BuildCommandOptions) 
     if !options.compile_target_code {
         return;
     }
+    // check if pnpm is available
+    let mut cmd = "npm";
+    let mut prod: &str = "--production";
+    if which("pnpm").is_ok() {
+        cmd = "pnpm";
+        prod = "--prod";
+    } 
     results
         .map(|app| {
-            // check if pnpm is available
-            let mut cmd = "npm";
-            let mut prod: &str = "--production";
-            if which("pnpm").is_ok() {
-                cmd = "pnpm";
-                prod = "--prod";
-            } 
             let mut npm_install = Command::new(cmd);
             npm_install.arg("install");
             if options.profile == BuildProfile::Release {
                 npm_install.arg(prod);
             }
-            npm_install.current_dir(self.lfc.out.display().to_string());
+            npm_install.current_dir(&app.output_root);
             execute_command_to_build_result(npm_install)
         })
         .map(|app| {
-            let mut npm_build = Command::new(cmd);
+            let mut npm_build = Command::new("npm");
             npm_build.arg("run");
             npm_build.arg("build");
-            let reactor_path = Path::new("./node_modules/@lf_lang/reactor-ts");
+            let reactor_path = app.output_root.join("node_modules/@lf_lang/reactor-ts");
             npm_build.current_dir(reactor_path.display().to_string());
             execute_command_to_build_result(npm_build)
         });
@@ -49,8 +48,8 @@ impl BatchBackend for Npm {
             CommandSpec::Clean => {
                 results.par_map(|app| {
                     crate::util::default_build_clean(&app.output_root)?;
-                    fs::remove_dir_all("./node_modules").is_ok()
-                        && fs::remove_dir_all("./dist").is_ok();
+                    fs::remove_dir_all("./node_modules")?;
+                    fs::remove_dir_all("./dist")?;
                     Ok(())
                 });
             }
