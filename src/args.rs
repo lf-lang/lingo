@@ -87,15 +87,15 @@ pub struct InitArgs {
     #[clap(value_enum, short, long)]
     pub language: Option<TargetLanguage>,
 
-    #[clap(value_enum, short, long)]
-    pub platform: Option<Platform>,
+    #[clap(value_enum, short, long, default_value_t = Platform::Native)]
+    pub platform: Platform,
 }
 impl InitArgs {
     pub fn get_target_language(&self) -> TargetLanguage {
         self.language.unwrap_or({
             // Target language for Zephyr is C, else Cpp.
             match self.platform {
-                Some(Platform::Zephyr) => TargetLanguage::C,
+                Platform::Zephyr => TargetLanguage::C,
                 _ => TargetLanguage::Cpp,
             }
         })
