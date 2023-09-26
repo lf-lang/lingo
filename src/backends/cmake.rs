@@ -42,7 +42,7 @@ fn gen_cmake_files(app: &App, options: &BuildCommandOptions) -> BuildResult {
 }
 
 fn do_cmake_build(results: &mut BatchBuildResults, options: &BuildCommandOptions) {
-    super::lfc::LFC::do_parallel_lfc_codegen(options, results, false);
+    super::lfc::LFC::do_parallel_lfc_codegen(options, results, true);
     if !options.compile_target_code {
         return;
     }

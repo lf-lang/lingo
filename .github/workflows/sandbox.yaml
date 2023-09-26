@@ -1,0 +1,52 @@
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+name: Sandbox
+jobs:
+  check:
+    name: Sandbox
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - id: get-release
+        name: get-latest-release
+        uses: pozetroninc/github-action-get-latest-release@master
+        with:
+          repository: lf-lang/lingua-franca
+      - name: Integration Test
+        run: |
+            # uninstalling java11 and installing java17
+            sudo apt remove openjdk-11-jre-headless
+            sudo apt remove temurin-11-jdk
+            sudo apt remove temurin-8-jdk
+            sudo apt install openjdk-17-jre-headless
+            
+            # setting java17
+            export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+            
+            # building lingo
+            cargo b --release
+
+            # installing lingua-franca tests           
+            git clone https://github.com/lf-lang/lingua-franca.git ./lf-test
+
+            # installing lfc
+            curl -L0 https://github.com/lf-lang/lingua-franca/releases/download/v0.5.1/lf-cli-0.5.1-Linux-x86_64.tar.gz --output ./lf-release.tar.gz
+            tar -xvf ./lf-release.tar.gz
+
+            # copying Lingo.toml
+            cp test/Lingo-Cpp.toml ./lf-test/test/Lingo.toml
+
+
+            cd ./lf-test/test/Cpp
+            ../../../target/release/lingo build --lfc ../../../lf-cli-0.5.1-Linux-x86_64/bin/lfc
+        shell: bash
+      

@@ -89,10 +89,12 @@ impl<'a> LfcJsonArgs<'a> {
             .unwrap()
             .as_object_mut()
             .unwrap();
+        
         // lfc does not support no-compile:false
         if self.no_compile {
-            properties.insert("no-compile".to_string(), self.no_compile.into());
+            properties.insert("no-compile".to_string(), serde_json::Value::Bool(true));
         }
+
         Ok(value)
     }
 }
