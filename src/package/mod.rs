@@ -13,6 +13,7 @@ use std::{env, io};
 use crate::args::BuildSystem::{CMake, Cargo, LFC};
 use crate::util::errors::{BuildResult, LingoError};
 use git2::Repository;
+use tempfile::tempdir;
 
 fn is_valid_location_for_project(path: &std::path::Path) -> bool {
     !path.join("src").exists() && !path.join(".git").exists() && !path.join("application").exists()
@@ -211,14 +212,13 @@ impl ConfigFile {
     }
 
     fn setup_template_repo(&self, url: &str) -> BuildResult {
-        let tmp_path = Path::new("tmp"); if tmp_path.exists() {
-            remove_dir_all(tmp_path)?;
-        }
+        let dir = tempdir()?;
+        let tmp_path = dir.path();
         Repository::clone(url, tmp_path)?;
         // Copy the cloned template repo into the project directory
         copy_recursively(tmp_path, Path::new("."))?;
         // Remove temporary folder
-        remove_dir_all(tmp_path)?;
+        dir.close()?;
         Ok(())
     }
 
