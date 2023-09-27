@@ -6,8 +6,8 @@ use std::sync::Arc;
 use rayon::prelude::*;
 
 use crate::args::{BuildSystem, Platform};
-use crate::util::errors::{AnyError, BuildResult, LingoError};
 use crate::package::App;
+use crate::util::errors::{AnyError, BuildResult, LingoError};
 
 pub mod cmake;
 pub mod lfc;
