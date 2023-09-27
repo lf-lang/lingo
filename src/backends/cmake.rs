@@ -4,74 +4,12 @@ use std::process::Command;
 
 use crate::util::execute_command_to_build_result;
 use crate::App;
-use crate::args::Platform;
 
 use crate::backends::{
     BatchBackend, BatchBuildResults, BuildCommandOptions, BuildProfile, BuildResult, CommandSpec
 };
 
 pub struct Cmake;
-
-fn gen_cmake_files_c(app: &App, options: &BuildCommandOptions) -> BuildResult {
-    let build_dir = app.output_root
-        .join(app.name.clone())
-        .join("build");
-    // TODO: might be mismatched build dir
-    fs::create_dir_all(&build_dir)?;
-    let mut cmake = Command::new("cmake");
-    cmake.arg(format!(
-        "-DCMAKE_BUILD_TYPE={}",
-        if options.profile == BuildProfile::Release {
-            "RELEASE"
-        } else {
-            "DEBUG"
-        }
-    ));
-
-    // platform options 
-    match app.platform {
-        Platform::Native => {
-            // default
-            todo!();
-        },
-        Platform::Zephyr => {
-            todo!();
-        },
-        Platform::RP2040 => {
-            // pico sdk path
-            cmake.arg(format!(
-                    "-DPICO_SDK_PATH={}",
-                    "./pico-sdk"
-                    //find_pico_sdk().display()
-            ));
-            // if defined in enviornment
-            // add to toml
-            // usb
-            // FIXME: use defined prop
-            cmake.arg(format!(
-                    "-DPICO_STDIO_UART={}",
-                    "1"
-                    //stdio_uart.to_int().to_string()
-            ));
-            // uart
-            // FIXME: use defined prop
-            cmake.arg(format!(
-                    "-DPICO_STDIO_USB={}",
-                    "0"
-                    //stdio_usb.to_int().to_string()
-            ));
-            // board
-            // FIXME: use defined prop
-            cmake.arg(format!(
-                    "-DPICO_BOARD={}",
-                    "pico"
-                    // board_option
-                    //board.to_string()
-            ));
-            Ok(())
-        }
-    }
-}
 
 fn gen_cmake_files(app: &App, options: &BuildCommandOptions) -> BuildResult {
     let build_dir = app.output_root.join("build");

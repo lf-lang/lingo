@@ -233,7 +233,7 @@ impl ConfigFile {
 
     // Sets up a LF project with RP2040 MCU as the target platform.
     // Initializes a repo using the lf-pico-template
-    pub fn setup_rp2040(&self) -> BuildResult {
+    fn setup_rp2040(&self) -> BuildResult {
         let url = "https://github.com/lf-lang/lf-pico-template";
         // leave git artifacts
         self.setup_template_repo(url)?;
