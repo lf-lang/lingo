@@ -12,17 +12,16 @@ fn do_pnpm_build(results: &mut BatchBuildResults, options: &BuildCommandOptions)
     if !options.compile_target_code {
         return;
     }
-    
-    results
-        .map(|app| {
-            let mut npm_install = Command::new("pnpm");
-            npm_install.arg("install");
-            if options.profile == BuildProfile::Release {
-                npm_install.arg("--production");
-            }
-            npm_install.current_dir(&app.output_root);
-            execute_command_to_build_result(npm_install)
-        });
+
+    results.map(|app| {
+        let mut npm_install = Command::new("pnpm");
+        npm_install.arg("install");
+        if options.profile == BuildProfile::Release {
+            npm_install.arg("--production");
+        }
+        npm_install.current_dir(&app.output_root);
+        execute_command_to_build_result(npm_install)
+    });
 }
 
 impl BatchBackend for Pnpm {

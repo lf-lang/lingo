@@ -13,16 +13,15 @@ fn do_npm_build(results: &mut BatchBuildResults, options: &BuildCommandOptions) 
         return;
     }
 
-    results
-        .map(|app| {
-            let mut npm_install = Command::new("npm");
-            npm_install.arg("install");
-            if options.profile == BuildProfile::Release {
-                npm_install.arg("--production");
-            }
-            npm_install.current_dir(&app.output_root);
-            execute_command_to_build_result(npm_install)
-        });
+    results.map(|app| {
+        let mut npm_install = Command::new("npm");
+        npm_install.arg("install");
+        if options.profile == BuildProfile::Release {
+            npm_install.arg("--production");
+        }
+        npm_install.current_dir(&app.output_root);
+        execute_command_to_build_result(npm_install)
+    });
 }
 
 impl BatchBackend for Npm {
