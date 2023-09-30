@@ -15,6 +15,7 @@ pub enum LingoError {
     UnknownAppNames(Vec<String>),
     InvalidProjectLocation(PathBuf),
     UseWestBuildToBuildApp,
+    InvalidMainReactor,
 }
 
 impl Display for LingoError {
@@ -34,6 +35,12 @@ impl Display for LingoError {
             }
             LingoError::UseWestBuildToBuildApp => {
                 write!(f, "Use `west lf-build` to build and run Zephyr programs.")
+            }
+            LingoError::InvalidMainReactor => {
+                write!(
+                    f,
+                    "The main reactor was not a valid path to a file containing a main reactor"
+                )
             }
         }
     }

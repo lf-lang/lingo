@@ -68,6 +68,8 @@ pub struct BuildCommandOptions {
     /// that the number will be automatically determined.
     /// A value of one effectively disables parallel builds.
     pub max_threads: usize,
+    /// if compilation should continue if one of the apps fails building
+    pub keep_going: bool,
 }
 
 /// Description of a lingo command

@@ -119,6 +119,7 @@ fn build<'a>(args: &BuildArgs, config: &'a Config) -> BatchBuildResults<'a> {
             compile_target_code: !args.no_compile,
             lfc_exec_path: util::find_lfc_exec(args).expect("TODO replace me"),
             max_threads: args.threads,
+            keep_going: args.keep_going,
         }),
         config,
         args.keep_going,

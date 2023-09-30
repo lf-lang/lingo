@@ -109,7 +109,11 @@ impl App {
     }
     pub fn executable_path(&self) -> PathBuf {
         let mut p = self.output_root.join("bin");
-        p.push(&self.name);
+        if self.target == TargetLanguage::TypeScript {
+            p.push(self.name.clone() + ".js")
+        } else {
+            p.push(&self.name);
+        }
         p
     }
 }
@@ -239,6 +243,7 @@ impl ConfigFile {
     }
 
     pub fn setup_example(&self) -> BuildResult {
+        println!("{:?}", self.apps[0].platform);
         if is_valid_location_for_project(Path::new(".")) {
             match self.apps[0].platform {
                 Some(Platform::Native) => self.setup_native(),
