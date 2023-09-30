@@ -68,11 +68,7 @@ fn do_npm_build(results: &mut BatchBuildResults, options: &BuildCommandOptions) 
                 .join("dist")
                 .join(file_name + ".js");
 
-            //let cmake_binary_name = app.main_reactor.file_stem().unwrap();
             // cleanup: rename executable to match the app name
-            let bin_dir = app.output_root.join("bin");
-            println!("{:?}", &path);
-            println!("{:?}", &app.executable_path());
             fs::rename(path, app.executable_path())?;
             Ok(())
         });

@@ -1,4 +1,8 @@
+use crate::util::errors::LingoError;
 use crate::util::execute_command_to_build_result;
+use std::error::Error;
+use std::fs;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 pub struct Pnpm;
@@ -13,15 +17,61 @@ fn do_pnpm_build(results: &mut BatchBuildResults, options: &BuildCommandOptions)
         return;
     }
 
-    results.map(|app| {
-        let mut npm_install = Command::new("pnpm");
-        npm_install.arg("install");
-        if options.profile == BuildProfile::Release {
-            npm_install.arg("--production");
+    let extract_name = |path: &PathBuf| -> Result<String, Box<dyn Error + Send + Sync>> {
+        match Path::new(&path).file_stem() {
+            Some(value) => value
+                .to_str()
+                .map(|x| String::from(x))
+                .ok_or(Box::new(LingoError::InvalidMainReactor)),
+            None => Err(Box::new(LingoError::InvalidMainReactor)),
         }
-        npm_install.current_dir(&app.output_root);
-        execute_command_to_build_result(npm_install)
-    });
+    };
+
+    results
+        .map(|app| {
+            let file_name = extract_name(&app.main_reactor)?;
+            let path = app.output_root.join("src-gen").join(file_name);
+
+            let mut npm_install = Command::new("pnpm");
+            npm_install.current_dir(path);
+            npm_install.arg("install");
+            if options.profile == BuildProfile::Release {
+                npm_install.arg("--prod"); // different to npm
+            }
+            execute_command_to_build_result(npm_install)?;
+            Ok(())
+        })
+        .map(|app| {
+            let file_name = extract_name(&app.main_reactor)?;
+            let path = app.output_root.join("src-gen").join(file_name);
+
+            let mut npm_build = Command::new("pnpm");
+            npm_build.current_dir(path);
+            npm_build.arg("run");
+            npm_build.arg("build");
+
+            if options.profile == BuildProfile::Release {
+                npm_build.arg("--production");
+            }
+            execute_command_to_build_result(npm_build)?;
+
+            Ok(())
+        })
+        .map(|app| {
+            fs::create_dir_all(&app.output_root.join("bin"))?;
+
+            let file_name = extract_name(&app.main_reactor)?;
+            let path = app
+                .output_root
+                .join("src-gen")
+                .join(&file_name)
+                .join("dist")
+                .join(file_name + ".js");
+
+            // cleanup: rename executable to match the app name
+            fs::rename(path, app.executable_path())?;
+            Ok(())
+        });
 }
 
 impl BatchBackend for Pnpm {

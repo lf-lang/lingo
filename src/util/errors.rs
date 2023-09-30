@@ -39,7 +39,7 @@ impl Display for LingoError {
             LingoError::InvalidMainReactor => {
                 write!(
                     f,
-                    "The main reactor was not a valid path to a file containing a main reactor"
+                    "Not a valid path path to a file that contains a main reactor"
                 )
             }
         }
