@@ -13,6 +13,7 @@ use std::{env, io};
 use crate::args::BuildSystem::{CMake, Cargo, LFC};
 use crate::util::errors::{BuildResult, LingoError};
 use git2::Repository;
+use which::which;
 
 fn is_valid_location_for_project(path: &std::path::Path) -> bool {
     !path.join("src").exists() && !path.join(".git").exists() && !path.join("application").exists()
@@ -93,6 +94,13 @@ impl App {
         match self.target {
             TargetLanguage::Cpp => CMake,
             TargetLanguage::Rust => Cargo,
+            TargetLanguage::TypeScript => {
+                if which("pnpm").is_ok() {
+                    BuildSystem::Pnpm
+                } else {
+                    BuildSystem::Npm
+                }
+            }
             _ => LFC,
         }
     }
