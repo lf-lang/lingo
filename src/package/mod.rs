@@ -243,7 +243,6 @@ impl ConfigFile {
     }
 
     pub fn setup_example(&self) -> BuildResult {
-        println!("{:?}", self.apps[0].platform);
         if is_valid_location_for_project(Path::new(".")) {
             match self.apps[0].platform {
                 Some(Platform::Native) => self.setup_native(),
