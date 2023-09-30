@@ -1,7 +1,5 @@
-target TypeScript;
+target TypeScript
 
-main reactor Main {
-    reaction (startup)  {=
-        console.log("Hello World");
-    =}
-} 
+main reactor {
+  reaction(startup) {= console.log("Hello World"); =}
+}
