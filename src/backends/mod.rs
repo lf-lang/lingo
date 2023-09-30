@@ -12,6 +12,7 @@ use crate::{args::BuildSystem, package::App};
 pub mod cmake;
 pub mod lfc;
 pub mod npm;
+pub mod pnpm;
 
 pub fn execute_command<'a>(command: &CommandSpec, apps: &[&'a App]) -> BatchBuildResults<'a> {
     // Group apps by build system
@@ -41,6 +42,7 @@ pub fn execute_command<'a>(command: &CommandSpec, apps: &[&'a App]) -> BatchBuil
             BuildSystem::CMake => cmake::Cmake.execute_command(command, &mut sub_res),
             BuildSystem::Cargo => todo!(),
             BuildSystem::Npm => npm::Npm.execute_command(command, &mut sub_res),
+            BuildSystem::Pnpm => pnpm::Pnpm.execute_command(command, &mut sub_res)
         };
         result.append(sub_res);
     }

@@ -202,6 +202,7 @@ impl ConfigFile {
         let hello_world_code: &'static str = match self.apps[0].target {
             TargetLanguage::Cpp => include_str!("../../defaults/HelloCpp.lf"),
             TargetLanguage::C => include_str!("../../defaults/HelloC.lf"),
+            TargetLanguage::TypeScript => include_str!("../../defaults/HelloTS.lf"),
             _ => panic!("Target langauge not supported yet"), // FIXME: Add examples for other programs
         };
 

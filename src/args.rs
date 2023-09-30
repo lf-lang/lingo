@@ -24,6 +24,7 @@ pub enum BuildSystem {
     CMake,
     Cargo,
     Npm,
+    Pnpm
 }
 
 #[derive(Args, Debug)]
