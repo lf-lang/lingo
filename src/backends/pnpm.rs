@@ -21,7 +21,7 @@ fn do_pnpm_build(results: &mut BatchBuildResults, options: &BuildCommandOptions)
         match Path::new(&path).file_stem() {
             Some(value) => value
                 .to_str()
-                .map(|x| String::from(x))
+                .map(String::from)
                 .ok_or(Box::new(LingoError::InvalidMainReactor)),
             None => Err(Box::new(LingoError::InvalidMainReactor)),
         }
@@ -58,7 +58,7 @@ fn do_pnpm_build(results: &mut BatchBuildResults, options: &BuildCommandOptions)
             Ok(())
         })
         .map(|app| {
-            fs::create_dir_all(&app.output_root.join("bin"))?;
+            fs::create_dir_all(app.output_root.join("bin"))?;
 
             let file_name = extract_name(&app.main_reactor)?;
             let path = app
