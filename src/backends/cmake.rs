@@ -16,6 +16,7 @@ fn gen_cmake_files(app: &App, options: &BuildCommandOptions) -> BuildResult {
     fs::create_dir_all(&build_dir)?;
 
     let mut cmake = Command::new("cmake");
+    // cmake args
     cmake.arg(format!(
         "-DCMAKE_BUILD_TYPE={}",
         if options.profile == BuildProfile::Release {

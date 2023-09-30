@@ -13,6 +13,7 @@ use std::{env, io};
 use crate::args::BuildSystem::{CMake, Cargo, LFC};
 use crate::util::errors::{BuildResult, LingoError};
 use git2::Repository;
+use tempfile::tempdir;
 
 fn is_valid_location_for_project(path: &std::path::Path) -> bool {
     !path.join("src").exists() && !path.join(".git").exists() && !path.join("application").exists()
@@ -107,16 +108,16 @@ impl App {
     }
 }
 
-/// Simple or DetailedDependcy
+/// Simple or DetailedDependency
 #[derive(Clone, Deserialize, Serialize)]
-pub enum FileDependcy {
+pub enum FileDependency {
     // the version string
     Simple(String),
     /// version string and source
     Advanced(DetailedDependency),
 }
 
-/// Dependcy with source and version
+/// Dependency with source and version
 #[derive(Clone, Deserialize, Serialize)]
 pub struct DetailedDependency {
     version: String,
@@ -210,32 +211,33 @@ impl ConfigFile {
         Ok(())
     }
 
-    pub fn setup_template_repo(&self, url: &str) -> BuildResult {
-        let tmp_path = Path::new("tmp");
-        if tmp_path.exists() {
-            remove_dir_all(tmp_path)?;
-        }
+    fn setup_template_repo(&self, url: &str) -> BuildResult {
+        let dir = tempdir()?;
+        let tmp_path = dir.path();
         Repository::clone(url, tmp_path)?;
         // Copy the cloned template repo into the project directory
         copy_recursively(tmp_path, Path::new("."))?;
-        // Remove .git, .gitignore ad temporary folder
-        remove_file(".gitignore")?;
-        remove_dir_all(Path::new(".git"))?;
-        remove_dir_all(tmp_path)?;
+        // Remove temporary folder
+        dir.close()?;
         Ok(())
     }
 
     // Sets up a LF project with Zephyr as the target platform.
-    pub fn setup_zephyr(&self) -> BuildResult {
+    fn setup_zephyr(&self) -> BuildResult {
         let url = "https://github.com/lf-lang/lf-west-template";
-        self.setup_template_repo(url)
+        self.setup_template_repo(url)?;
+        remove_file(".gitignore")?;
+        remove_dir_all(Path::new(".git"))?;
+        Ok(())
     }
 
     // Sets up a LF project with RP2040 MCU as the target platform.
     // Initializes a repo using the lf-pico-template
-    pub fn setup_rp2040(&self) -> BuildResult {
+    fn setup_rp2040(&self) -> BuildResult {
         let url = "https://github.com/lf-lang/lf-pico-template";
-        self.setup_template_repo(url)
+        // leave git artifacts
+        self.setup_template_repo(url)?;
+        Ok(())
     }
 
     pub fn setup_example(&self) -> BuildResult {

@@ -86,7 +86,6 @@ impl ToString for TargetLanguage {
 pub struct InitArgs {
     #[clap(value_enum, short, long)]
     pub language: Option<TargetLanguage>,
-
     #[clap(value_enum, short, long)]
     pub platform: Option<Platform>,
 }
@@ -109,7 +108,7 @@ pub enum Command {
     /// initializing a lingua-franca project
     Init(InitArgs),
 
-    /// compiling one ore multiple binaries in a lingua-franca package
+    /// compiling one or multiple binaries in a lingua-franca package
     Build(BuildArgs),
 
     /// Updates the dependencies and potentially build tools
