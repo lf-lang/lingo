@@ -7,11 +7,21 @@ use std::process::Command;
 
 pub struct Npm;
 
+pub struct TypeScriptToolCommands {
+    pub binary_name: &'static str,
+    pub install_command: &'static str,
+    pub release_build_argument: &'static str,
+}
+
 use crate::backends::{
     BatchBackend, BatchBuildResults, BuildCommandOptions, BuildProfile, CommandSpec,
 };
 
-fn do_npm_build(results: &mut BatchBuildResults, options: &BuildCommandOptions) {
+pub fn do_typescript_build(
+    results: &mut BatchBuildResults,
+    options: &BuildCommandOptions,
+    commands: TypeScriptToolCommands,
+) {
     super::lfc::LFC::do_parallel_lfc_codegen(options, results, false);
     if !options.compile_target_code {
         return;
@@ -32,11 +42,11 @@ fn do_npm_build(results: &mut BatchBuildResults, options: &BuildCommandOptions) 
             let file_name = extract_name(&app.main_reactor)?;
             let path = app.output_root.join("src-gen").join(file_name);
 
-            let mut npm_install = Command::new("npm");
+            let mut npm_install = Command::new(commands.binary_name);
             npm_install.current_dir(path);
-            npm_install.arg("install");
+            npm_install.arg(commands.install_command);
             if options.profile == BuildProfile::Release {
-                npm_install.arg("--production");
+                npm_install.arg(commands.release_build_argument);
             }
             execute_command_to_build_result(npm_install)?;
             Ok(())
@@ -45,13 +55,13 @@ fn do_npm_build(results: &mut BatchBuildResults, options: &BuildCommandOptions) 
             let file_name = extract_name(&app.main_reactor)?;
             let path = app.output_root.join("src-gen").join(file_name);
 
-            let mut npm_build = Command::new("npm");
+            let mut npm_build = Command::new(commands.binary_name);
             npm_build.current_dir(path);
             npm_build.arg("run");
             npm_build.arg("build");
 
             if options.profile == BuildProfile::Release {
-                npm_build.arg("--production");
+                npm_build.arg(commands.release_build_argument);
             }
             execute_command_to_build_result(npm_build)?;
 
@@ -77,7 +87,15 @@ fn do_npm_build(results: &mut BatchBuildResults, options: &BuildCommandOptions) 
 impl BatchBackend for Npm {
     fn execute_command(&mut self, command: &CommandSpec, results: &mut BatchBuildResults) {
         match command {
-            CommandSpec::Build(options) => do_npm_build(results, options),
+            CommandSpec::Build(options) => do_typescript_build(
+                results,
+                options,
+                TypeScriptToolCommands {
+                    binary_name: "npm",
+                    install_command: "install",
+                    release_build_argument: "--production",
+                },
+            ),
             CommandSpec::Clean => {
                 results.par_map(|app| {
                     crate::util::default_build_clean(&app.output_root)?;
