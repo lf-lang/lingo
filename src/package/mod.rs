@@ -13,6 +13,7 @@ use std::{env, io};
 use crate::args::BuildSystem::{CMake, Cargo, LFC};
 use crate::util::errors::{BuildResult, LingoError};
 use git2::Repository;
+use tempfile::tempdir;
 use which::which;
 
 fn is_valid_location_for_project(path: &std::path::Path) -> bool {
@@ -92,6 +93,7 @@ pub struct App {
 impl App {
     pub fn build_system(&self) -> BuildSystem {
         match self.target {
+            TargetLanguage::C => LFC,
             TargetLanguage::Cpp => CMake,
             TargetLanguage::Rust => Cargo,
             TargetLanguage::TypeScript => {
@@ -118,16 +120,16 @@ impl App {
     }
 }
 
-/// Simple or DetailedDependcy
+/// Simple or DetailedDependency
 #[derive(Clone, Deserialize, Serialize)]
-pub enum FileDependcy {
+pub enum FileDependency {
     // the version string
     Simple(String),
     /// version string and source
     Advanced(DetailedDependency),
 }
 
-/// Dependcy with source and version
+/// Dependency with source and version
 #[derive(Clone, Deserialize, Serialize)]
 pub struct DetailedDependency {
     version: String,
@@ -222,23 +224,32 @@ impl ConfigFile {
         Ok(())
     }
 
-    // Sets up a LF project with Zephyr as the target platform.
-    pub fn setup_zephyr(&self) -> BuildResult {
-        // Clone lf-west-template into a temporary directory
-        let tmp_path = Path::new("zephyr_tmp");
-        if tmp_path.exists() {
-            remove_dir_all(tmp_path)?;
-        }
-        let url = "https://github.com/lf-lang/lf-west-template";
+    fn setup_template_repo(&self, url: &str) -> BuildResult {
+        let dir = tempdir()?;
+        let tmp_path = dir.path();
         Repository::clone(url, tmp_path)?;
-
         // Copy the cloned template repo into the project directory
         copy_recursively(tmp_path, Path::new("."))?;
+        // Remove temporary folder
+        dir.close()?;
+        Ok(())
+    }
 
-        // Remove .git, .gitignore ad temporary folder
+    // Sets up a LF project with Zephyr as the target platform.
+    fn setup_zephyr(&self) -> BuildResult {
+        let url = "https://github.com/lf-lang/lf-west-template";
+        self.setup_template_repo(url)?;
         remove_file(".gitignore")?;
         remove_dir_all(Path::new(".git"))?;
-        remove_dir_all(tmp_path)?;
+        Ok(())
+    }
+
+    // Sets up a LF project with RP2040 MCU as the target platform.
+    // Initializes a repo using the lf-pico-template
+    fn setup_rp2040(&self) -> BuildResult {
+        let url = "https://github.com/lf-lang/lf-pico-template";
+        // leave git artifacts
+        self.setup_template_repo(url)?;
         Ok(())
     }
 
@@ -247,6 +258,7 @@ impl ConfigFile {
             match self.apps[0].platform {
                 Some(Platform::Native) => self.setup_native(),
                 Some(Platform::Zephyr) => self.setup_zephyr(),
+                Some(Platform::RP2040) => self.setup_rp2040(),
                 _ => Ok(()),
             }
         } else {

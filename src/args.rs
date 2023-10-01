@@ -16,6 +16,7 @@ pub enum TargetLanguage {
 pub enum Platform {
     Native,
     Zephyr,
+    RP2040,
 }
 
 #[derive(clap::ValueEnum, Clone, Copy, Debug, Deserialize, Serialize, Eq, PartialEq, Hash)]
@@ -87,16 +88,17 @@ impl ToString for TargetLanguage {
 pub struct InitArgs {
     #[clap(value_enum, short, long)]
     pub language: Option<TargetLanguage>,
-
     #[clap(value_enum, short, long, default_value_t = Platform::Native)]
     pub platform: Platform,
 }
 impl InitArgs {
     pub fn get_target_language(&self) -> TargetLanguage {
         self.language.unwrap_or({
-            // Target language for Zephyr is C, else Cpp.
+            // Target language for Zephyr and RP2040 is C
+            // Else use Cpp.
             match self.platform {
                 Platform::Zephyr => TargetLanguage::C,
+                Platform::RP2040 => TargetLanguage::C,
                 _ => TargetLanguage::Cpp,
             }
         })
@@ -108,7 +110,7 @@ pub enum Command {
     /// initializing a lingua-franca project
     Init(InitArgs),
 
-    /// compiling one ore multiple binaries in a lingua-franca package
+    /// compiling one or multiple binaries in a lingua-franca package
     Build(BuildArgs),
 
     /// Updates the dependencies and potentially build tools

@@ -48,7 +48,7 @@ impl BatchBackend for LFC {
             CommandSpec::Update => todo!(),
             CommandSpec::Clean => {
                 results.par_map(|app| {
-                    fs::remove_dir_all(app.src_gen_dir())?;
+                    crate::util::default_build_clean(&app.output_root)?;
                     Ok(())
                 });
             }
@@ -89,7 +89,10 @@ impl<'a> LfcJsonArgs<'a> {
             .unwrap()
             .as_object_mut()
             .unwrap();
-        properties.insert("no-compile".to_string(), self.no_compile.into());
+        // lfc does not support no-compile:false
+        if self.no_compile {
+            properties.insert("no-compile".to_string(), self.no_compile.into());
+        }
         Ok(value)
     }
 }
