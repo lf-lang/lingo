@@ -14,6 +14,7 @@ use crate::args::BuildSystem::{CMake, Cargo, LFC};
 use crate::util::errors::{BuildResult, LingoError};
 use git2::Repository;
 use tempfile::tempdir;
+use which::which;
 
 fn is_valid_location_for_project(path: &std::path::Path) -> bool {
     !path.join("src").exists() && !path.join(".git").exists() && !path.join("application").exists()
@@ -95,6 +96,13 @@ impl App {
             TargetLanguage::C => LFC,
             TargetLanguage::Cpp => CMake,
             TargetLanguage::Rust => Cargo,
+            TargetLanguage::TypeScript => {
+                if which("pnpm").is_ok() {
+                    BuildSystem::Pnpm
+                } else {
+                    BuildSystem::Npm
+                }
+            }
             _ => LFC,
         }
     }
@@ -103,7 +111,11 @@ impl App {
     }
     pub fn executable_path(&self) -> PathBuf {
         let mut p = self.output_root.join("bin");
-        p.push(&self.name);
+        if self.target == TargetLanguage::TypeScript {
+            p.push(self.name.clone() + ".js")
+        } else {
+            p.push(&self.name);
+        }
         p
     }
 }
@@ -204,6 +216,7 @@ impl ConfigFile {
         let hello_world_code: &'static str = match self.apps[0].target {
             TargetLanguage::Cpp => include_str!("../../defaults/HelloCpp.lf"),
             TargetLanguage::C => include_str!("../../defaults/HelloC.lf"),
+            TargetLanguage::TypeScript => include_str!("../../defaults/HelloTS.lf"),
             _ => panic!("Target langauge not supported yet"), // FIXME: Add examples for other programs
         };
 
