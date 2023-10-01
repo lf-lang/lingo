@@ -3,7 +3,7 @@ use clap::{Args, Parser, Subcommand};
 use serde_derive::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-#[derive(clap::ValueEnum, Clone, Copy, Debug, Deserialize, Serialize)]
+#[derive(clap::ValueEnum, Clone, Copy, Debug, Deserialize, Serialize, PartialEq)]
 pub enum TargetLanguage {
     C,
     Cpp,
@@ -23,6 +23,8 @@ pub enum BuildSystem {
     LFC,
     CMake,
     Cargo,
+    Npm,
+    Pnpm,
 }
 
 #[derive(Args, Debug)]
