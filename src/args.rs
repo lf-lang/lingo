@@ -86,8 +86,8 @@ impl ToString for TargetLanguage {
 pub struct InitArgs {
     #[clap(value_enum, short, long)]
     pub language: Option<TargetLanguage>,
-    #[clap(value_enum, short, long)]
-    pub platform: Option<Platform>,
+    #[clap(value_enum, short, long, default_value_t = Platform::Native)]
+    pub platform: Platform,
 }
 impl InitArgs {
     pub fn get_target_language(&self) -> TargetLanguage {
@@ -95,8 +95,8 @@ impl InitArgs {
             // Target language for Zephyr and RP2040 is C
             // Else use Cpp.
             match self.platform {
-                Some(Platform::Zephyr) => TargetLanguage::C,
-                Some(Platform::RP2040) => TargetLanguage::C,
+                Platform::Zephyr => TargetLanguage::C,
+                Platform::RP2040 => TargetLanguage::C,
                 _ => TargetLanguage::Cpp,
             }
         })
