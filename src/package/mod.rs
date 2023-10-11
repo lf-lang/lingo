@@ -216,8 +216,9 @@ impl ConfigFile {
         let hello_world_code: &'static str = match self.apps[0].target {
             TargetLanguage::Cpp => include_str!("../../defaults/HelloCpp.lf"),
             TargetLanguage::C => include_str!("../../defaults/HelloC.lf"),
+            TargetLanguage::Python => include_str!("../../defaults/HelloPy.lf"),
             TargetLanguage::TypeScript => include_str!("../../defaults/HelloTS.lf"),
-            _ => panic!("Target langauge not supported yet"), // FIXME: Add examples for other programs
+            _ => panic!("Target langauge not supported yet"), //FIXME: Add support for Rust.
         };
 
         write(Path::new("./src/Main.lf"), hello_world_code)?;
