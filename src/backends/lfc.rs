@@ -19,7 +19,9 @@ impl LFC {
         results: &mut BatchBuildResults,
         compile_target_code: bool,
     ) {
-        results.par_map(|app| LFC::do_lfc_codegen(app, options, compile_target_code));
+        results.keep_going(options.keep_going);
+        // TODO: using map_par introduced a race condition
+        results.map(|app| LFC::do_lfc_codegen(app, options, compile_target_code));
     }
 
     /// Do codegen for a single app.
@@ -89,7 +91,7 @@ impl<'a> LfcJsonArgs<'a> {
             .unwrap()
             .as_object_mut()
             .unwrap();
-        
+
         // lfc does not support no-compile:false
         if self.no_compile {
             properties.insert("no-compile".to_string(), serde_json::Value::Bool(true));

@@ -1,0 +1,360 @@
+[package]
+name = "LFC-Tests"
+version = "0.2.0"
+homepage = "https://lf-lang.org"
+description = "LFC fallback tests"
+
+# shared properties of all binaries
+[properties]
+
+[[app]]
+target = "C"
+platform = "Native"
+main = "C/src/ActionDelay.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "C"
+platform = "Native"
+main = "C/src/ActionIsPresent.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "C"
+platform = "Native"
+main = "C/src/ActionWithNoReaction.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "C"
+platform = "Native"
+main = "C/src/After.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "C"
+platform = "Native"
+main = "C/src/AfterCycles.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "C"
+platform = "Native"
+main = "C/src/AfterOverlapped.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "C"
+platform = "Native"
+main = "C/src/AfterZero.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "C"
+platform = "Native"
+main = "C/src/Alignment.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "C"
+platform = "Native"
+main = "C/src/ArrayAsParameter.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "C"
+platform = "Native"
+main = "C/src/ArrayAsType.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "C"
+platform = "Native"
+main = "C/src/ArrayFree.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "C"
+platform = "Native"
+main = "C/src/ArrayFreeMultiple.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "C"
+platform = "Native"
+main = "C/src/ArrayParallel.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "C"
+platform = "Native"
+main = "C/src/ArrayPrint.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+
+[[app]]
+target = "Python"
+platform = "Native"
+main = "Python/src/ActionDelay.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "Python"
+platform = "Native"
+main = "Python/src/ActionIsPresent.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "Python"
+platform = "Native"
+main = "Python/src/ActionWithNoReaction.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "Python"
+platform = "Native"
+main = "Python/src/After.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "Python"
+platform = "Native"
+main = "Python/src/AfterCycles.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "Python"
+platform = "Native"
+main = "Python/src/AfterOverlapped.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "Python"
+platform = "Native"
+main = "Python/src/ArrayAsType.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "Python"
+platform = "Native"
+main = "Python/src/ArrayFree.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "Python"
+platform = "Native"
+main = "Python/src/ArrayParallel.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "Python"
+platform = "Native"
+main = "Python/src/ArrayPrint.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "Rust"
+platform = "Native"
+main = "Rust/src/ActionDelay.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "Rust"
+platform = "Native"
+main = "Rust/src/ActionImplicitDelay.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "Rust"
+platform = "Native"
+main = "Rust/src/ActionIsPresent.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "Rust"
+platform = "Native"
+main = "Rust/src/ActionIsPresentDouble.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "Rust"
+platform = "Native"
+main = "Rust/src/ActionScheduleMicrostep.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "Rust"
+platform = "Native"
+main = "Rust/src/ActionValues.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "Rust"
+platform = "Native"
+main = "Rust/src/ActionValuesCleanup.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "Rust"
+platform = "Native"
+main = "Rust/src/CompositionInitializationOrder.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "Rust"
+platform = "Native"
+main = "Rust/src/CompositionWithPorts.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "Rust"
+platform = "Native"
+main = "Rust/src/CtorParamDefault.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "Rust"
+platform = "Native"
+main = "Rust/src/CtorParamMixed.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "Rust"
+platform = "Native"
+main = "Rust/src/CtorParamSimple.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "Rust"
+platform = "Native"
+main = "Rust/src/DependencyOnChildPort.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "Rust"
+platform = "Native"
+main = "Rust/src/DependencyThroughChildPort.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "Rust"
+platform = "Native"
+main = "Rust/src/DependencyUseAccessible.lf"
+
+[app.dependencies]
+
+[app.properties]

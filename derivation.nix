@@ -1,4 +1,4 @@
-{ naersk, src, lib, pkg-config, cmake, zlib, openssl }:
+{ naersk, src, lib, pkg-config, cmake, zlib, openssl, glibc}:
 
 naersk.buildPackage {
   pname = "lingo";
@@ -8,8 +8,8 @@ naersk.buildPackage {
 
   cargoSha256 = lib.fakeSha256;
 
-  nativeBuildInputs = [ pkg-config cmake ];
-  buildInputs = [ zlib openssl ];
+  nativeBuildInputs = [ pkg-config cmake zlib openssl glibc];
+  buildInputs = [  ];
 
   meta = with lib; {
     description = "Simple package manager for lingua franca";

@@ -1,0 +1,1071 @@
+[package]
+name = "TypeScript-Tests"
+version = "0.2.0"
+homepage = "https://lf-lang.org"
+description = "All TypeScript Lingua-Franca Unit Tests"
+
+# shared properties of all binaries
+[properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/ActionDelay.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/ActionWithNoReaction.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/After.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/ArrayAsType.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/ArrayPrint.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/ArrayScale.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/Composition.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/CompositionAfter.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/CountTest.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/DanglingOutput.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/Deadline.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/DeadlineHandledAbove.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/DelayInt.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/DelayedAction.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/DelayedReaction.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/Determinism.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/DoubleInvocation.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/DoubleReaction.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/DoubleTrigger.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/FloatLiteral.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/Gain.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/GetTime.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/Hello.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/HelloWorld.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/Hierarchy.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/Hierarchy2.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/Import.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/Microsteps.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/Minimal.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/MultipleContained.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/NativeListsAndTimes.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/ParameterizedState.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/PeriodicDesugared.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/PhysicalConnection.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/Preamble.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/ReadOutputOfContainedReactor.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/Schedule.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/ScheduleLogicalAction.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/SendingInside.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/SendingInside2.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/SendsPointerTest.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/SimpleDeadline.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/SimpleImport.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/SlowingClock.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/SlowingClockPhysical.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/Stop.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/Stride.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/StructAsState.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/StructAsType.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/StructAsTypeDirect.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/StructPrint.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/StructScale.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/TestForPreviousOutput.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/TimeLimit.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/TimeState.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/Wcet.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/concurrent/AsyncCallback.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+#[[app]]
+#target = "TypeScript"
+#platform = "Native"
+#main = "TypeScript/src/docker/HelloWorldContainerized.lf"
+#
+#[app.dependencies]
+#
+#[app.properties]
+#
+#[[app]]
+#target = "TypeScript"
+#platform = "Native"
+#main = "TypeScript/src/docker/federated/DistributedCountContainerized.lf"
+#
+#[app.dependencies]
+#
+#[app.properties]
+#
+#[[app]]
+#target = "TypeScript"
+#platform = "Native"
+#main = "TypeScript/src/federated/ChainWithDelay.lf"
+#
+#[app.dependencies]
+#
+#[app.properties]
+#
+#[[app]]
+#target = "TypeScript"
+#platform = "Native"
+#main = "TypeScript/src/federated/DistributedCount.lf"
+#
+#[app.dependencies]
+#
+#[app.properties]
+#
+#[[app]]
+#target = "TypeScript"
+#platform = "Native"
+#main = "TypeScript/src/federated/DistributedCountPhysical.lf"
+#
+#[app.dependencies]
+#
+#[app.properties]
+#
+#[[app]]
+#target = "TypeScript"
+#platform = "Native"
+#main = "TypeScript/src/federated/DistributedCountPhysicalAfterDelay.lf"
+#
+#[app.dependencies]
+#
+#[app.properties]
+#
+#[[app]]
+#target = "TypeScript"
+#platform = "Native"
+#main = "TypeScript/src/federated/DistributedDoublePort.lf"
+#
+#[app.dependencies]
+#
+#[app.properties]
+#
+#[[app]]
+#target = "TypeScript"
+#platform = "Native"
+#main = "TypeScript/src/federated/DistributedLoopedAction.lf"
+#
+#[app.dependencies]
+#
+#[app.properties]
+#
+#[[app]]
+#target = "TypeScript"
+#platform = "Native"
+#main = "TypeScript/src/federated/DistributedLoopedPhysicalAction.lf"
+#
+#[app.dependencies]
+#
+#[app.properties]
+#
+#[[app]]
+#target = "TypeScript"
+#platform = "Native"
+#main = "TypeScript/src/federated/DistributedStop.lf"
+#
+#[app.dependencies]
+#
+#[app.properties]
+#
+#[[app]]
+#target = "TypeScript"
+#platform = "Native"
+#main = "TypeScript/src/federated/DistributedStopZero.lf"
+#
+#[app.dependencies]
+#
+#[app.properties]
+#
+#[[app]]
+#target = "TypeScript"
+#platform = "Native"
+#main = "TypeScript/src/federated/HelloDistributed.lf"
+#
+#[app.dependencies]
+#
+#[app.properties]
+#
+#[[app]]
+#target = "TypeScript"
+#platform = "Native"
+#main = "TypeScript/src/federated/LoopDistributedCentralized.lf"
+#
+#[app.dependencies]
+#
+#[app.properties]
+#
+#[[app]]
+#target = "TypeScript"
+#platform = "Native"
+#main = "TypeScript/src/federated/LoopDistributedDouble.lf"
+#
+#[app.dependencies]
+#
+#[app.properties]
+#
+#[[app]]
+#target = "TypeScript"
+#platform = "Native"
+#main = "TypeScript/src/federated/PingPongDistributed.lf"
+#
+#[app.dependencies]
+#
+#[app.properties]
+#
+#[[app]]
+#target = "TypeScript"
+#platform = "Native"
+#main = "TypeScript/src/federated/PingPongDistributedPhysical.lf"
+#
+#[app.dependencies]
+#
+#[app.properties]
+#
+#[[app]]
+#target = "TypeScript"
+#platform = "Native"
+#main = "TypeScript/src/federated/SimpleFederated.lf"
+#
+#[app.dependencies]
+#
+#[app.properties]
+#
+#[[app]]
+#target = "TypeScript"
+#platform = "Native"
+#main = "TypeScript/src/federated/SpuriousDependency.lf"
+#
+#[app.dependencies]
+#
+#[app.properties]
+#
+#[[app]]
+#target = "TypeScript"
+#platform = "Native"
+#main = "TypeScript/src/federated/StopAtShutdown.lf"
+#
+#[app.dependencies]
+#
+#[app.properties]
+#
+#[[app]]
+#target = "TypeScript"
+#platform = "Native"
+#main = "TypeScript/src/federated/TopLevelArtifacts.lf"
+#
+#[app.dependencies]
+#
+#[app.properties]
+#
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/BankMulticast.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/BankMultiportToReaction.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/BankReactionsInContainer.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/BankSelfBroadcast.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/BankToBank.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/BankToBankMultiport.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/BankToBankMultiportAfter.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/BankToMultiport.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/BankToReaction.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/Broadcast.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/BroadcastAfter.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/BroadcastMultipleAfter.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/FullyConnected.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/MultiportFromBank.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/MultiportFromBankHierarchy.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/MultiportFromBankHierarchyAfter.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/MultiportFromHierarchy.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/MultiportFromReaction.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/MultiportIn.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/MultiportInParameterized.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/MultiportMutableInput.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/MultiportMutableInputArray.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/MultiportOut.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/MultiportToBank.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/MultiportToBankAfter.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/MultiportToBankDouble.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/MultiportToBankHierarchy.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/MultiportToHierarchy.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/MultiportToMultiport.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/MultiportToMultiport2.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/MultiportToMultiport2After.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/MultiportToMultiportArray.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/MultiportToMultiportParameter.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/MultiportToPort.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/MultiportToReaction.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/NestedBanks.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/PipelineAfter.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/ReactionToContainedBank.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/multiport/ReactionsToNested.lf"
+
+[app.dependencies]
+
+[app.properties]
+
+#[[app]]
+#target = "TypeScript"
+#platform = "Native"
+#main = "TypeScript/src/serialization/ProtoNoPacking.lf"
+#
+#[app.dependencies]
+#
+#[app.properties]
+
+[[app]]
+target = "TypeScript"
+platform = "Native"
+main = "TypeScript/src/target/AfterNoTypes.lf"
+
+[app.dependencies]
+
+[app.properties]
+

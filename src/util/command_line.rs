@@ -71,7 +71,10 @@ pub fn run_and_capture(command: &mut Command) -> io::Result<(ExitStatus, Vec<u8>
 
 pub fn execute_command_to_build_result(mut command: Command) -> BuildResult {
     match run_and_capture(&mut command) {
-        Err(e) => Err(Box::new(e)),
+        Err(e) => {
+            eprintln!("error occured while executing commandline: {:?}", &e);
+            Err(Box::new(e))
+        }
         Ok((status, _, _)) if !status.success() => {
             Err(Box::new(LingoError::CommandFailed(command, status)))
         }

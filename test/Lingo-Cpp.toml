@@ -1,1179 +1,16 @@
 [package]
-name = "Tests"
-version = "0.1.0"
+name = "Cpp-Tests"
+version = "0.2.0"
 homepage = "https://lf-lang.org"
-description = "All Lingua-Franca Unit Tests"
+description = "All Cpp Lingua-Franca Unit Tests"
 
 # shared properties of all binaries
 [properties]
-no-compile = true
 
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/ActionDelay.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/ActionWithNoReaction.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/After.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/ArrayAsParameter.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/ArrayAsType.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/ArrayPrint.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/ArrayScale.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/Composition.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/CompositionAfter.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/CountTest.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/DanglingOutput.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/Deadline.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/DeadlineHandledAbove.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/DelayInt.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/DelayedAction.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/DelayedReaction.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/Determinism.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/DoubleInvocation.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/DoubleReaction.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/DoubleTrigger.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/FloatLiteral.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/Gain.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/GetTime.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/Hello.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/HelloWorld.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/Hierarchy.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/Hierarchy2.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/Import.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/Microsteps.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/Minimal.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/MovingAverage.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/MultipleContained.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/NativeListsAndTimes.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/ParameterizedState.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/PeriodicDesugared.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/PhysicalConnection.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/Preamble.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/ReadOutputOfContainedReactor.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/Schedule.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/ScheduleLogicalAction.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/SendingInside.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/SendingInside2.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/SendsPointerTest.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/SimpleDeadline.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/SimpleImport.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/SlowingClock.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/SlowingClockPhysical.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/Stop.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/Stride.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/StructAsState.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/StructAsType.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/StructAsTypeDirect.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/StructPrint.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/StructScale.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/TestForPreviousOutput.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/TimeLimit.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/TimeState.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/Wcet.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/concurrent/AsyncCallback.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/docker/HelloWorldContainerized.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/docker/federated/DistributedCountContainerized.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/federated/ChainWithDelay.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/federated/DistributedCount.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/federated/DistributedCountPhysical.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/federated/DistributedCountPhysicalAfterDelay.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/federated/DistributedDoublePort.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/federated/DistributedLoopedAction.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/federated/DistributedLoopedPhysicalAction.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/federated/DistributedStop.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/federated/DistributedStopZero.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/federated/HelloDistributed.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/federated/LoopDistributedCentralized.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/federated/LoopDistributedDouble.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/federated/PingPongDistributed.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/federated/PingPongDistributedPhysical.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/federated/SimpleFederated.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/federated/SpuriousDependency.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/federated/StopAtShutdown.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/federated/TopLevelArtifacts.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/BankMulticast.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/BankMultiportToReaction.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/BankReactionsInContainer.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/BankSelfBroadcast.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/BankToBank.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/BankToBankMultiport.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/BankToBankMultiportAfter.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/BankToMultiport.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/BankToReaction.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/Broadcast.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/BroadcastAfter.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/BroadcastMultipleAfter.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/FullyConnected.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/MultiportFromBank.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/MultiportFromBankHierarchy.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/MultiportFromBankHierarchyAfter.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/MultiportFromHierarchy.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/MultiportFromReaction.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/MultiportIn.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/MultiportInParameterized.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/MultiportMutableInput.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/MultiportMutableInputArray.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/MultiportOut.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/MultiportToBank.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/MultiportToBankAfter.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/MultiportToBankDouble.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/MultiportToBankHierarchy.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/MultiportToHierarchy.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/MultiportToMultiport.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/MultiportToMultiport2.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/MultiportToMultiport2After.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/MultiportToMultiportArray.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/MultiportToMultiportParameter.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/MultiportToPort.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/MultiportToReaction.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/NestedBanks.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/PipelineAfter.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/ReactionToContainedBank.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/multiport/ReactionsToNested.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/serialization/ProtoNoPacking.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "TypeScript"
-platform = "Native"
-main_reactor = "TypeScript/src/target/AfterNoTypes.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "Cpp"
-platform = "Native"
-main_reactor = "Cpp/src/ActionDelay.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "Cpp"
-platform = "Native"
-main_reactor = "Cpp/src/ActionIsPresent.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "Cpp"
-platform = "Native"
-main_reactor = "Cpp/src/ActionValues.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "Cpp"
-platform = "Native"
-main_reactor = "Cpp/src/ActionWithNoReaction.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "Cpp"
-platform = "Native"
-main_reactor = "Cpp/src/After.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "Cpp"
-platform = "Native"
-main_reactor = "Cpp/src/AfterOverlapped.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "Cpp"
-platform = "Native"
-main_reactor = "Cpp/src/AfterZero.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "Cpp"
-platform = "Native"
-main_reactor = "Cpp/src/Alignment.lf"
-
-[app.dependencies]
-
-[app.properties]
-
-[[app]]
-target = "Cpp"
-platform = "Native"
-main_reactor = "Cpp/src/ArrayAsParameter.lf"
-
-[app.dependencies]
-
-[app.properties]
-
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/ArrayAsType.lf"
+main = "Cpp/src/ActionDelay.lf"
 
 [app.dependencies]
 
@@ -1182,7 +19,7 @@ main_reactor = "Cpp/src/ArrayAsType.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/ArrayParallel.lf"
+main = "Cpp/src/ActionIsPresent.lf"
 
 [app.dependencies]
 
@@ -1191,7 +28,7 @@ main_reactor = "Cpp/src/ArrayParallel.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/ArrayPrint.lf"
+main = "Cpp/src/ActionValues.lf"
 
 [app.dependencies]
 
@@ -1200,7 +37,7 @@ main_reactor = "Cpp/src/ArrayPrint.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/ArrayScale.lf"
+main = "Cpp/src/ActionWithNoReaction.lf"
 
 [app.dependencies]
 
@@ -1209,7 +46,7 @@ main_reactor = "Cpp/src/ArrayScale.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/Banking.lf"
+main = "Cpp/src/After.lf"
 
 [app.dependencies]
 
@@ -1218,7 +55,7 @@ main_reactor = "Cpp/src/Banking.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/BenchmarkRunner.lf"
+main = "Cpp/src/AfterOverlapped.lf"
 
 [app.dependencies]
 
@@ -1227,7 +64,7 @@ main_reactor = "Cpp/src/BenchmarkRunner.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/CharLiteralInitializer.lf"
+main = "Cpp/src/AfterZero.lf"
 
 [app.dependencies]
 
@@ -1236,7 +73,7 @@ main_reactor = "Cpp/src/CharLiteralInitializer.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/Composition.lf"
+main = "Cpp/src/Alignment.lf"
 
 [app.dependencies]
 
@@ -1245,7 +82,7 @@ main_reactor = "Cpp/src/Composition.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/CompositionAfter.lf"
+main = "Cpp/src/ArrayAsParameter.lf"
 
 [app.dependencies]
 
@@ -1254,7 +91,7 @@ main_reactor = "Cpp/src/CompositionAfter.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/CompositionGain.lf"
+main = "Cpp/src/ArrayAsType.lf"
 
 [app.dependencies]
 
@@ -1263,7 +100,7 @@ main_reactor = "Cpp/src/CompositionGain.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/ConnectionMerging.lf"
+main = "Cpp/src/ArrayParallel.lf"
 
 [app.dependencies]
 
@@ -1272,7 +109,7 @@ main_reactor = "Cpp/src/ConnectionMerging.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/CountTest.lf"
+main = "Cpp/src/ArrayPrint.lf"
 
 [app.dependencies]
 
@@ -1281,7 +118,7 @@ main_reactor = "Cpp/src/CountTest.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/DanglingOutput.lf"
+main = "Cpp/src/ArrayScale.lf"
 
 [app.dependencies]
 
@@ -1290,7 +127,7 @@ main_reactor = "Cpp/src/DanglingOutput.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/Deadline.lf"
+main = "Cpp/src/CharLiteralInitializer.lf"
 
 [app.dependencies]
 
@@ -1299,7 +136,7 @@ main_reactor = "Cpp/src/Deadline.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/DeadlineHandledAbove.lf"
+main = "Cpp/src/Composition.lf"
 
 [app.dependencies]
 
@@ -1308,7 +145,7 @@ main_reactor = "Cpp/src/DeadlineHandledAbove.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/DelayInt.lf"
+main = "Cpp/src/CompositionAfter.lf"
 
 [app.dependencies]
 
@@ -1317,7 +154,7 @@ main_reactor = "Cpp/src/DelayInt.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/DelayedAction.lf"
+main = "Cpp/src/CompositionGain.lf"
 
 [app.dependencies]
 
@@ -1326,7 +163,7 @@ main_reactor = "Cpp/src/DelayedAction.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/DelayedReaction.lf"
+main = "Cpp/src/CountTest.lf"
 
 [app.dependencies]
 
@@ -1335,7 +172,7 @@ main_reactor = "Cpp/src/DelayedReaction.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/Determinism.lf"
+main = "Cpp/src/DanglingOutput.lf"
 
 [app.dependencies]
 
@@ -1344,7 +181,7 @@ main_reactor = "Cpp/src/Determinism.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/DoubleInvocation.lf"
+main = "Cpp/src/Deadline.lf"
 
 [app.dependencies]
 
@@ -1353,7 +190,7 @@ main_reactor = "Cpp/src/DoubleInvocation.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/DoublePort.lf"
+main = "Cpp/src/DeadlineHandledAbove.lf"
 
 [app.dependencies]
 
@@ -1362,7 +199,7 @@ main_reactor = "Cpp/src/DoublePort.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/DoubleReaction.lf"
+main = "Cpp/src/DelayInt.lf"
 
 [app.dependencies]
 
@@ -1371,7 +208,7 @@ main_reactor = "Cpp/src/DoubleReaction.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/DoubleTrigger.lf"
+main = "Cpp/src/DelayedAction.lf"
 
 [app.dependencies]
 
@@ -1380,7 +217,7 @@ main_reactor = "Cpp/src/DoubleTrigger.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/FloatLiteral.lf"
+main = "Cpp/src/DelayedReaction.lf"
 
 [app.dependencies]
 
@@ -1389,7 +226,7 @@ main_reactor = "Cpp/src/FloatLiteral.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/Gain.lf"
+main = "Cpp/src/Determinism.lf"
 
 [app.dependencies]
 
@@ -1398,7 +235,7 @@ main_reactor = "Cpp/src/Gain.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/GetMicroStep.lf"
+main = "Cpp/src/DoubleInvocation.lf"
 
 [app.dependencies]
 
@@ -1407,7 +244,7 @@ main_reactor = "Cpp/src/GetMicroStep.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/GetTime.lf"
+main = "Cpp/src/DoublePort.lf"
 
 [app.dependencies]
 
@@ -1416,7 +253,7 @@ main_reactor = "Cpp/src/GetTime.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/Hello.lf"
+main = "Cpp/src/DoubleReaction.lf"
 
 [app.dependencies]
 
@@ -1425,7 +262,7 @@ main_reactor = "Cpp/src/Hello.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/HelloBodylessWorld.lf"
+main = "Cpp/src/DoubleTrigger.lf"
 
 [app.dependencies]
 
@@ -1434,7 +271,7 @@ main_reactor = "Cpp/src/HelloBodylessWorld.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/HelloWorld.lf"
+main = "Cpp/src/FloatLiteral.lf"
 
 [app.dependencies]
 
@@ -1443,7 +280,7 @@ main_reactor = "Cpp/src/HelloWorld.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/Hierarchy.lf"
+main = "Cpp/src/Gain.lf"
 
 [app.dependencies]
 
@@ -1452,7 +289,7 @@ main_reactor = "Cpp/src/Hierarchy.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/Hierarchy2.lf"
+main = "Cpp/src/GetMicroStep.lf"
 
 [app.dependencies]
 
@@ -1461,7 +298,7 @@ main_reactor = "Cpp/src/Hierarchy2.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/Import.lf"
+main = "Cpp/src/GetTime.lf"
 
 [app.dependencies]
 
@@ -1470,7 +307,7 @@ main_reactor = "Cpp/src/Import.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/ImportComposition.lf"
+main = "Cpp/src/Hello.lf"
 
 [app.dependencies]
 
@@ -1479,7 +316,7 @@ main_reactor = "Cpp/src/ImportComposition.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/ImportRenamed.lf"
+main = "Cpp/src/HelloBodylessWorld.lf"
 
 [app.dependencies]
 
@@ -1488,7 +325,7 @@ main_reactor = "Cpp/src/ImportRenamed.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/ManualDelayedReaction.lf"
+main = "Cpp/src/HelloWorld.lf"
 
 [app.dependencies]
 
@@ -1497,7 +334,7 @@ main_reactor = "Cpp/src/ManualDelayedReaction.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/Methods.lf"
+main = "Cpp/src/Hierarchy.lf"
 
 [app.dependencies]
 
@@ -1506,7 +343,7 @@ main_reactor = "Cpp/src/Methods.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/Microsteps.lf"
+main = "Cpp/src/Hierarchy2.lf"
 
 [app.dependencies]
 
@@ -1515,7 +352,7 @@ main_reactor = "Cpp/src/Microsteps.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/Minimal.lf"
+main = "Cpp/src/Import.lf"
 
 [app.dependencies]
 
@@ -1524,7 +361,7 @@ main_reactor = "Cpp/src/Minimal.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/MovingAverage.lf"
+main = "Cpp/src/ImportComposition.lf"
 
 [app.dependencies]
 
@@ -1533,7 +370,7 @@ main_reactor = "Cpp/src/MovingAverage.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/MultipleContained.lf"
+main = "Cpp/src/ImportRenamed.lf"
 
 [app.dependencies]
 
@@ -1542,7 +379,7 @@ main_reactor = "Cpp/src/MultipleContained.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/NativeListsAndTimes.lf"
+main = "Cpp/src/ManualDelayedReaction.lf"
 
 [app.dependencies]
 
@@ -1551,7 +388,7 @@ main_reactor = "Cpp/src/NativeListsAndTimes.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/NestedTriggeredReactions.lf"
+main = "Cpp/src/Methods.lf"
 
 [app.dependencies]
 
@@ -1560,7 +397,7 @@ main_reactor = "Cpp/src/NestedTriggeredReactions.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/ParameterHierarchy.lf"
+main = "Cpp/src/Microsteps.lf"
 
 [app.dependencies]
 
@@ -1569,7 +406,7 @@ main_reactor = "Cpp/src/ParameterHierarchy.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/ParameterizedState.lf"
+main = "Cpp/src/Minimal.lf"
 
 [app.dependencies]
 
@@ -1578,7 +415,7 @@ main_reactor = "Cpp/src/ParameterizedState.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/ParametersOutOfOrder.lf"
+main = "Cpp/src/MovingAverage.lf"
 
 [app.dependencies]
 
@@ -1587,7 +424,7 @@ main_reactor = "Cpp/src/ParametersOutOfOrder.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/PeriodicDesugared.lf"
+main = "Cpp/src/MultipleContained.lf"
 
 [app.dependencies]
 
@@ -1596,7 +433,7 @@ main_reactor = "Cpp/src/PeriodicDesugared.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/PhysicalConnection.lf"
+main = "Cpp/src/NativeListsAndTimes.lf"
 
 [app.dependencies]
 
@@ -1605,7 +442,7 @@ main_reactor = "Cpp/src/PhysicalConnection.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/Pipeline.lf"
+main = "Cpp/src/NestedTriggeredReactions.lf"
 
 [app.dependencies]
 
@@ -1614,7 +451,7 @@ main_reactor = "Cpp/src/Pipeline.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/PreambleTest.lf"
+main = "Cpp/src/ParameterHierarchy.lf"
 
 [app.dependencies]
 
@@ -1623,7 +460,7 @@ main_reactor = "Cpp/src/PreambleTest.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/ReadOutputOfContainedReactor.lf"
+main = "Cpp/src/ParameterizedState.lf"
 
 [app.dependencies]
 
@@ -1632,7 +469,7 @@ main_reactor = "Cpp/src/ReadOutputOfContainedReactor.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/Schedule.lf"
+main = "Cpp/src/ParametersOutOfOrder.lf"
 
 [app.dependencies]
 
@@ -1641,7 +478,7 @@ main_reactor = "Cpp/src/Schedule.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/ScheduleLogicalAction.lf"
+main = "Cpp/src/PeriodicDesugared.lf"
 
 [app.dependencies]
 
@@ -1650,7 +487,7 @@ main_reactor = "Cpp/src/ScheduleLogicalAction.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/SelfLoop.lf"
+main = "Cpp/src/PhysicalConnection.lf"
 
 [app.dependencies]
 
@@ -1659,7 +496,7 @@ main_reactor = "Cpp/src/SelfLoop.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/SendingInside.lf"
+main = "Cpp/src/Pipeline.lf"
 
 [app.dependencies]
 
@@ -1668,7 +505,7 @@ main_reactor = "Cpp/src/SendingInside.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/SendingInside2.lf"
+main = "Cpp/src/PreambleTest.lf"
 
 [app.dependencies]
 
@@ -1677,7 +514,7 @@ main_reactor = "Cpp/src/SendingInside2.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/ShutdownAsync.lf"
+main = "Cpp/src/ReadOutputOfContainedReactor.lf"
 
 [app.dependencies]
 
@@ -1686,7 +523,7 @@ main_reactor = "Cpp/src/ShutdownAsync.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/ShutdownSync.lf"
+main = "Cpp/src/Schedule.lf"
 
 [app.dependencies]
 
@@ -1695,7 +532,7 @@ main_reactor = "Cpp/src/ShutdownSync.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/SimpleDeadline.lf"
+main = "Cpp/src/ScheduleLogicalAction.lf"
 
 [app.dependencies]
 
@@ -1704,7 +541,7 @@ main_reactor = "Cpp/src/SimpleDeadline.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/SimpleImport.lf"
+main = "Cpp/src/SelfLoop.lf"
 
 [app.dependencies]
 
@@ -1713,7 +550,7 @@ main_reactor = "Cpp/src/SimpleImport.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/SlowingClock.lf"
+main = "Cpp/src/SendingInside.lf"
 
 [app.dependencies]
 
@@ -1722,7 +559,7 @@ main_reactor = "Cpp/src/SlowingClock.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/SlowingClockPhysical.lf"
+main = "Cpp/src/SendingInside2.lf"
 
 [app.dependencies]
 
@@ -1731,7 +568,7 @@ main_reactor = "Cpp/src/SlowingClockPhysical.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/StartupOutFromInside.lf"
+main = "Cpp/src/ShutdownAsync.lf"
 
 [app.dependencies]
 
@@ -1740,7 +577,7 @@ main_reactor = "Cpp/src/StartupOutFromInside.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/Starve.lf"
+main = "Cpp/src/ShutdownSync.lf"
 
 [app.dependencies]
 
@@ -1749,7 +586,7 @@ main_reactor = "Cpp/src/Starve.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/StarveZero.lf"
+main = "Cpp/src/SimpleDeadline.lf"
 
 [app.dependencies]
 
@@ -1758,7 +595,7 @@ main_reactor = "Cpp/src/StarveZero.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/Stride.lf"
+main = "Cpp/src/SimpleImport.lf"
 
 [app.dependencies]
 
@@ -1767,7 +604,7 @@ main_reactor = "Cpp/src/Stride.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/StructAsState.lf"
+main = "Cpp/src/SlowingClock.lf"
 
 [app.dependencies]
 
@@ -1776,7 +613,7 @@ main_reactor = "Cpp/src/StructAsState.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/StructAsType.lf"
+main = "Cpp/src/SlowingClockPhysical.lf"
 
 [app.dependencies]
 
@@ -1785,7 +622,7 @@ main_reactor = "Cpp/src/StructAsType.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/StructAsTypeDirect.lf"
+main = "Cpp/src/StartupOutFromInside.lf"
 
 [app.dependencies]
 
@@ -1794,7 +631,7 @@ main_reactor = "Cpp/src/StructAsTypeDirect.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/StructParallel.lf"
+main = "Cpp/src/Starve.lf"
 
 [app.dependencies]
 
@@ -1803,7 +640,7 @@ main_reactor = "Cpp/src/StructParallel.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/StructPrint.lf"
+main = "Cpp/src/StarveZero.lf"
 
 [app.dependencies]
 
@@ -1812,25 +649,71 @@ main_reactor = "Cpp/src/StructPrint.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/StructScale.lf"
+main = "Cpp/src/Stride.lf"
 
 [app.dependencies]
 
 [app.properties]
-
-[[app]]
-target = "Cpp"
-platform = "Native"
-main_reactor = "Cpp/src/TestForPreviousOutput.lf"
 
-[app.dependencies]
-
-[app.properties]
+# TODO: include not working properly
+#[[app]]
+#target = "Cpp"
+#platform = "Native"
+#main = "Cpp/src/StructAsState.lf"
+#
+#[app.dependencies]
+#
+#[app.properties]
+#
+#[[app]]
+#target = "Cpp"
+#platform = "Native"
+#main = "Cpp/src/StructAsType.lf"
+#
+#[app.dependencies]
+#
+#[app.properties]
+#
+#[[app]]
+#target = "Cpp"
+#platform = "Native"
+#main = "Cpp/src/StructAsTypeDirect.lf"
+#
+#[app.dependencies]
+#
+#[app.properties]
+#
+#[[app]]
+#target = "Cpp"
+#platform = "Native"
+#main = "Cpp/src/StructParallel.lf"
+#
+#[app.dependencies]
+#
+#[app.properties]
+#
+#[[app]]
+#target = "Cpp"
+#platform = "Native"
+#main = "Cpp/src/StructPrint.lf"
+#
+#[app.dependencies]
+#
+#[app.properties]
+#
+#[[app]]
+#target = "Cpp"
+#platform = "Native"
+#main = "Cpp/src/StructScale.lf"
+#
+#[app.dependencies]
+#
+#[app.properties]
 
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/TimeLimit.lf"
+main = "Cpp/src/TestForPreviousOutput.lf"
 
 [app.dependencies]
 
@@ -1839,7 +722,7 @@ main_reactor = "Cpp/src/TimeLimit.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/TimeState.lf"
+main = "Cpp/src/TimeLimit.lf"
 
 [app.dependencies]
 
@@ -1848,7 +731,7 @@ main_reactor = "Cpp/src/TimeState.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/TimerIsPresent.lf"
+main = "Cpp/src/TimeState.lf"
 
 [app.dependencies]
 
@@ -1857,7 +740,7 @@ main_reactor = "Cpp/src/TimerIsPresent.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/ToReactionNested.lf"
+main = "Cpp/src/TimerIsPresent.lf"
 
 [app.dependencies]
 
@@ -1866,7 +749,7 @@ main_reactor = "Cpp/src/ToReactionNested.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/TriggerDownstreamOnlyIfPresent2.lf"
+main = "Cpp/src/ToReactionNested.lf"
 
 [app.dependencies]
 
@@ -1875,7 +758,7 @@ main_reactor = "Cpp/src/TriggerDownstreamOnlyIfPresent2.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/concurrent/AsyncCallback.lf"
+main = "Cpp/src/TriggerDownstreamOnlyIfPresent2.lf"
 
 [app.dependencies]
 
@@ -1884,7 +767,7 @@ main_reactor = "Cpp/src/concurrent/AsyncCallback.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/concurrent/AsyncCallback2.lf"
+main = "Cpp/src/concurrent/AsyncCallback.lf"
 
 [app.dependencies]
 
@@ -1893,7 +776,7 @@ main_reactor = "Cpp/src/concurrent/AsyncCallback2.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/concurrent/CompositionThreaded.lf"
+main = "Cpp/src/concurrent/AsyncCallback2.lf"
 
 [app.dependencies]
 
@@ -1902,7 +785,7 @@ main_reactor = "Cpp/src/concurrent/CompositionThreaded.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/concurrent/DeadlineHandledAboveThreaded.lf"
+main = "Cpp/src/concurrent/CompositionThreaded.lf"
 
 [app.dependencies]
 
@@ -1911,7 +794,7 @@ main_reactor = "Cpp/src/concurrent/DeadlineHandledAboveThreaded.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/concurrent/DeadlineThreaded.lf"
+main = "Cpp/src/concurrent/DeadlineHandledAboveThreaded.lf"
 
 [app.dependencies]
 
@@ -1920,7 +803,7 @@ main_reactor = "Cpp/src/concurrent/DeadlineThreaded.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/concurrent/DelayIntThreaded.lf"
+main = "Cpp/src/concurrent/DeadlineThreaded.lf"
 
 [app.dependencies]
 
@@ -1929,7 +812,7 @@ main_reactor = "Cpp/src/concurrent/DelayIntThreaded.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/concurrent/DeterminismThreaded.lf"
+main = "Cpp/src/concurrent/DelayIntThreaded.lf"
 
 [app.dependencies]
 
@@ -1938,7 +821,7 @@ main_reactor = "Cpp/src/concurrent/DeterminismThreaded.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/concurrent/DoubleReactionThreaded.lf"
+main = "Cpp/src/concurrent/DeterminismThreaded.lf"
 
 [app.dependencies]
 
@@ -1947,7 +830,7 @@ main_reactor = "Cpp/src/concurrent/DoubleReactionThreaded.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/concurrent/GainThreaded.lf"
+main = "Cpp/src/concurrent/DoubleReactionThreaded.lf"
 
 [app.dependencies]
 
@@ -1956,7 +839,7 @@ main_reactor = "Cpp/src/concurrent/GainThreaded.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/concurrent/HelloThreaded.lf"
+main = "Cpp/src/concurrent/GainThreaded.lf"
 
 [app.dependencies]
 
@@ -1965,7 +848,7 @@ main_reactor = "Cpp/src/concurrent/HelloThreaded.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/concurrent/ImportThreaded.lf"
+main = "Cpp/src/concurrent/HelloThreaded.lf"
 
 [app.dependencies]
 
@@ -1974,7 +857,7 @@ main_reactor = "Cpp/src/concurrent/ImportThreaded.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/concurrent/MinimalThreaded.lf"
+main = "Cpp/src/concurrent/ImportThreaded.lf"
 
 [app.dependencies]
 
@@ -1983,7 +866,7 @@ main_reactor = "Cpp/src/concurrent/MinimalThreaded.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/concurrent/SendingInsideThreaded.lf"
+main = "Cpp/src/concurrent/MinimalThreaded.lf"
 
 [app.dependencies]
 
@@ -1992,7 +875,7 @@ main_reactor = "Cpp/src/concurrent/SendingInsideThreaded.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/concurrent/Threaded.lf"
+main = "Cpp/src/concurrent/SendingInsideThreaded.lf"
 
 [app.dependencies]
 
@@ -2001,7 +884,7 @@ main_reactor = "Cpp/src/concurrent/Threaded.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/concurrent/ThreadedThreaded.lf"
+main = "Cpp/src/concurrent/Threaded.lf"
 
 [app.dependencies]
 
@@ -2010,7 +893,7 @@ main_reactor = "Cpp/src/concurrent/ThreadedThreaded.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/concurrent/TimeLimitThreaded.lf"
+main = "Cpp/src/concurrent/ThreadedThreaded.lf"
 
 [app.dependencies]
 
@@ -2019,7 +902,7 @@ main_reactor = "Cpp/src/concurrent/TimeLimitThreaded.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/concurrent/Workers.lf"
+main = "Cpp/src/concurrent/TimeLimitThreaded.lf"
 
 [app.dependencies]
 
@@ -2028,7 +911,7 @@ main_reactor = "Cpp/src/concurrent/Workers.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveBank.lf"
+main = "Cpp/src/concurrent/Workers.lf"
 
 [app.dependencies]
 
@@ -2037,7 +920,7 @@ main_reactor = "Cpp/src/enclave/EnclaveBank.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveBankEach.lf"
+main = "Cpp/src/enclave/EnclaveBank.lf"
 
 [app.dependencies]
 
@@ -2046,7 +929,7 @@ main_reactor = "Cpp/src/enclave/EnclaveBankEach.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveBroadcast.lf"
+main = "Cpp/src/enclave/EnclaveBankEach.lf"
 
 [app.dependencies]
 
@@ -2055,7 +938,7 @@ main_reactor = "Cpp/src/enclave/EnclaveBroadcast.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveCommunication.lf"
+main = "Cpp/src/enclave/EnclaveBroadcast.lf"
 
 [app.dependencies]
 
@@ -2064,7 +947,7 @@ main_reactor = "Cpp/src/enclave/EnclaveCommunication.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveCommunication2.lf"
+main = "Cpp/src/enclave/EnclaveCommunication.lf"
 
 [app.dependencies]
 
@@ -2073,7 +956,7 @@ main_reactor = "Cpp/src/enclave/EnclaveCommunication2.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveCommunicationDelayed.lf"
+main = "Cpp/src/enclave/EnclaveCommunication2.lf"
 
 [app.dependencies]
 
@@ -2082,7 +965,7 @@ main_reactor = "Cpp/src/enclave/EnclaveCommunicationDelayed.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveCommunicationDelayed2.lf"
+main = "Cpp/src/enclave/EnclaveCommunicationDelayed.lf"
 
 [app.dependencies]
 
@@ -2091,7 +974,7 @@ main_reactor = "Cpp/src/enclave/EnclaveCommunicationDelayed2.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveCommunicationDelayedLocalEvents.lf"
+main = "Cpp/src/enclave/EnclaveCommunicationDelayed2.lf"
 
 [app.dependencies]
 
@@ -2100,7 +983,7 @@ main_reactor = "Cpp/src/enclave/EnclaveCommunicationDelayedLocalEvents.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveCommunicationLocalEvents.lf"
+main = "Cpp/src/enclave/EnclaveCommunicationDelayedLocalEvents.lf"
 
 [app.dependencies]
 
@@ -2109,7 +992,7 @@ main_reactor = "Cpp/src/enclave/EnclaveCommunicationLocalEvents.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveCommunicationMultiportToBank.lf"
+main = "Cpp/src/enclave/EnclaveCommunicationLocalEvents.lf"
 
 [app.dependencies]
 
@@ -2118,7 +1001,7 @@ main_reactor = "Cpp/src/enclave/EnclaveCommunicationMultiportToBank.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveCommunicationMultiportToBankDelayed.lf"
+main = "Cpp/src/enclave/EnclaveCommunicationMultiportToBank.lf"
 
 [app.dependencies]
 
@@ -2127,7 +1010,7 @@ main_reactor = "Cpp/src/enclave/EnclaveCommunicationMultiportToBankDelayed.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveCommunicationMultiportToBankEach.lf"
+main = "Cpp/src/enclave/EnclaveCommunicationMultiportToBankDelayed.lf"
 
 [app.dependencies]
 
@@ -2136,7 +1019,7 @@ main_reactor = "Cpp/src/enclave/EnclaveCommunicationMultiportToBankEach.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveCommunicationMultiportToBankEachDelayed.lf"
+main = "Cpp/src/enclave/EnclaveCommunicationMultiportToBankEach.lf"
 
 [app.dependencies]
 
@@ -2145,7 +1028,7 @@ main_reactor = "Cpp/src/enclave/EnclaveCommunicationMultiportToBankEachDelayed.l
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveCommunicationMultiportToBankEachPhysical.lf"
+main = "Cpp/src/enclave/EnclaveCommunicationMultiportToBankEachDelayed.lf"
 
 [app.dependencies]
 
@@ -2154,7 +1037,7 @@ main_reactor = "Cpp/src/enclave/EnclaveCommunicationMultiportToBankEachPhysical.
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveCommunicationMultiportToBankPhysical.lf"
+main = "Cpp/src/enclave/EnclaveCommunicationMultiportToBankEachPhysical.lf"
 
 [app.dependencies]
 
@@ -2163,7 +1046,7 @@ main_reactor = "Cpp/src/enclave/EnclaveCommunicationMultiportToBankPhysical.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveCommunicationPhysical.lf"
+main = "Cpp/src/enclave/EnclaveCommunicationMultiportToBankPhysical.lf"
 
 [app.dependencies]
 
@@ -2172,7 +1055,7 @@ main_reactor = "Cpp/src/enclave/EnclaveCommunicationPhysical.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveCommunicationPhysicalLocalEvents.lf"
+main = "Cpp/src/enclave/EnclaveCommunicationPhysical.lf"
 
 [app.dependencies]
 
@@ -2181,7 +1064,7 @@ main_reactor = "Cpp/src/enclave/EnclaveCommunicationPhysicalLocalEvents.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveCycle.lf"
+main = "Cpp/src/enclave/EnclaveCommunicationPhysicalLocalEvents.lf"
 
 [app.dependencies]
 
@@ -2190,7 +1073,7 @@ main_reactor = "Cpp/src/enclave/EnclaveCycle.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveCycle2lf"
+main = "Cpp/src/enclave/EnclaveCycle.lf"
 
 [app.dependencies]
 
@@ -2199,7 +1082,7 @@ main_reactor = "Cpp/src/enclave/EnclaveCycle2lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveCycleTwoTimers.lf"
+main = "Cpp/src/enclave/EnclaveCycleTwoTimers.lf"
 
 [app.dependencies]
 
@@ -2208,7 +1091,7 @@ main_reactor = "Cpp/src/enclave/EnclaveCycleTwoTimers.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveHelloWorld.lf"
+main = "Cpp/src/enclave/EnclaveHelloWorld.lf"
 
 [app.dependencies]
 
@@ -2217,7 +1100,7 @@ main_reactor = "Cpp/src/enclave/EnclaveHelloWorld.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveHierarchy.lf"
+main = "Cpp/src/enclave/EnclaveHierarchy.lf"
 
 [app.dependencies]
 
@@ -2226,7 +1109,7 @@ main_reactor = "Cpp/src/enclave/EnclaveHierarchy.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveMultiportToPort.lf"
+main = "Cpp/src/enclave/EnclaveMultiportToPort.lf"
 
 [app.dependencies]
 
@@ -2235,7 +1118,7 @@ main_reactor = "Cpp/src/enclave/EnclaveMultiportToPort.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveMultiportToPort2.lf"
+main = "Cpp/src/enclave/EnclaveMultiportToPort2.lf"
 
 [app.dependencies]
 
@@ -2244,7 +1127,7 @@ main_reactor = "Cpp/src/enclave/EnclaveMultiportToPort2.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveShutdown.lf"
+main = "Cpp/src/enclave/EnclaveShutdown.lf"
 
 [app.dependencies]
 
@@ -2253,7 +1136,7 @@ main_reactor = "Cpp/src/enclave/EnclaveShutdown.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveSparseUpstreamEvents.lf"
+main = "Cpp/src/enclave/EnclaveSparseUpstreamEvents.lf"
 
 [app.dependencies]
 
@@ -2262,7 +1145,7 @@ main_reactor = "Cpp/src/enclave/EnclaveSparseUpstreamEvents.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveSparseUpstreamEventsDelayed.lf"
+main = "Cpp/src/enclave/EnclaveSparseUpstreamEventsDelayed.lf"
 
 [app.dependencies]
 
@@ -2271,7 +1154,7 @@ main_reactor = "Cpp/src/enclave/EnclaveSparseUpstreamEventsDelayed.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveSparseUpstreamEventsPhysical.lf"
+main = "Cpp/src/enclave/EnclaveSparseUpstreamEventsPhysical.lf"
 
 [app.dependencies]
 
@@ -2280,7 +1163,7 @@ main_reactor = "Cpp/src/enclave/EnclaveSparseUpstreamEventsPhysical.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveTimeout.lf"
+main = "Cpp/src/enclave/EnclaveTimeout.lf"
 
 [app.dependencies]
 
@@ -2289,7 +1172,7 @@ main_reactor = "Cpp/src/enclave/EnclaveTimeout.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveUpstreamPhysicalAction.lf"
+main = "Cpp/src/enclave/EnclaveUpstreamPhysicalAction.lf"
 
 [app.dependencies]
 
@@ -2298,7 +1181,7 @@ main_reactor = "Cpp/src/enclave/EnclaveUpstreamPhysicalAction.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/enclave/EnclaveUpstreamPhysicalActionDelayed.lf"
+main = "Cpp/src/enclave/EnclaveUpstreamPhysicalActionDelayed.lf"
 
 [app.dependencies]
 
@@ -2307,7 +1190,7 @@ main_reactor = "Cpp/src/enclave/EnclaveUpstreamPhysicalActionDelayed.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/BankSelfBroadcast.lf"
+main = "Cpp/src/multiport/BankSelfBroadcast.lf"
 
 [app.dependencies]
 
@@ -2316,7 +1199,7 @@ main_reactor = "Cpp/src/multiport/BankSelfBroadcast.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/BankToBank.lf"
+main = "Cpp/src/multiport/BankToBank.lf"
 
 [app.dependencies]
 
@@ -2325,7 +1208,7 @@ main_reactor = "Cpp/src/multiport/BankToBank.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/BankToBankMultiport.lf"
+main = "Cpp/src/multiport/BankToBankMultiport.lf"
 
 [app.dependencies]
 
@@ -2334,7 +1217,7 @@ main_reactor = "Cpp/src/multiport/BankToBankMultiport.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/BankToBankMultiportAfter.lf"
+main = "Cpp/src/multiport/BankToBankMultiportAfter.lf"
 
 [app.dependencies]
 
@@ -2343,7 +1226,7 @@ main_reactor = "Cpp/src/multiport/BankToBankMultiportAfter.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/BankToMultiport.lf"
+main = "Cpp/src/multiport/BankToMultiport.lf"
 
 [app.dependencies]
 
@@ -2352,7 +1235,7 @@ main_reactor = "Cpp/src/multiport/BankToMultiport.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/Broadcast.lf"
+main = "Cpp/src/multiport/Broadcast.lf"
 
 [app.dependencies]
 
@@ -2361,7 +1244,7 @@ main_reactor = "Cpp/src/multiport/Broadcast.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/BroadcastAfter.lf"
+main = "Cpp/src/multiport/BroadcastAfter.lf"
 
 [app.dependencies]
 
@@ -2370,7 +1253,7 @@ main_reactor = "Cpp/src/multiport/BroadcastAfter.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/BroadcastMultipleAfter.lf"
+main = "Cpp/src/multiport/BroadcastMultipleAfter.lf"
 
 [app.dependencies]
 
@@ -2379,7 +1262,7 @@ main_reactor = "Cpp/src/multiport/BroadcastMultipleAfter.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/FullyConnected.lf"
+main = "Cpp/src/multiport/FullyConnected.lf"
 
 [app.dependencies]
 
@@ -2388,7 +1271,7 @@ main_reactor = "Cpp/src/multiport/FullyConnected.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/FullyConnectedAddressable.lf"
+main = "Cpp/src/multiport/FullyConnectedAddressable.lf"
 
 [app.dependencies]
 
@@ -2397,7 +1280,7 @@ main_reactor = "Cpp/src/multiport/FullyConnectedAddressable.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/FullyConnectedAddressableAfter.lf"
+main = "Cpp/src/multiport/FullyConnectedAddressableAfter.lf"
 
 [app.dependencies]
 
@@ -2406,7 +1289,7 @@ main_reactor = "Cpp/src/multiport/FullyConnectedAddressableAfter.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/IndexIntoMultiportInput.lf"
+main = "Cpp/src/multiport/IndexIntoMultiportInput.lf"
 
 [app.dependencies]
 
@@ -2415,7 +1298,7 @@ main_reactor = "Cpp/src/multiport/IndexIntoMultiportInput.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/IndexIntoMultiportOutput.lf"
+main = "Cpp/src/multiport/IndexIntoMultiportOutput.lf"
 
 [app.dependencies]
 
@@ -2424,7 +1307,7 @@ main_reactor = "Cpp/src/multiport/IndexIntoMultiportOutput.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/Multiport.lf"
+main = "Cpp/src/multiport/Multiport.lf"
 
 [app.dependencies]
 
@@ -2433,7 +1316,7 @@ main_reactor = "Cpp/src/multiport/Multiport.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/MultiportFromBank.lf"
+main = "Cpp/src/multiport/MultiportFromBank.lf"
 
 [app.dependencies]
 
@@ -2442,7 +1325,7 @@ main_reactor = "Cpp/src/multiport/MultiportFromBank.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/MultiportFromBankHierarchy.lf"
+main = "Cpp/src/multiport/MultiportFromBankHierarchy.lf"
 
 [app.dependencies]
 
@@ -2451,7 +1334,7 @@ main_reactor = "Cpp/src/multiport/MultiportFromBankHierarchy.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/MultiportFromBankHierarchyAfter.lf"
+main = "Cpp/src/multiport/MultiportFromBankHierarchyAfter.lf"
 
 [app.dependencies]
 
@@ -2460,7 +1343,7 @@ main_reactor = "Cpp/src/multiport/MultiportFromBankHierarchyAfter.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/MultiportFromHierarchy.lf"
+main = "Cpp/src/multiport/MultiportFromHierarchy.lf"
 
 [app.dependencies]
 
@@ -2469,7 +1352,7 @@ main_reactor = "Cpp/src/multiport/MultiportFromHierarchy.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/MultiportIn.lf"
+main = "Cpp/src/multiport/MultiportIn.lf"
 
 [app.dependencies]
 
@@ -2478,7 +1361,7 @@ main_reactor = "Cpp/src/multiport/MultiportIn.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/MultiportMultipleSet.lf"
+main = "Cpp/src/multiport/MultiportMultipleSet.lf"
 
 [app.dependencies]
 
@@ -2487,7 +1370,7 @@ main_reactor = "Cpp/src/multiport/MultiportMultipleSet.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/MultiportOut.lf"
+main = "Cpp/src/multiport/MultiportOut.lf"
 
 [app.dependencies]
 
@@ -2496,7 +1379,7 @@ main_reactor = "Cpp/src/multiport/MultiportOut.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/MultiportToBank.lf"
+main = "Cpp/src/multiport/MultiportToBank.lf"
 
 [app.dependencies]
 
@@ -2505,7 +1388,7 @@ main_reactor = "Cpp/src/multiport/MultiportToBank.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/MultiportToBankAfter.lf"
+main = "Cpp/src/multiport/MultiportToBankAfter.lf"
 
 [app.dependencies]
 
@@ -2514,7 +1397,7 @@ main_reactor = "Cpp/src/multiport/MultiportToBankAfter.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/MultiportToBankHierarchy.lf"
+main = "Cpp/src/multiport/MultiportToBankHierarchy.lf"
 
 [app.dependencies]
 
@@ -2523,7 +1406,7 @@ main_reactor = "Cpp/src/multiport/MultiportToBankHierarchy.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/MultiportToHierarchy.lf"
+main = "Cpp/src/multiport/MultiportToHierarchy.lf"
 
 [app.dependencies]
 
@@ -2532,7 +1415,7 @@ main_reactor = "Cpp/src/multiport/MultiportToHierarchy.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/MultiportToMultiport.lf"
+main = "Cpp/src/multiport/MultiportToMultiport.lf"
 
 [app.dependencies]
 
@@ -2541,7 +1424,7 @@ main_reactor = "Cpp/src/multiport/MultiportToMultiport.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/MultiportToMultiport2.lf"
+main = "Cpp/src/multiport/MultiportToMultiport2.lf"
 
 [app.dependencies]
 
@@ -2550,7 +1433,7 @@ main_reactor = "Cpp/src/multiport/MultiportToMultiport2.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/MultiportToMultiport2After.lf"
+main = "Cpp/src/multiport/MultiportToMultiport2After.lf"
 
 [app.dependencies]
 
@@ -2559,7 +1442,7 @@ main_reactor = "Cpp/src/multiport/MultiportToMultiport2After.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/MultiportToMultiportArray.lf"
+main = "Cpp/src/multiport/MultiportToMultiportArray.lf"
 
 [app.dependencies]
 
@@ -2568,7 +1451,7 @@ main_reactor = "Cpp/src/multiport/MultiportToMultiportArray.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/MultiportToMultiportPhysical.lf"
+main = "Cpp/src/multiport/MultiportToMultiportPhysical.lf"
 
 [app.dependencies]
 
@@ -2577,7 +1460,7 @@ main_reactor = "Cpp/src/multiport/MultiportToMultiportPhysical.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/MultiportToPort.lf"
+main = "Cpp/src/multiport/MultiportToPort.lf"
 
 [app.dependencies]
 
@@ -2586,7 +1469,7 @@ main_reactor = "Cpp/src/multiport/MultiportToPort.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/PipelineAfter.lf"
+main = "Cpp/src/multiport/PipelineAfter.lf"
 
 [app.dependencies]
 
@@ -2595,7 +1478,7 @@ main_reactor = "Cpp/src/multiport/PipelineAfter.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/ReadMultiportOutputOfContainedBank.lf"
+main = "Cpp/src/multiport/ReadMultiportOutputOfContainedBank.lf"
 
 [app.dependencies]
 
@@ -2604,7 +1487,7 @@ main_reactor = "Cpp/src/multiport/ReadMultiportOutputOfContainedBank.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/ReadOutputOfContainedBank.lf"
+main = "Cpp/src/multiport/ReadOutputOfContainedBank.lf"
 
 [app.dependencies]
 
@@ -2613,7 +1496,7 @@ main_reactor = "Cpp/src/multiport/ReadOutputOfContainedBank.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/SparseMultiport.lf"
+main = "Cpp/src/multiport/SparseMultiport.lf"
 
 [app.dependencies]
 
@@ -2622,7 +1505,7 @@ main_reactor = "Cpp/src/multiport/SparseMultiport.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/WidthGivenByCode.lf"
+main = "Cpp/src/multiport/WidthGivenByCode.lf"
 
 [app.dependencies]
 
@@ -2631,7 +1514,7 @@ main_reactor = "Cpp/src/multiport/WidthGivenByCode.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/WriteInputOfContainedBank.lf"
+main = "Cpp/src/multiport/WriteInputOfContainedBank.lf"
 
 [app.dependencies]
 
@@ -2640,7 +1523,7 @@ main_reactor = "Cpp/src/multiport/WriteInputOfContainedBank.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/multiport/WriteMultiportInputOfContainedBank.lf"
+main = "Cpp/src/multiport/WriteMultiportInputOfContainedBank.lf"
 
 [app.dependencies]
 
@@ -2649,7 +1532,7 @@ main_reactor = "Cpp/src/multiport/WriteMultiportInputOfContainedBank.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/properties/Fast.lf"
+main = "Cpp/src/properties/Fast.lf"
 
 [app.dependencies]
 
@@ -2658,7 +1541,7 @@ main_reactor = "Cpp/src/properties/Fast.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/properties/Timeout.lf"
+main = "Cpp/src/properties/Timeout.lf"
 
 [app.dependencies]
 
@@ -2667,7 +1550,7 @@ main_reactor = "Cpp/src/properties/Timeout.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/properties/TimeoutZero.lf"
+main = "Cpp/src/properties/TimeoutZero.lf"
 
 [app.dependencies]
 
@@ -2676,7 +1559,7 @@ main_reactor = "Cpp/src/properties/TimeoutZero.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/target/AfterVoid.lf"
+main = "Cpp/src/target/AfterVoid.lf"
 
 [app.dependencies]
 
@@ -2685,7 +1568,7 @@ main_reactor = "Cpp/src/target/AfterVoid.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/target/BraceAndParenInitialization.lf"
+main = "Cpp/src/target/BraceAndParenInitialization.lf"
 
 [app.dependencies]
 
@@ -2694,7 +1577,7 @@ main_reactor = "Cpp/src/target/BraceAndParenInitialization.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/target/CMakeInclude.lf"
+main = "Cpp/src/target/CMakeInclude.lf"
 
 [app.dependencies]
 
@@ -2703,7 +1586,7 @@ main_reactor = "Cpp/src/target/CMakeInclude.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/target/CliParserGenericArguments.lf"
+main = "Cpp/src/target/CliParserGenericArguments.lf"
 
 [app.dependencies]
 
@@ -2712,7 +1595,7 @@ main_reactor = "Cpp/src/target/CliParserGenericArguments.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/target/CombinedTypeNames.lf"
+main = "Cpp/src/target/CombinedTypeNames.lf"
 
 [app.dependencies]
 
@@ -2721,7 +1604,7 @@ main_reactor = "Cpp/src/target/CombinedTypeNames.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/target/GenericAfter.lf"
+main = "Cpp/src/target/GenericAfter.lf"
 
 [app.dependencies]
 
@@ -2730,7 +1613,7 @@ main_reactor = "Cpp/src/target/GenericAfter.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/target/GenericDelay.lf"
+main = "Cpp/src/target/GenericDelay.lf"
 
 [app.dependencies]
 
@@ -2739,7 +1622,7 @@ main_reactor = "Cpp/src/target/GenericDelay.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/target/GenericParameterAndState.lf"
+main = "Cpp/src/target/GenericParameterAndState.lf"
 
 [app.dependencies]
 
@@ -2748,7 +1631,7 @@ main_reactor = "Cpp/src/target/GenericParameterAndState.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/target/InitializerSyntax.lf"
+main = "Cpp/src/target/InitializerSyntax.lf"
 
 [app.dependencies]
 
@@ -2757,7 +1640,7 @@ main_reactor = "Cpp/src/target/InitializerSyntax.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/target/MultipleContainedGeneric.lf"
+main = "Cpp/src/target/MultipleContainedGeneric.lf"
 
 [app.dependencies]
 
@@ -2766,7 +1649,7 @@ main_reactor = "Cpp/src/target/MultipleContainedGeneric.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/target/PointerParameters.lf"
+main = "Cpp/src/target/PointerParameters.lf"
 
 [app.dependencies]
 
@@ -2775,7 +1658,7 @@ main_reactor = "Cpp/src/target/PointerParameters.lf"
 [[app]]
 target = "Cpp"
 platform = "Native"
-main_reactor = "Cpp/src/target/PreambleFile.lf"
+main = "Cpp/src/target/PreambleFile.lf"
 
 [app.dependencies]
 

@@ -33,7 +33,12 @@ fn gen_cmake_files(app: &App, options: &BuildCommandOptions) -> BuildResult {
     cmake.arg("-DREACTOR_CPP_VALIDATE=ON");
     cmake.arg("-DREACTOR_CPP_TRACE=OFF");
     cmake.arg("-DREACTOR_CPP_LOG_LEVEL=3");
-    cmake.arg(format!("-DLF_SRC_PKG_PATH={}", app.root_path.display()));
+    cmake.arg(format!(
+        "-DLF_SRC_PKG_PATH={}",
+        app.src_dir_path()
+            .expect("not a valid main reactor path")
+            .display()
+    ));
     cmake.arg(app.src_gen_dir());
     cmake.arg(format!("-B {}", build_dir.display()));
     cmake.current_dir(&build_dir);
@@ -42,6 +47,7 @@ fn gen_cmake_files(app: &App, options: &BuildCommandOptions) -> BuildResult {
 }
 
 fn do_cmake_build(results: &mut BatchBuildResults, options: &BuildCommandOptions) {
+    results.keep_going(options.keep_going);
     super::lfc::LFC::do_parallel_lfc_codegen(options, results, true);
     if !options.compile_target_code {
         return;

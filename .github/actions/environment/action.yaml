@@ -1,0 +1,37 @@
+name: Build toolchain
+description: Installs Dependencies and Compiles Lingo
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
+    - uses: actions/setup-java@v3
+      with:
+        distribution: temurin
+        java-version: 17
+    - name: Integration Test
+      run: |
+          # setting java17
+          ls -alh /usr/lib/jvm/
+          # export JAVA_HOME=/usr/lib/jvm/java-17-temurin-amd64
+          
+          # building lingo
+          cargo b --release
+
+          # installing lingua-franca tests           
+          git clone https://github.com/lf-lang/lingua-franca.git ./lingua-franca
+          
+          # installing lfc
+          curl -Ls https://install.lf-lang.org | bash -s nightly cli 
+          export PATH="$HOME/.local/bin:$PATH"
+
+          # going into lfc repo and checking out the vers
+          cd ./lingua-franca 
+          git reset nightly
+          cd ..
+                    
+      shell: bash
