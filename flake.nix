@@ -1,7 +1,5 @@
 {
   inputs = {
-    nixpkgs.url = github:NixOS/nixpkgs/nixos-unstable;
-
     naersk = {
       url = github:nix-community/naersk;
     };

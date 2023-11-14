@@ -1,0 +1,57 @@
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+name: Test Lingo
+jobs:
+  cpp-test:
+    name: CPP Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup
+        uses: ./.github/actions/environment
+      - name: Integration Test Cpp
+        run: |
+            # copying Lingo.toml
+            cp test/Lingo-Cpp.toml ./lingua-franca/test/Lingo.toml
+
+            cd ./lingua-franca/test/
+            ../../target/release/lingo build
+
+        shell: bash
+  typescript-test:
+    name: TypeScript Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup
+        uses: ./.github/actions/environment
+      - name: Integration Test TypeScript
+        run: |
+            # copying Lingo.toml
+            cp test/Lingo-TypeScript.toml ./lingua-franca/test/Lingo.toml
+
+            cd ./lingua-franca/test/
+            ../../target/release/lingo build
+
+        shell: bash
+  lfc-test:
+    name: LFC Fallback Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup
+        uses: ./.github/actions/environment
+      - name: Integration Test TypeScript
+        run: |
+            # copying Lingo.toml
+            cp test/Lingo-LFC.toml ./lingua-franca/test/Lingo.toml
+
+            cd ./lingua-franca/test/
+            ../../target/release/lingo build
+
+        shell: bash
+

@@ -40,9 +40,9 @@ pub fn execute_command<'a>(command: &CommandSpec, apps: &[&'a App]) -> BatchBuil
         match build_system {
             BuildSystem::LFC => lfc::LFC.execute_command(command, &mut sub_res),
             BuildSystem::CMake => cmake::Cmake.execute_command(command, &mut sub_res),
-            BuildSystem::Cargo => todo!(),
             BuildSystem::Npm => npm::Npm.execute_command(command, &mut sub_res),
             BuildSystem::Pnpm => pnpm::Pnpm.execute_command(command, &mut sub_res),
+            BuildSystem::Cargo => todo!(),
         };
         result.append(sub_res);
     }
@@ -91,6 +91,7 @@ pub trait BatchBackend {
 /// Collects build results by app.
 pub struct BatchBuildResults<'a> {
     results: Vec<(&'a App, BuildResult)>,
+    keep_going: bool,
 }
 
 impl<'a> BatchBuildResults<'a> {
@@ -98,6 +99,7 @@ impl<'a> BatchBuildResults<'a> {
     fn new() -> Self {
         Self {
             results: Vec::new(),
+            keep_going: false,
         }
     }
 
@@ -106,7 +108,12 @@ impl<'a> BatchBuildResults<'a> {
     fn for_apps(apps: &[&'a App]) -> Self {
         Self {
             results: apps.iter().map(|&a| (a, Ok(()))).collect(),
+            keep_going: false,
         }
+    }
+    /// sets the keep going value
+    fn keep_going(&mut self, value: bool) {
+        self.keep_going = value
     }
 
     /// Print this result collection to standard output.
@@ -143,6 +150,14 @@ impl<'a> BatchBuildResults<'a> {
         self.results.iter_mut().for_each(|(app, res)| {
             if let Ok(()) = res {
                 *res = f(app);
+
+                if (*res).is_err() && !self.keep_going {
+                    panic!(
+                        "build step failed because of {} with main reactor {}!",
+                        &app.name,
+                        &app.main_reactor.display()
+                    );
+                }
             }
         });
         self
@@ -157,6 +172,15 @@ impl<'a> BatchBuildResults<'a> {
         self.results.par_iter_mut().for_each(|(app, res)| {
             if let Ok(()) = res {
                 *res = f(app);
+
+                if (*res).is_err() && !self.keep_going {
+                    panic!(
+                        "build step failed with error {:?} because of app {} with main reactor {}!",
+                        &res,
+                        &app.name,
+                        &app.main_reactor.display()
+                    );
+                }
             }
         });
         self
@@ -175,12 +199,18 @@ impl<'a> BatchBuildResults<'a> {
             .iter()
             .filter_map(|&(app, ref res)| res.as_ref().ok().map(|()| app))
             .collect();
+
         if vec.is_empty() {
             return self;
         }
+
         match f(&vec) {
             Ok(()) => { /* Do nothing, all apps have succeeded. */ }
             Err(e) => {
+                if !self.keep_going {
+                    panic!("build step failed!");
+                }
+
                 // Mark all as failed for the same reason.
                 let shared: Arc<AnyError> = e.into();
                 for (_app, res) in &mut self.results {

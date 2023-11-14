@@ -14,9 +14,9 @@ fast = true
 [[app]]
 name = "git-hook"
 target = "Cpp"
-main_reactor = "src/Main.lf"
+main = "src/Main.lf"
 dependencies = {}
-# main_reactor defaults to src/Main.lf
+# main defaults to src/Main.lf
 
 # dependencies
 #[[app.dependencies]]
@@ -31,7 +31,7 @@ logging = "info"
 # second binary
 [[app]]
 name = "embedded"
-main_reactor = "src/Main2.lf"
+main = "src/Main2.lf"
 dependencies = {}
 target = "Cpp"
 

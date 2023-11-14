@@ -1,6 +1,7 @@
 use crate::util::errors::LingoError;
 use crate::util::execute_command_to_build_result;
 use std::error::Error;
+use std::ffi::OsString;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -22,6 +23,7 @@ pub fn do_typescript_build(
     options: &BuildCommandOptions,
     commands: TypeScriptToolCommands,
 ) {
+    results.keep_going(options.keep_going);
     super::lfc::LFC::do_parallel_lfc_codegen(options, results, false);
     if !options.compile_target_code {
         return;
@@ -37,10 +39,34 @@ pub fn do_typescript_build(
         }
     };
 
+    let extract_location = |main_reactor: &PathBuf,
+                            root_path: &PathBuf|
+     -> Result<PathBuf, Box<dyn Error + Send + Sync>> {
+        let output_dir = main_reactor.strip_prefix(root_path)?;
+
+        let src_index = output_dir
+            .iter()
+            .map(|x| x.to_os_string())
+            .position(|element| element == *"src")
+            .ok_or(LingoError::InvalidMainReactor)?;
+
+        let mut path_copy: Vec<OsString> = output_dir.iter().map(|x| x.to_os_string()).collect();
+        path_copy.drain(0..src_index + 1);
+
+        let mut new_path_buf: PathBuf = PathBuf::new();
+
+        for element in path_copy {
+            new_path_buf.push(element);
+        }
+
+        new_path_buf.set_extension("");
+        Ok(new_path_buf)
+    };
+
     results
         .map(|app| {
-            let file_name = extract_name(&app.main_reactor)?;
-            let path = app.output_root.join("src-gen").join(file_name);
+            let src_postfix = extract_location(&app.main_reactor, &app.root_path)?;
+            let path = app.output_root.join("src-gen").join(src_postfix);
 
             let mut npm_install = Command::new(commands.binary_name);
             npm_install.current_dir(path);
@@ -48,12 +74,13 @@ pub fn do_typescript_build(
             if options.profile == BuildProfile::Release {
                 npm_install.arg(commands.release_build_argument);
             }
+
             execute_command_to_build_result(npm_install)?;
             Ok(())
         })
         .map(|app| {
-            let file_name = extract_name(&app.main_reactor)?;
-            let path = app.output_root.join("src-gen").join(file_name);
+            let src_postfix = extract_location(&app.main_reactor, &app.root_path)?; // path after src
+            let path = app.output_root.join("src-gen").join(src_postfix);
 
             let mut npm_build = Command::new(commands.binary_name);
             npm_build.current_dir(path);
@@ -63,18 +90,20 @@ pub fn do_typescript_build(
             if options.profile == BuildProfile::Release {
                 npm_build.arg(commands.release_build_argument);
             }
+
             execute_command_to_build_result(npm_build)?;
 
             Ok(())
         })
         .map(|app| {
             fs::create_dir_all(app.output_root.join("bin"))?;
-
             let file_name = extract_name(&app.main_reactor)?;
+            let src_postfix = extract_location(&app.main_reactor, &app.root_path)?; // path after src
+
             let path = app
                 .output_root
                 .join("src-gen")
-                .join(&file_name)
+                .join(src_postfix)
                 .join("dist")
                 .join(file_name + ".js");
 

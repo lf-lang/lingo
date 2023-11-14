@@ -10,7 +10,7 @@ use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
 use std::{env, io};
 
-use crate::args::BuildSystem::{CMake, Cargo, LFC};
+use crate::args::BuildSystem::{CMake, LFC};
 use crate::util::errors::{BuildResult, LingoError};
 use git2::Repository;
 use tempfile::tempdir;
@@ -59,7 +59,7 @@ pub struct AppFile {
     pub name: Option<String>,
 
     /// if not specified will default to main.lf
-    pub main_reactor: Option<PathBuf>,
+    pub main: Option<PathBuf>,
 
     /// target of the app
     pub target: TargetLanguage,
@@ -75,15 +75,15 @@ pub struct AppFile {
 pub struct App {
     /// Absolute path to the directory where the Lingo.toml file is located.
     pub root_path: PathBuf,
-
     /// Name of the app (and the final binary).
     pub name: String,
     /// Root directory where to place src-gen and other compilation-specifics stuff.
     pub output_root: PathBuf,
-
     /// Absolute path to the main reactor file.
     pub main_reactor: PathBuf,
+    /// target language of this lf program
     pub target: TargetLanguage,
+    /// platform for which this program should be compiled
     pub platform: Platform,
 
     pub dependencies: HashMap<String, DetailedDependency>,
@@ -95,7 +95,6 @@ impl App {
         match self.target {
             TargetLanguage::C => LFC,
             TargetLanguage::Cpp => CMake,
-            TargetLanguage::Rust => Cargo,
             TargetLanguage::TypeScript => {
                 if which("pnpm").is_ok() {
                     BuildSystem::Pnpm
@@ -117,6 +116,15 @@ impl App {
             p.push(&self.name);
         }
         p
+    }
+
+    pub fn src_dir_path(&self) -> Option<PathBuf> {
+        for path in self.main_reactor.ancestors() {
+            if path.ends_with("src") {
+                return Some(path.to_path_buf());
+            }
+        }
+        None
     }
 }
 
@@ -168,7 +176,7 @@ impl ConfigFile {
             .into_iter()
             .map(|spec| AppFile {
                 name: Some(spec.name),
-                main_reactor: Some(spec.path),
+                main: Some(spec.path),
                 target: spec.target,
                 platform: Some(init_args.platform),
                 dependencies: HashMap::new(),
@@ -277,22 +285,35 @@ impl ConfigFile {
             apps: self
                 .apps
                 .into_iter()
-                .map(|app| App {
-                    root_path: path.to_path_buf(),
-                    name: app.name.unwrap_or(package_name.clone()),
-                    output_root: path.join("target"),
-                    main_reactor: {
-                        let mut abs = path.to_path_buf();
-                        abs.push(
-                            app.main_reactor
-                                .unwrap_or(Self::DEFAULT_MAIN_REACTOR_RELPATH.into()),
-                        );
-                        abs
-                    },
-                    target: app.target,
-                    platform: app.platform.unwrap_or(Platform::Native),
-                    dependencies: app.dependencies,
-                    properties: app.properties,
+                .map(|app| {
+                    let file_name: Option<String> = match app.main.clone() {
+                        Some(path) => path
+                            .file_stem()
+                            .to_owned()
+                            .and_then(|x| x.to_str())
+                            .map(|x| x.to_string()),
+                        None => None,
+                    };
+                    let name = app
+                        .name
+                        .unwrap_or(file_name.unwrap_or(package_name.clone()).to_string());
+                    App {
+                        root_path: path.to_path_buf(),
+                        name,
+                        output_root: path.join("target"),
+                        main_reactor: {
+                            let mut abs = path.to_path_buf();
+                            abs.push(
+                                app.main
+                                    .unwrap_or(Self::DEFAULT_MAIN_REACTOR_RELPATH.into()),
+                            );
+                            abs
+                        },
+                        target: app.target,
+                        platform: app.platform.unwrap_or(Platform::Native),
+                        dependencies: app.dependencies,
+                        properties: app.properties,
+                    }
                 })
                 .collect(),
             package: self.package,
