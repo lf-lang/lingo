@@ -3,7 +3,7 @@ name = "lingua-franca"
 version = "0.2.0"
 edition = "2021"
 
-description = "Packagemanager for Lingua-Franca"
+description = "Package manager and build tool for the Lingua Franca coordination language"
 homepage = "https://lf-lang.org"
 repository = "https://github.com/lf-lang/lingo"
 license = "BSD-2-Clause"
