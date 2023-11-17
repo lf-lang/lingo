@@ -124,10 +124,10 @@ pub enum Command {
 }
 
 #[derive(Parser)]
-#[clap(name = "lingua-franca package manager and build tool")]
+#[clap(name = "Lingua Franca package manager and build tool")]
 #[clap(author = "tassilo.tanneberger@tu-dresden.de")]
 #[clap(version = env!("CARGO_PKG_VERSION"))]
-#[clap(about = "Build system of lingua-franca projects", long_about = None)]
+#[clap(about = "Build system for the Lingua Franca coordination language", long_about = None)]
 pub struct CommandLineArgs {
     /// which command of lingo to use
     #[clap(subcommand)]
