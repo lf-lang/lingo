@@ -6,7 +6,7 @@ edition = "2021"
 description = "Packagemanager for Lingua-Franca"
 homepage = "https://lf-lang.org"
 repository = "https://github.com/lf-lang/lingo"
-
+license = "BSD-2-Clause"
 
 [[bin]]
 name = "lingo"
