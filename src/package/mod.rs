@@ -1,5 +1,5 @@
-pub mod version;
 pub mod management;
+pub mod version;
 
 use crate::args::{BuildSystem, InitArgs, Platform, TargetLanguage};
 use crate::util::{analyzer, copy_recursively};
@@ -18,8 +18,8 @@ use crate::util::errors::{BuildResult, LingoError};
 use git2::Repository;
 use tempfile::tempdir;
 
-use which::which;
 use management::DetailedDependency;
+use which::which;
 
 fn is_valid_location_for_project(path: &std::path::Path) -> bool {
     !path.join("src").exists() && !path.join(".git").exists() && !path.join("application").exists()
@@ -132,7 +132,6 @@ impl App {
         None
     }
 }
-
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct PackageDescription {

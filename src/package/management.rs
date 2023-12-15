@@ -1,26 +1,29 @@
-use std::path::PathBuf;
+use crate::package::version::{from_version_string, to_version_string, Version};
 use serde_derive::{Deserialize, Serialize};
-use url::Url;
 use std::path::Path;
-use crate::package::version::{Version, to_version_string, from_version_string};
+use std::path::PathBuf;
+use url::Url;
 
 #[derive(Clone, Deserialize, Serialize)]
 enum ProjectSource {
-    #[serde(rename="git")]
+    #[serde(rename = "git")]
     Git(Url),
-    #[serde(rename="tarball")]
+    #[serde(rename = "tarball")]
     TarBall(Url),
-    #[serde(rename="path")]
-    Path(PathBuf)
+    #[serde(rename = "path")]
+    Path(PathBuf),
 }
 
 /// Dependency with source and version
 #[derive(Clone, Deserialize, Serialize)]
 pub struct DetailedDependency {
-    #[serde(deserialize_with="from_version_string", serialize_with="to_version_string")]
+    #[serde(
+        deserialize_with = "from_version_string",
+        serialize_with = "to_version_string"
+    )]
     version: Version,
     #[serde(flatten)]
-    mutual_exclusive: ProjectSource
+    mutual_exclusive: ProjectSource,
 }
 
 fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> std::io::Result<()> {
@@ -37,18 +40,15 @@ fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> std::io::Result
     Ok(())
 }
 
-
 impl DetailedDependency {
-    fn fetch(&self, library_path: &PathBuf) -> anyhow::Result<()>{
+    fn fetch(&self, library_path: &PathBuf) -> anyhow::Result<()> {
         match &self.mutual_exclusive {
-            ProjectSource::Path(path_buf) => {
-                Ok(copy_dir_all(path_buf, library_path)?)
-            },
-            ProjectSource::Git(git_url ) => {
+            ProjectSource::Path(path_buf) => Ok(copy_dir_all(path_buf, library_path)?),
+            ProjectSource::Git(git_url) => {
                 git2::Repository::clone(git_url.as_str(), library_path)?;
                 Ok(())
-            },
-            _ => todo!("Not Supported")
+            }
+            _ => todo!("Not Supported"),
         }
     }
 }
