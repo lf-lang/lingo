@@ -30,3 +30,6 @@ termion = "2.0"
 git2 = "0.18"
 run_script = "0.10"
 tempfile = "3.0"
+#version = { version = "3.0", features = [] }
+url = { version = "2.5", features = ["serde"] }
+anyhow = "1.0.75"

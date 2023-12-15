@@ -1,3 +1,6 @@
+pub mod version;
+pub mod management;
+
 use crate::args::{BuildSystem, InitArgs, Platform, TargetLanguage};
 use crate::util::{analyzer, copy_recursively};
 
@@ -14,7 +17,9 @@ use crate::args::BuildSystem::{CMake, LFC};
 use crate::util::errors::{BuildResult, LingoError};
 use git2::Repository;
 use tempfile::tempdir;
+
 use which::which;
+use management::DetailedDependency;
 
 fn is_valid_location_for_project(path: &std::path::Path) -> bool {
     !path.join("src").exists() && !path.join(".git").exists() && !path.join("application").exists()
@@ -128,23 +133,6 @@ impl App {
     }
 }
 
-/// Simple or DetailedDependency
-#[derive(Clone, Deserialize, Serialize)]
-pub enum FileDependency {
-    // the version string
-    Simple(String),
-    /// version string and source
-    Advanced(DetailedDependency),
-}
-
-/// Dependency with source and version
-#[derive(Clone, Deserialize, Serialize)]
-pub struct DetailedDependency {
-    version: String,
-    git: Option<String>,
-    tarball: Option<String>,
-    zip: Option<String>,
-}
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct PackageDescription {
