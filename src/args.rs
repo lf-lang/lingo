@@ -4,6 +4,7 @@ use serde_derive::{Deserialize, Serialize};
 use std::path::PathBuf;
 
 #[derive(clap::ValueEnum, Clone, Copy, Debug, Deserialize, Serialize, PartialEq)]
+#[clap(rename_all = "lowercase")]
 pub enum TargetLanguage {
     C,
     Cpp,
@@ -78,12 +79,6 @@ impl BuildArgs {
     }
 }
 
-impl ToString for TargetLanguage {
-    fn to_string(&self) -> String {
-        format!("{:?}", self)
-    }
-}
-
 #[derive(Args, Debug)]
 pub struct InitArgs {
     #[clap(value_enum, short, long)]
@@ -91,6 +86,7 @@ pub struct InitArgs {
     #[clap(value_enum, short, long, default_value_t = Platform::Native)]
     pub platform: Platform,
 }
+
 impl InitArgs {
     pub fn get_target_language(&self) -> TargetLanguage {
         self.language.unwrap_or({
@@ -137,7 +133,7 @@ pub struct CommandLineArgs {
     #[clap(short, long, action)]
     pub quiet: bool,
 
-    /// lingo wouldn't produce any output
+    /// lingo will give more detailed feedback
     #[clap(short, long, action)]
     pub verbose: bool,
 }
