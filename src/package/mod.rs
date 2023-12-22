@@ -20,6 +20,10 @@ use tempfile::tempdir;
 
 use management::DetailedDependency;
 use which::which;
+/// place where are the build artifacts will be dropped
+const OUTPUT_DIRECTORY: &str = "target";
+// name of the folder inside the `OUTPUT_DIRECTORY` where libraries will be copied into
+const LIBRARY_DIRECTORY: &str = "library";
 
 fn is_valid_location_for_project(path: &std::path::Path) -> bool {
     !path.join("src").exists() && !path.join(".git").exists() && !path.join("application").exists()
@@ -287,7 +291,7 @@ impl ConfigFile {
                     App {
                         root_path: path.to_path_buf(),
                         name,
-                        output_root: path.join("target"),
+                        output_root: path.join(OUTPUT_DIRECTORY),
                         main_reactor: {
                             let mut abs = path.to_path_buf();
                             abs.push(
