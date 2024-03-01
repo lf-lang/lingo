@@ -2,8 +2,8 @@ use std::fs;
 
 use std::process::Command;
 
+use crate::package::App;
 use crate::util::execute_command_to_build_result;
-use crate::App;
 
 use crate::backends::{
     BatchBackend, BatchBuildResults, BuildCommandOptions, BuildProfile, BuildResult, CommandSpec,

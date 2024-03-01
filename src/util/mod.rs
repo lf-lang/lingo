@@ -64,7 +64,7 @@ pub fn default_build_clean(out_dir: &Path) -> io::Result<()> {
     )
 }
 
-pub fn find_lfc_exec(args: &crate::BuildArgs) -> Result<PathBuf, io::Error> {
+pub fn find_lfc_exec(args: &crate::args::BuildArgs) -> Result<PathBuf, io::Error> {
     if let Some(lfc) = &args.lfc {
         if lfc.exists() {
             return Ok(lfc.clone());
