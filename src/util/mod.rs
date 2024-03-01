@@ -1,13 +1,15 @@
 use std::path::{Path, PathBuf};
 use std::{fs, io};
 
-use which::which;
+// use which::which;
 
 pub mod analyzer;
 mod command_line;
 pub mod errors;
 
 pub use command_line::*;
+
+use crate::WhichType;
 
 /// finds toml file recurisvely
 pub fn find_toml(input_path: &Path) -> Option<PathBuf> {
@@ -64,7 +66,10 @@ pub fn default_build_clean(out_dir: &Path) -> io::Result<()> {
     )
 }
 
-pub fn find_lfc_exec(args: &crate::args::BuildArgs) -> Result<PathBuf, io::Error> {
+pub fn find_lfc_exec(
+    args: &crate::args::BuildArgs,
+    which: WhichType,
+) -> Result<PathBuf, io::Error> {
     if let Some(lfc) = &args.lfc {
         if lfc.exists() {
             return Ok(lfc.clone());

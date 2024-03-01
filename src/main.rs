@@ -5,18 +5,20 @@ use std::{env, io};
 
 use clap::Parser;
 
-use crate::args::InitArgs;
-use args::{BuildArgs, Command as ConsoleCommand, CommandLineArgs};
-use package::App;
+use git2::Repository;
+use liblingo::args::InitArgs;
+use liblingo::args::{BuildArgs, Command as ConsoleCommand, CommandLineArgs};
+use liblingo::package::App;
 
-use crate::backends::{BatchBuildResults, BuildCommandOptions, CommandSpec};
-use crate::package::{Config, ConfigFile};
-use crate::util::errors::{BuildResult, LingoError};
+use liblingo::backends::{BatchBuildResults, BuildCommandOptions, CommandSpec};
+use liblingo::package::{Config, ConfigFile};
+use liblingo::util::errors::{BuildResult, LingoError};
 
-pub mod args;
-pub mod backends;
-pub mod package;
-pub(crate) mod util;
+// pub mod args;
+// pub mod backends;
+// pub mod package;
+// pub(crate) mod util;
+// pub mod
 
 fn main() {
     // parses command line arguments
@@ -24,7 +26,7 @@ fn main() {
 
     // Finds Lingo.toml recursively inside the parent directories.
     // If it exists the returned path is absolute.
-    let lingo_path = util::find_toml(&env::current_dir().unwrap());
+    let lingo_path = liblingo::util::find_toml(&env::current_dir().unwrap());
 
     // tries to read Lingo.toml
     let mut wrapped_config = lingo_path.as_ref().and_then(|path| {
@@ -94,7 +96,7 @@ fn execute_command(config: Option<&Config>, command: ConsoleCommand) -> CommandR
             let mut res = build(&build_command_args, config);
             res.map(|app| {
                 let mut command = Command::new(app.executable_path());
-                util::run_and_capture(&mut command)?;
+                liblingo::util::run_and_capture(&mut command)?;
                 Ok(())
             });
             CommandResult::Batch(res)
@@ -109,7 +111,7 @@ fn execute_command(config: Option<&Config>, command: ConsoleCommand) -> CommandR
 fn do_init(init_config: InitArgs) -> BuildResult {
     let initial_config = ConfigFile::new_for_init_task(init_config)?;
     initial_config.write(Path::new("./Lingo.toml"))?;
-    initial_config.setup_example()
+    initial_config.setup_example(Repository::clone)
 }
 
 fn build<'a>(args: &BuildArgs, config: &'a Config) -> BatchBuildResults<'a> {
@@ -117,7 +119,8 @@ fn build<'a>(args: &BuildArgs, config: &'a Config) -> BatchBuildResults<'a> {
         CommandSpec::Build(BuildCommandOptions {
             profile: args.build_profile(),
             compile_target_code: !args.no_compile,
-            lfc_exec_path: util::find_lfc_exec(args).expect("TODO replace me"),
+            lfc_exec_path: liblingo::util::find_lfc_exec(args, which::which::<&str>)
+                .expect("TODO replace me"),
             max_threads: args.threads,
             keep_going: args.keep_going,
         }),
@@ -128,7 +131,7 @@ fn build<'a>(args: &BuildArgs, config: &'a Config) -> BatchBuildResults<'a> {
 
 fn run_command(task: CommandSpec, config: &Config, _fail_at_end: bool) -> BatchBuildResults {
     let apps = config.apps.iter().collect::<Vec<_>>();
-    backends::execute_command(&task, &apps)
+    liblingo::backends::execute_command(&task, &apps, which::which)
 }
 
 enum CommandResult<'a> {
