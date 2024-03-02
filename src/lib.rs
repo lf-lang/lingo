@@ -53,6 +53,7 @@ impl<'a> From<GitUrl<'a>> for &'a str {
     }
 }
 
-pub type WhichCapability = Box<dyn Fn(&str) -> Result<std::path::PathBuf, WhichError>>;
-pub type GitCloneCapability = Box<dyn Fn(GitUrl, &std::path::Path) -> Result<(), GitCloneError>>;
-pub type FsReadCapability = Box<dyn Fn(&std::path::Path) -> io::Result<String>>;
+pub type WhichCapability<'a> = Box<dyn Fn(&str) -> Result<std::path::PathBuf, WhichError> + 'a>;
+pub type GitCloneCapability<'a> =
+    Box<dyn Fn(GitUrl, &std::path::Path) -> Result<(), GitCloneError> + 'a>;
+pub type FsReadCapability<'a> = Box<dyn Fn(&std::path::Path) -> io::Result<String> + 'a>;
