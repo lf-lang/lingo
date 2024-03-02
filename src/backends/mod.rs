@@ -8,7 +8,7 @@ use rayon::prelude::*;
 use crate::args::{BuildSystem, Platform};
 use crate::package::App;
 use crate::util::errors::{AnyError, BuildResult, LingoError};
-use crate::WhichType;
+use crate::WhichCapability;
 
 pub mod cmake;
 pub mod lfc;
@@ -18,13 +18,13 @@ pub mod pnpm;
 pub fn execute_command<'a>(
     command: &CommandSpec,
     apps: &[&'a App],
-    which: WhichType,
+    which: WhichCapability,
 ) -> BatchBuildResults<'a> {
     // Group apps by build system
     let mut by_build_system = HashMap::<BuildSystem, Vec<&App>>::new();
     for &app in apps {
         by_build_system
-            .entry(app.build_system(which))
+            .entry(app.build_system(&which))
             .or_default()
             .push(app);
     }

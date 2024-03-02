@@ -1,9 +1,10 @@
-use std::path::Display;
+use std::io;
 
 pub mod args;
 pub mod backends;
 pub mod package;
 pub mod util;
+
 #[derive(Debug)]
 pub enum WhichError {
     /// An executable binary with that name was not found
@@ -14,7 +15,7 @@ pub enum WhichError {
     CannotCanonicalize,
 }
 #[derive(Debug)]
-pub struct GitCloneError(String);
+pub struct GitCloneError(pub String); // TODO: create a more domain-specific error time like the actual git2::Error
 
 impl std::fmt::Display for WhichError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -38,5 +39,20 @@ impl std::error::Error for WhichError {}
 
 impl std::error::Error for GitCloneError {}
 
-pub type WhichType = fn(binary_name: &str) -> Result<std::path::PathBuf, WhichError>;
-pub type GitCloneType = fn(url: &str, into: &std::path::Path) -> Result<(), GitCloneError>;
+pub struct GitUrl<'a>(&'a str);
+
+impl<'a> From<&'a str> for GitUrl<'a> {
+    fn from(value: &'a str) -> Self {
+        GitUrl(value)
+    }
+}
+
+impl<'a> From<GitUrl<'a>> for &'a str {
+    fn from(value: GitUrl<'a>) -> Self {
+        value.0
+    }
+}
+
+pub type WhichCapability = Box<dyn Fn(&str) -> Result<std::path::PathBuf, WhichError>>;
+pub type GitCloneCapability = Box<dyn Fn(GitUrl, &std::path::Path) -> Result<(), GitCloneError>>;
+pub type FsReadCapability = Box<dyn Fn(&std::path::Path) -> io::Result<String>>;
