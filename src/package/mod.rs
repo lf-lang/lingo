@@ -3,7 +3,6 @@ use crate::util::{analyzer, copy_recursively};
 use crate::{FsReadCapability, GitCloneCapability, GitUrl, WhichCapability};
 
 use serde_derive::{Deserialize, Serialize};
-use web_sys::wasm_bindgen::JsValue;
 
 use std::collections::HashMap;
 
@@ -212,12 +211,7 @@ impl ConfigFile {
     }
 
     pub fn from(path: &Path, fsr: FsReadCapability) -> io::Result<ConfigFile> {
-        web_sys::console::log_1(&JsValue::from_str("reading contents from path..."));
         let contents = fsr(path);
-        web_sys::console::log_1(&JsValue::from_str(&format!(
-            "contents read from path with result: {:?}",
-            contents
-        )));
         contents.and_then(|contents| {
             toml::from_str(&contents).map_err(|e| {
                 io::Error::new(

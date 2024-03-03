@@ -126,10 +126,10 @@ impl<'a> BatchBuildResults<'a> {
         for (app, b) in &self.results {
             match b {
                 Ok(()) => {
-                    println!("- {}: Success", &app.name);
+                    log::info!("- {}: Success", &app.name);
                 }
                 Err(e) => {
-                    println!("- {}: Error: {}", &app.name, e);
+                    log::error!("- {}: Error: {}", &app.name, e);
                 }
             }
         }

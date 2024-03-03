@@ -57,7 +57,7 @@ pub fn delete_subdirs(path_root: &Path, subdirs: &[&str]) -> io::Result<()> {
 }
 
 pub fn default_build_clean(out_dir: &Path) -> io::Result<()> {
-    println!("removing build artifacts in {:?}", out_dir);
+    log::info!("removing build artifacts in {:?}", out_dir);
     delete_subdirs(
         out_dir,
         &["bin", "include", "src-gen", "lib64", "share", "build"],

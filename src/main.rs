@@ -36,6 +36,7 @@ fn do_read_to_string(p: &Path) -> io::Result<String> {
 }
 
 fn main() {
+    print_logger::new().init().unwrap();
     // parses command line arguments
     let args = CommandLineArgs::parse();
 
@@ -46,7 +47,7 @@ fn main() {
     // tries to read Lingo.toml
     let mut wrapped_config = lingo_path.as_ref().and_then(|path| {
         ConfigFile::from(path, Box::new(do_read_to_string))
-            .map_err(|err| println!("Error while reading Lingo.toml: {}", err))
+            .map_err(|err| log::error!("Error while reading Lingo.toml: {}", err))
             .ok()
             .map(|cf| cf.to_config(path.parent().unwrap()))
     });
@@ -68,7 +69,7 @@ fn print_res(result: BuildResult) {
     match result {
         Ok(_) => {}
         Err(errs) => {
-            println!("{}", errs);
+            log::error!("{}", errs);
         }
     }
 }
@@ -104,7 +105,7 @@ fn execute_command(config: Option<&Config>, command: ConsoleCommand) -> CommandR
             "Error: Missing Lingo.toml file",
         )))),
         (Some(config), ConsoleCommand::Build(build_command_args)) => {
-            println!("Building ...");
+            log::info!("Building ...");
             CommandResult::Batch(build(&build_command_args, config))
         }
         (Some(config), ConsoleCommand::Run(build_command_args)) => {

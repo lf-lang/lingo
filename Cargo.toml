@@ -38,7 +38,5 @@ run_script = "0.10"
 tempfile = "3.0"
 which = { version = "5.0", optional = true }
 git2 = { version = "0.18", optional = true }
-
-[dependencies.web-sys]
-version = "0.3.68"
-features = ["console"]
+log = "0.4.21"
+print_logger = "0.2.0"

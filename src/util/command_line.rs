@@ -38,7 +38,7 @@ pub fn run_and_capture(command: &mut Command) -> io::Result<(ExitStatus, Vec<u8>
     // These expects should be guaranteed to be ok because we used piped().
     let mut child_stdout = child.stdout.take().expect("logic error getting stdout");
     let mut child_stderr = child.stderr.take().expect("logic error getting stderr");
-    println!("Running {:?}", command);
+    log::info!("Running {:?}", command);
 
     thread::scope(|s| {
         let stdout_thread = s.spawn(|_| -> io::Result<Vec<u8>> {
@@ -72,7 +72,7 @@ pub fn run_and_capture(command: &mut Command) -> io::Result<(ExitStatus, Vec<u8>
 pub fn execute_command_to_build_result(mut command: Command) -> BuildResult {
     match run_and_capture(&mut command) {
         Err(e) => {
-            eprintln!("error occured while executing commandline: {:?}", &e);
+            log::error!("error occured while executing commandline: {:?}", &e);
             Err(Box::new(e))
         }
         Ok((status, _, _)) if !status.success() => {
