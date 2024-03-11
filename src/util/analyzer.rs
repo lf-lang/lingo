@@ -7,7 +7,7 @@ use regex::Regex;
 
 use crate::args::TargetLanguage;
 
-lazy_static! {
+lazy_static! {  // FIXME: ad hoc parsing using regexes should be forbidden
     static ref TARGET_RE: Regex = Regex::new(r"\btarget\s+(\w+)\s*[{;]").unwrap();
 }
 lazy_static! {
@@ -23,10 +23,10 @@ fn search_inside_file(path: &Path) -> io::Result<Option<MainReactorSpec>> {
 
     let mut target: TargetLanguage = DEFAULT_TARGET;
     for line in content.split('\n') {
-        if let Some(captures) = MAIN_REACTOR_RE.captures(line) {
+        if let Some(captures) = TARGET_RE.captures(line) {
             target = TargetLanguage::from_str(captures.get(1).unwrap().as_str(), true).unwrap();
         }
-        if let Some(captures) = TARGET_RE.captures(line) {
+        if let Some(captures) = MAIN_REACTOR_RE.captures(line) {
             let name = captures.get(1).unwrap().as_str().into();
             return Ok(Some(MainReactorSpec {
                 name,
