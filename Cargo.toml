@@ -1,5 +1,5 @@
 [package]
-name = "lingua-franca"
+name = "lingo"
 version = "0.2.0"
 edition = "2021"
 
@@ -8,10 +8,19 @@ homepage = "https://lf-lang.org"
 repository = "https://github.com/lf-lang/lingo"
 license = "BSD-2-Clause"
 
+[lib]
+name = "liblingo"
+path = "src/lib.rs"
+
 [[bin]]
 name = "lingo"
 publish = true
 path = "./src/main.rs"
+required-features = ["binary"]
+
+[features]
+default = ["binary"]
+binary = ["which", "git2"]
 
 [dependencies]
 
@@ -20,13 +29,14 @@ os-version = "0.2"
 serde = "1.0"
 serde_json = "1.0"
 serde_derive = "1.0"
-which = "5.0"
 regex = "1.8"
 lazy_static = "1.4"
 rayon = "1.7"
-toml = {version = "0.8"}
+toml = { version = "0.8" }
 crossbeam = "0.8"
-termion = "2.0"
-git2 = "0.18"
 run_script = "0.10"
 tempfile = "3.0"
+which = { version = "5.0", optional = true }
+git2 = { version = "0.18", optional = true }
+log = "0.4.21"
+print_logger = "0.2.0"

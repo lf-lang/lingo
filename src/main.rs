@@ -1,35 +1,53 @@
 use std::io::ErrorKind;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::{env, io};
 
 use clap::Parser;
 
-use crate::args::InitArgs;
-use args::{BuildArgs, Command as ConsoleCommand, CommandLineArgs};
-use package::App;
+use git2::Repository;
+use liblingo::args::InitArgs;
+use liblingo::args::{BuildArgs, Command as ConsoleCommand, CommandLineArgs};
 
-use crate::backends::{BatchBuildResults, BuildCommandOptions, CommandSpec};
-use crate::package::{Config, ConfigFile};
-use crate::util::errors::{BuildResult, LingoError};
+use liblingo::backends::{BatchBuildResults, BuildCommandOptions, CommandSpec};
+use liblingo::package::{Config, ConfigFile};
+use liblingo::util::errors::{BuildResult, LingoError};
+use liblingo::{GitCloneError, GitUrl, WhichError};
 
-pub mod args;
-pub mod backends;
-pub mod package;
-pub(crate) mod util;
+fn do_repo_clone(url: GitUrl, into: &std::path::Path) -> Result<(), GitCloneError> {
+    Repository::clone(url.into(), into).map_or_else(
+        |err: git2::Error| Err(GitCloneError(format!("{}", err))),
+        |_| Ok(()),
+    )
+}
+
+fn do_which(cmd: &str) -> Result<PathBuf, WhichError> {
+    which::which(cmd).map_err(|err| match err {
+        which::Error::CannotFindBinaryPath => WhichError::CannotFindBinaryPath,
+        which::Error::CannotGetCurrentDirAndPathListEmpty => {
+            WhichError::CannotGetCurrentDirAndPathListEmpty
+        }
+        which::Error::CannotCanonicalize => WhichError::CannotCanonicalize,
+    })
+}
+
+fn do_read_to_string(p: &Path) -> io::Result<String> {
+    std::fs::read_to_string(p)
+}
 
 fn main() {
+    print_logger::new().init().unwrap();
     // parses command line arguments
     let args = CommandLineArgs::parse();
 
     // Finds Lingo.toml recursively inside the parent directories.
     // If it exists the returned path is absolute.
-    let lingo_path = util::find_toml(&env::current_dir().unwrap());
+    let lingo_path = liblingo::util::find_toml(&env::current_dir().unwrap());
 
     // tries to read Lingo.toml
     let mut wrapped_config = lingo_path.as_ref().and_then(|path| {
-        ConfigFile::from(path)
-            .map_err(|err| println!("Error while reading Lingo.toml: {}", err))
+        ConfigFile::from(path, Box::new(do_read_to_string))
+            .map_err(|err| log::error!("Error while reading Lingo.toml: {}", err))
             .ok()
             .map(|cf| cf.to_config(path.parent().unwrap()))
     });
@@ -51,7 +69,7 @@ fn print_res(result: BuildResult) {
     match result {
         Ok(_) => {}
         Err(errs) => {
-            println!("{}", errs);
+            log::error!("{}", errs);
         }
     }
 }
@@ -87,14 +105,14 @@ fn execute_command(config: Option<&Config>, command: ConsoleCommand) -> CommandR
             "Error: Missing Lingo.toml file",
         )))),
         (Some(config), ConsoleCommand::Build(build_command_args)) => {
-            println!("Building ...");
+            log::info!("Building ...");
             CommandResult::Batch(build(&build_command_args, config))
         }
         (Some(config), ConsoleCommand::Run(build_command_args)) => {
             let mut res = build(&build_command_args, config);
             res.map(|app| {
                 let mut command = Command::new(app.executable_path());
-                util::run_and_capture(&mut command)?;
+                liblingo::util::run_and_capture(&mut command)?;
                 Ok(())
             });
             CommandResult::Batch(res)
@@ -109,7 +127,7 @@ fn execute_command(config: Option<&Config>, command: ConsoleCommand) -> CommandR
 fn do_init(init_config: InitArgs) -> BuildResult {
     let initial_config = ConfigFile::new_for_init_task(init_config)?;
     initial_config.write(Path::new("./Lingo.toml"))?;
-    initial_config.setup_example()
+    initial_config.setup_example(Box::new(do_repo_clone))
 }
 
 fn build<'a>(args: &BuildArgs, config: &'a Config) -> BatchBuildResults<'a> {
@@ -117,7 +135,8 @@ fn build<'a>(args: &BuildArgs, config: &'a Config) -> BatchBuildResults<'a> {
         CommandSpec::Build(BuildCommandOptions {
             profile: args.build_profile(),
             compile_target_code: !args.no_compile,
-            lfc_exec_path: util::find_lfc_exec(args).expect("TODO replace me"),
+            lfc_exec_path: liblingo::util::find_lfc_exec(args, Box::new(do_which))
+                .expect("TODO replace me"),
             max_threads: args.threads,
             keep_going: args.keep_going,
         }),
@@ -128,7 +147,7 @@ fn build<'a>(args: &BuildArgs, config: &'a Config) -> BatchBuildResults<'a> {
 
 fn run_command(task: CommandSpec, config: &Config, _fail_at_end: bool) -> BatchBuildResults {
     let apps = config.apps.iter().collect::<Vec<_>>();
-    backends::execute_command(&task, &apps)
+    liblingo::backends::execute_command(&task, &apps, Box::new(do_which))
 }
 
 enum CommandResult<'a> {

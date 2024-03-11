@@ -60,7 +60,7 @@ impl BatchBackend for LFC {
 
 /// Formats LFC arguments to JSON.
 #[derive(Serialize, Clone)]
-struct LfcJsonArgs<'a> {
+pub struct LfcJsonArgs<'a> {
     /// Path to the LF source file containing the main reactor.
     pub src: &'a Path,
     /// Path to the directory into which build artifacts like

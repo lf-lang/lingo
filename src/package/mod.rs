@@ -1,20 +1,19 @@
 use crate::args::{BuildSystem, InitArgs, Platform, TargetLanguage};
 use crate::util::{analyzer, copy_recursively};
+use crate::{FsReadCapability, GitCloneCapability, GitUrl, WhichCapability};
 
 use serde_derive::{Deserialize, Serialize};
 
 use std::collections::HashMap;
 
-use std::fs::{read_to_string, remove_dir_all, remove_file, write};
+use std::fs::{remove_dir_all, remove_file, write};
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
 use std::{env, io};
 
 use crate::args::BuildSystem::{CMake, LFC};
 use crate::util::errors::{BuildResult, LingoError};
-use git2::Repository;
 use tempfile::tempdir;
-use which::which;
 
 fn is_valid_location_for_project(path: &std::path::Path) -> bool {
     !path.join("src").exists() && !path.join(".git").exists() && !path.join("application").exists()
@@ -91,7 +90,7 @@ pub struct App {
 }
 
 impl App {
-    pub fn build_system(&self) -> BuildSystem {
+    pub fn build_system(&self, which: &WhichCapability) -> BuildSystem {
         match self.target {
             TargetLanguage::C => LFC,
             TargetLanguage::Cpp => CMake,
@@ -211,10 +210,15 @@ impl ConfigFile {
         write(path, toml_string)
     }
 
-    pub fn from(path: &Path) -> io::Result<ConfigFile> {
-        read_to_string(path).and_then(|contents| {
-            toml::from_str(&contents)
-                .map_err(|e| io::Error::new(ErrorKind::InvalidData, format!("{}", e)))
+    pub fn from(path: &Path, fsr: FsReadCapability) -> io::Result<ConfigFile> {
+        let contents = fsr(path);
+        contents.and_then(|contents| {
+            toml::from_str(&contents).map_err(|e| {
+                io::Error::new(
+                    ErrorKind::InvalidData,
+                    format!("failed to convert string to toml: {}", e),
+                )
+            })
         })
     }
 
@@ -233,10 +237,10 @@ impl ConfigFile {
         Ok(())
     }
 
-    fn setup_template_repo(&self, url: &str) -> BuildResult {
+    fn setup_template_repo(&self, url: &str, clone: GitCloneCapability) -> BuildResult {
         let dir = tempdir()?;
         let tmp_path = dir.path();
-        Repository::clone(url, tmp_path)?;
+        clone(GitUrl::from(url), tmp_path)?;
         // Copy the cloned template repo into the project directory
         copy_recursively(tmp_path, Path::new("."))?;
         // Remove temporary folder
@@ -245,9 +249,9 @@ impl ConfigFile {
     }
 
     // Sets up a LF project with Zephyr as the target platform.
-    fn setup_zephyr(&self) -> BuildResult {
+    fn setup_zephyr(&self, clone: GitCloneCapability) -> BuildResult {
         let url = "https://github.com/lf-lang/lf-west-template";
-        self.setup_template_repo(url)?;
+        self.setup_template_repo(url, clone)?;
         remove_file(".gitignore")?;
         remove_dir_all(Path::new(".git"))?;
         Ok(())
@@ -255,19 +259,19 @@ impl ConfigFile {
 
     // Sets up a LF project with RP2040 MCU as the target platform.
     // Initializes a repo using the lf-pico-template
-    fn setup_rp2040(&self) -> BuildResult {
+    fn setup_rp2040(&self, clone: GitCloneCapability) -> BuildResult {
         let url = "https://github.com/lf-lang/lf-pico-template";
         // leave git artifacts
-        self.setup_template_repo(url)?;
+        self.setup_template_repo(url, clone)?;
         Ok(())
     }
 
-    pub fn setup_example(&self) -> BuildResult {
+    pub fn setup_example(&self, clone: GitCloneCapability) -> BuildResult {
         if is_valid_location_for_project(Path::new(".")) {
             match self.apps[0].platform {
                 Some(Platform::Native) => self.setup_native(),
-                Some(Platform::Zephyr) => self.setup_zephyr(),
-                Some(Platform::RP2040) => self.setup_rp2040(),
+                Some(Platform::Zephyr) => self.setup_zephyr(clone),
+                Some(Platform::RP2040) => self.setup_rp2040(clone),
                 _ => Ok(()),
             }
         } else {
