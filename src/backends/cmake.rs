@@ -8,7 +8,7 @@ use crate::App;
 use crate::backends::{
     BatchBackend, BatchBuildResults, BuildCommandOptions, BuildProfile, BuildResult, CommandSpec,
 };
-use crate::package::management::{DependencyManager, DetailedDependency};
+use crate::package::management::DependencyManager;
 
 pub struct Cmake;
 
@@ -48,16 +48,21 @@ fn gen_cmake_files(app: &App, options: &BuildCommandOptions) -> BuildResult {
 }
 
 fn do_cmake_build(results: &mut BatchBuildResults, options: &BuildCommandOptions) {
-    results.map(|app| {
+    /*results.map(|app| {
         DependencyManager::new(
             app.dependencies
                 .clone()
                 .into_iter()
-                .collect::<Vec<(String, DetailedDependency)>>(),
+                .collect::<Vec<(String, PackageDetails)>>(),
         )
         .pull_dependencies(&app.output_root)?;
         Ok(())
     });
+    */
+
+    // open lingo.toml of the dependency
+    // read the version
+    // cry loud when it doesn't match out specified version
 
     results.keep_going(options.keep_going);
     super::lfc::LFC::do_parallel_lfc_codegen(options, results, true);

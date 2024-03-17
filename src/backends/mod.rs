@@ -6,7 +6,8 @@ use std::sync::Arc;
 use rayon::prelude::*;
 
 use crate::args::{BuildSystem, Platform};
-use crate::package::App;
+use crate::package::{App, Config};
+use crate::package::tree::PackageDetails;
 use crate::util::errors::{AnyError, BuildResult, LingoError};
 
 pub mod cmake;
@@ -14,10 +15,10 @@ pub mod lfc;
 pub mod npm;
 pub mod pnpm;
 
-pub fn execute_command<'a>(command: &CommandSpec, apps: &[&'a App]) -> BatchBuildResults<'a> {
+pub fn execute_command<'a>(command: &CommandSpec, config: &Config) -> BatchBuildResults<'a> {
     // Group apps by build system
     let mut by_build_system = HashMap::<BuildSystem, Vec<&App>>::new();
-    for &app in apps {
+    for app in &config.apps {
         by_build_system
             .entry(app.build_system())
             .or_default()
@@ -91,6 +92,7 @@ pub trait BatchBackend {
 /// Collects build results by app.
 pub struct BatchBuildResults<'a> {
     results: Vec<(&'a App, BuildResult)>,
+    dependencies: Vec<(String, PackageDetails)>,
     keep_going: bool,
 }
 

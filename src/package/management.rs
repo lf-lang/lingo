@@ -1,36 +1,16 @@
-use crate::package::version::{from_version_string, to_version_string, Version};
+use std::collections::HashMap;
 use crate::package::{LIBRARY_DIRECTORY};
-use serde_derive::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
-use url::Url;
+use crate::package::tree::{DependencyTree, DependencyTreeNode, PackageDetails, ProjectSource};
 
-#[derive(Clone, Deserialize, Serialize)]
-enum ProjectSource {
-    #[serde(rename = "git")]
-    Git(Url),
-    #[serde(rename = "tarball")]
-    TarBall(Url),
-    #[serde(rename = "path")]
-    Path(PathBuf),
-}
-
-/// Dependency with source and version
-#[derive(Clone, Deserialize, Serialize)]
-pub struct DetailedDependency {
-    #[serde(
-        deserialize_with = "from_version_string",
-        serialize_with = "to_version_string"
-    )]
-    version: Version,
-    #[serde(flatten)]
-    mutual_exclusive: ProjectSource,
-}
 
 //TODO: we probably want a LockedDependency here with SHA-Hash and Revision
 
-pub struct DependencyManager(Vec<(String, DetailedDependency)>);
+pub struct DependencyManager {
+    tree: DependencyTree
+}
 
 /// this copies all the files recursively from one location to another
 fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> std::io::Result<()> {
@@ -47,9 +27,9 @@ fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> std::io::Result
     Ok(())
 }
 
-impl DetailedDependency {
+impl PackageDetails {
     /// this function fetches the specified location and places it at the given location
-    fn fetch(&self, library_path: &PathBuf) -> anyhow::Result<()> {
+    pub fn fetch(&self, library_path: &PathBuf) -> anyhow::Result<()> {
         match &self.mutual_exclusive {
             ProjectSource::Path(path_buf) => Ok(copy_dir_all(path_buf, library_path)?),
             ProjectSource::Git(git_url) => {
@@ -62,18 +42,15 @@ impl DetailedDependency {
 }
 
 impl DependencyManager {
-    pub fn new(data: Vec<(String, DetailedDependency)>) -> DependencyManager {
-        DependencyManager(data)
-    }
-
-    pub fn pull_dependencies(&self, target_path: &PathBuf) -> anyhow::Result<()> {
+    pub fn new(dependencies: HashMap<String, PackageDetails>, target_path: &PathBuf) -> anyhow::Result<DependencyManager> {
         let library_path = target_path.join(LIBRARY_DIRECTORY);
-
         fs::create_dir_all(&library_path)?;
-        self.0
-            .iter()
-            .try_for_each(|(name, dependency)| dependency.fetch(&library_path.join(name)))?;
 
-        Ok(())
+        let tree = DependencyTree::new(dependencies, target_path)?;
+
+        Ok(DependencyManager {
+            tree,
+        })
     }
+
 }

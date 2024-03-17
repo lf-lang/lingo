@@ -1,5 +1,5 @@
 pub mod management;
-pub mod version;
+pub mod tree;
 
 use crate::args::{BuildSystem, InitArgs, Platform, TargetLanguage};
 use crate::util::{analyzer, copy_recursively};
@@ -18,8 +18,9 @@ use crate::util::errors::{BuildResult, LingoError};
 use git2::Repository;
 use tempfile::tempdir;
 
-use management::DetailedDependency;
 use which::which;
+use crate::package::tree::PackageDetails;
+
 /// place where are the build artifacts will be dropped
 const OUTPUT_DIRECTORY: &str = "target";
 // name of the folder inside the `OUTPUT_DIRECTORY` where libraries will be copied into
@@ -46,6 +47,13 @@ pub struct ConfigFile {
     /// list of apps defined inside this package
     #[serde(rename = "app")]
     pub apps: Vec<AppFile>,
+
+    /// library exported by this Lingo Toml
+    #[serde(rename = "lib")]
+    pub library: Option<AppFile>,
+
+    /// Dependencies for required to build this Lingua-Franca Project
+    pub dependencies: HashMap<String, PackageDetails>,
 }
 
 #[derive(Clone, Deserialize, Serialize)]
@@ -59,6 +67,13 @@ pub struct Config {
     /// list of apps defined inside this package
     #[serde(rename = "app")]
     pub apps: Vec<App>,
+
+    /// library exported by this package
+    #[serde(rename = "app")]
+    pub library: Option<App>,
+
+    /// Dependencies for required to build this Lingua-Franca Project
+    pub dependencies: HashMap<String, PackageDetails>,
 }
 
 /// Schema of the configuration parsed from the Lingo.toml
@@ -73,10 +88,10 @@ pub struct AppFile {
     /// target of the app
     pub target: TargetLanguage,
 
+    /// platform of this project
     pub platform: Option<Platform>,
 
-    pub dependencies: HashMap<String, DetailedDependency>,
-
+    /// target properties of that lingua-franca app
     pub properties: HashMap<String, serde_json::Value>,
 }
 
@@ -94,8 +109,7 @@ pub struct App {
     pub target: TargetLanguage,
     /// platform for which this program should be compiled
     pub platform: Platform,
-
-    pub dependencies: HashMap<String, DetailedDependency>,
+    /// target properties of that lingua-franca app
     pub properties: HashMap<String, serde_json::Value>,
 }
 
@@ -170,7 +184,6 @@ impl ConfigFile {
                 main: Some(spec.path),
                 target: spec.target,
                 platform: Some(init_args.platform),
-                dependencies: HashMap::new(),
                 properties: HashMap::new(),
             })
             .collect::<Vec<_>>();
@@ -192,7 +205,9 @@ impl ConfigFile {
                 homepage: None,
             },
             properties: HashMap::new(),
+            dependencies: HashMap::new(),
             apps: app_specs,
+            library: None,
         };
         Ok(result)
     }
@@ -271,43 +286,46 @@ impl ConfigFile {
     /// The `path` is the path to the directory containing the Lingo.toml file.
     pub fn to_config(self, path: &Path) -> Config {
         let package_name = &self.package.name;
+        let app_convert = |app: AppFile| {
+            let file_name: Option<String> = match app.main.clone() {
+                Some(path) => path
+                    .file_stem()
+                    .to_owned()
+                    .and_then(|x| x.to_str())
+                    .map(|x| x.to_string()),
+                None => None,
+            };
+            let name = app
+                .name
+                .unwrap_or(file_name.unwrap_or(package_name.clone()).to_string());
+            App {
+                root_path: path.to_path_buf(),
+                name,
+                output_root: path.join(OUTPUT_DIRECTORY),
+                main_reactor: {
+                    let mut abs = path.to_path_buf();
+                    abs.push(
+                        app.main
+                            .unwrap_or(Self::DEFAULT_MAIN_REACTOR_RELPATH.into()),
+                    );
+                    abs
+                },
+                target: app.target,
+                platform: app.platform.unwrap_or(Platform::Native),
+                properties: app.properties,
+            }
+        };
+
         Config {
             properties: self.properties,
             apps: self
                 .apps
                 .into_iter()
-                .map(|app| {
-                    let file_name: Option<String> = match app.main.clone() {
-                        Some(path) => path
-                            .file_stem()
-                            .to_owned()
-                            .and_then(|x| x.to_str())
-                            .map(|x| x.to_string()),
-                        None => None,
-                    };
-                    let name = app
-                        .name
-                        .unwrap_or(file_name.unwrap_or(package_name.clone()).to_string());
-                    App {
-                        root_path: path.to_path_buf(),
-                        name,
-                        output_root: path.join(OUTPUT_DIRECTORY),
-                        main_reactor: {
-                            let mut abs = path.to_path_buf();
-                            abs.push(
-                                app.main
-                                    .unwrap_or(Self::DEFAULT_MAIN_REACTOR_RELPATH.into()),
-                            );
-                            abs
-                        },
-                        target: app.target,
-                        platform: app.platform.unwrap_or(Platform::Native),
-                        dependencies: app.dependencies,
-                        properties: app.properties,
-                    }
-                })
+                .map(app_convert)
                 .collect(),
-            package: self.package,
+            package: self.package.clone(),
+            library: self.library.map(app_convert),
+            dependencies: self.dependencies,
         }
     }
 }
