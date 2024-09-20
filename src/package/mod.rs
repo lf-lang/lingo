@@ -46,7 +46,7 @@ pub const LIBRARY_DIRECTORY: &str = "libraries";
 const DEFAULT_EXECUTABLE_FOLDER: &str = "src";
 
 /// default folder for lf library files
-const DEFAULT_LIBRARY_FOLDER: &str = "lib";
+const DEFAULT_LIBRARY_FOLDER: &str = "src/lib";
 
 fn is_valid_location_for_project(path: &std::path::Path) -> bool {
     !path.join(DEFAULT_EXECUTABLE_FOLDER).exists()

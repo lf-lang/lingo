@@ -29,7 +29,7 @@ git2 = "0.18"
 tempfile = "3.0"
 url = { version = "2.5", features = ["serde"] }
 anyhow = "1.0"
-versions = { git = "https://github.com/tanneberger/rs-versions.git", features = ["serde"]}
+versions = { version = "6.3.2", features = ["serde"]}
 log = "0.4"
 sha1dir = { version = "1.0", git = "https://github.com/tanneberger/sha1dir" }
 colored = "2.1.0"

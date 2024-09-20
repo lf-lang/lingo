@@ -71,15 +71,17 @@ fn gen_cmake_files(app: &App, options: &BuildCommandOptions) -> BuildResult {
 }
 
 fn do_cmake_build(results: &mut BatchBuildResults, options: &BuildCommandOptions) {
-    // open lingo.toml of the dependency
-    // read the version
-    // cry loud when it doesn't match out specified version
-
+    // configure keep going parameter
     results.keep_going(options.keep_going);
+
+    // start code-generation
     super::lfc::LFC::do_parallel_lfc_codegen(options, results, false);
+
+    // stop process if the user request code-generation only
     if !options.compile_target_code {
         return;
     }
+
     results
         // generate all CMake files ahead of time
         .map(|app| gen_cmake_files(app, options))

@@ -58,7 +58,7 @@ impl TryFrom<&PackageLockSource> for PackageDetails {
                 PackageLockSourceType::TARBALL => ProjectSource::TarBall(Url::from_str(url)?),
                 PackageLockSourceType::PATH => ProjectSource::Path(PathBuf::from(url)),
             },
-            git_tag: value.rev.clone().map(|rev| GitLock::Rev(rev)),
+            git_tag: value.rev.clone().map(GitLock::Rev),
             git_rev: value.rev.clone(),
         })
     }
@@ -84,7 +84,7 @@ impl PackageDetails {
                     };
 
                     // TODO: this produces hard to debug output
-                    let (object, reference) = repo.revparse_ext(&name)?;
+                    let (object, reference) = repo.revparse_ext(name)?;
                     repo.checkout_tree(&object, None)?;
 
                     match reference {
@@ -108,15 +108,15 @@ impl PackageDetails {
 impl DependencyManager {
     pub fn from_dependencies(
         dependencies: Vec<(String, PackageDetails)>,
-        target_path: &PathBuf,
+        target_path: &Path,
     ) -> anyhow::Result<DependencyManager> {
         // create library folder
-        let library_path = target_path.clone().join(LIBRARY_DIRECTORY);
+        let library_path = target_path.join(LIBRARY_DIRECTORY);
         fs::create_dir_all(&library_path)?;
 
         let mut manager;
         let mut lock: DependencyLock;
-        let lock_file = target_path.clone().join("../Lingo.lock");
+        let lock_file = target_path.join("../Lingo.lock");
 
         // checks if a Lingo.lock file exists
         if lock_file.exists() {
@@ -126,7 +126,7 @@ impl DependencyManager {
 
             // if a lock file is present it will load the dependencies from it and checks
             // integrity of the build directory
-            if let Ok(()) = lock.init(&target_path.clone().join("lfc_include")) {
+            if let Ok(()) = lock.init(&target_path.join("lfc_include")) {
                 return Ok(DependencyManager {
                     pulling_queue: vec![],
                     lock,
@@ -153,7 +153,7 @@ impl DependencyManager {
         lock_file.write_all(serialized_toml.as_ref())?;
 
         // moves the selected packages into the include folder
-        let include_folder = target_path.clone().join("lfc_include");
+        let include_folder = target_path.join("lfc_include");
         lock.create_library_folder(&library_path, &include_folder)
             .expect("creating lock folder failed");
 
@@ -214,7 +214,7 @@ impl DependencyManager {
         // directory where the dependencies will be dropped
 
         // creating the necessary directories
-        fs::create_dir_all(&library_path)?;
+        fs::create_dir_all(library_path)?;
         fs::create_dir_all(&temporary_path)?;
 
         // cloning the specified package
@@ -268,7 +268,7 @@ impl DependencyManager {
         })
     }
 
-    fn flatten<'a>(root_nodes: Vec<DependencyTreeNode>) -> anyhow::Result<Vec<DependencyTreeNode>> {
+    fn flatten(root_nodes: Vec<DependencyTreeNode>) -> anyhow::Result<Vec<DependencyTreeNode>> {
         // implementation idea:
         // 1.   we collect all the version requirements for packages => are the different
         //      constraints satisfiable ?
@@ -300,7 +300,7 @@ impl DependencyManager {
             sources
                 .entry(&node.name)
                 .and_modify(move |value| {
-                    value.push(&node);
+                    value.push(node);
                 })
                 .or_insert(vec![&node]);
         }

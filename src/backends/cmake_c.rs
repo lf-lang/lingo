@@ -17,23 +17,19 @@ fn gen_cmake_files(app: &App, options: &BuildCommandOptions) -> BuildResult {
 
     // location of the cmake file
     let app_build_folder = app.src_gen_dir().join(&app.main_reactor_name);
-    println!("creating {}", &app_build_folder.display());
     let _ = std::fs::create_dir_all(&app_build_folder);
     let cmake_file = app_build_folder.clone().join("CMakeLists.txt");
 
-    println!("writing artifacts ...");
     // create potential files that come from the target properties
     app.properties
         .write_artifacts(&app_build_folder)
         .expect("cannot write artifacts");
 
     // read file and append cmake include to generated cmake file
-    println!("reading cmake file ... {:?}", &cmake_file);
     let mut content = fs::read_to_string(&cmake_file)?;
     let include_statement = "\ninclude(./aggregated_cmake_include.cmake)";
-    content += &*include_statement;
+    content += include_statement;
 
-    println!("writing cmake file ...");
     // overwrite cmake file
     let mut f = fs::OpenOptions::new()
         .write(true)
@@ -41,8 +37,6 @@ fn gen_cmake_files(app: &App, options: &BuildCommandOptions) -> BuildResult {
         .expect("cannot open file");
     f.write_all(content.as_ref()).expect("cannot write file");
     f.flush().expect("cannot flush");
-
-    println!("running file ...");
 
     // cmake args
     let mut cmake = Command::new("cmake");

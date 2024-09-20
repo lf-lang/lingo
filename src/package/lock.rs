@@ -220,7 +220,7 @@ impl DependencyLock {
                 error!("checksum does not match aborting!");
             }
 
-            let lingo_toml_text = fs::read_to_string(&temp.join("Lingo.toml"))?;
+            let lingo_toml_text = fs::read_to_string(temp.join("Lingo.toml"))?;
             let read_toml = toml::from_str::<ConfigFile>(&lingo_toml_text)?.to_config(&temp);
 
             println!(
@@ -240,8 +240,6 @@ impl DependencyLock {
                     .into());
                 }
             };
-
-
 
             self.loaded_dependencies.push(DependencyTreeNode {
                 name: read_toml.package.name.clone(),
@@ -265,18 +263,18 @@ impl DependencyLock {
 
     pub fn create_library_folder(
         &self,
-        source_path: &PathBuf,
+        source_path: &Path,
         target_path: &PathBuf,
     ) -> anyhow::Result<()> {
         fs::create_dir_all(target_path)?;
         for (_, dep) in self.dependencies.iter() {
-            let local_source = source_path.clone().join(&dep.checksum);
+            let local_source = source_path.join(&dep.checksum);
             let find_source = target_path.clone().join(&dep.name);
             fs::create_dir_all(&find_source)?;
             copy_dir_all(&local_source, &find_source)?;
         }
 
-        return Ok(());
+        Ok(())
     }
 
     pub fn aggregate_target_properties(&self) -> anyhow::Result<LibraryTargetProperties> {
@@ -285,6 +283,6 @@ impl DependencyLock {
             i.merge(&tp.properties)?;
         }
 
-        return Ok(i);
+        Ok(i)
     }
 }

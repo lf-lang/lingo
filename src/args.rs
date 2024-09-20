@@ -32,7 +32,6 @@ pub enum BuildSystem {
 #[derive(Args, Debug)]
 pub struct BuildArgs {
     /// Which build system to use
-    /// TODO: discuss this
     #[arg(short, long)]
     pub build_system: Option<BuildSystem>,
 

@@ -13,15 +13,15 @@ use crate::package::{
 use crate::util::errors::{AnyError, BuildResult, LingoError};
 
 pub mod cmake_c;
-
 pub mod cmake_cpp;
 pub mod lfc;
 pub mod npm;
 pub mod pnpm;
 
+#[allow(clippy::single_match)] // there more options will be added to this match block
 pub fn execute_command<'a>(command: &CommandSpec, config: &'a mut Config) -> BatchBuildResults<'a> {
     let mut result = BatchBuildResults::new();
-    let dependencies = Vec::from_iter(config.dependencies.clone().into_iter());
+    let dependencies = Vec::from_iter(config.dependencies.clone());
 
     match command {
         CommandSpec::Build(_build) => {
