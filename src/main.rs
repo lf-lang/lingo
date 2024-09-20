@@ -5,7 +5,7 @@ use std::{env, io};
 
 use clap::Parser;
 
-use crate::args::InitArgs;
+use crate::args::{InitArgs, TargetLanguage};
 use args::{BuildArgs, Command as ConsoleCommand, CommandLineArgs};
 use package::App;
 
@@ -39,7 +39,7 @@ fn main() {
         print_res(result)
     }
 
-    let result = execute_command(wrapped_config.as_ref(), args.command);
+    let result = execute_command(&mut wrapped_config, args.command);
 
     match result {
         CommandResult::Batch(res) => res.print_results(),
@@ -79,7 +79,7 @@ fn validate(config: &mut Option<Config>, command: &ConsoleCommand) -> BuildResul
     }
 }
 
-fn execute_command(config: Option<&Config>, command: ConsoleCommand) -> CommandResult {
+fn execute_command(config: &mut Option<Config>, command: ConsoleCommand) -> CommandResult {
     match (config, command) {
         (_, ConsoleCommand::Init(init_config)) => CommandResult::Single(do_init(init_config)),
         (None, _) => CommandResult::Single(Err(Box::new(io::Error::new(
@@ -87,7 +87,6 @@ fn execute_command(config: Option<&Config>, command: ConsoleCommand) -> CommandR
             "Error: Missing Lingo.toml file",
         )))),
         (Some(config), ConsoleCommand::Build(build_command_args)) => {
-            println!("Building ...");
             CommandResult::Batch(build(&build_command_args, config))
         }
         (Some(config), ConsoleCommand::Run(build_command_args)) => {
@@ -107,12 +106,15 @@ fn execute_command(config: Option<&Config>, command: ConsoleCommand) -> CommandR
 }
 
 fn do_init(init_config: InitArgs) -> BuildResult {
-    let initial_config = ConfigFile::new_for_init_task(init_config)?;
+    let initial_config = ConfigFile::new_for_init_task(&init_config)?;
     initial_config.write(Path::new("./Lingo.toml"))?;
-    initial_config.setup_example()
+    initial_config.setup_example(
+        init_config.platform,
+        init_config.language.unwrap_or(TargetLanguage::Cpp),
+    )
 }
 
-fn build<'a>(args: &BuildArgs, config: &'a Config) -> BatchBuildResults<'a> {
+fn build<'a>(args: &BuildArgs, config: &'a mut Config) -> BatchBuildResults<'a> {
     run_command(
         CommandSpec::Build(BuildCommandOptions {
             profile: args.build_profile(),
@@ -126,9 +128,10 @@ fn build<'a>(args: &BuildArgs, config: &'a Config) -> BatchBuildResults<'a> {
     )
 }
 
-fn run_command(task: CommandSpec, config: &Config, _fail_at_end: bool) -> BatchBuildResults {
-    let apps = config.apps.iter().collect::<Vec<_>>();
-    backends::execute_command(&task, &apps)
+fn run_command(task: CommandSpec, config: &mut Config, _fail_at_end: bool) -> BatchBuildResults {
+    //let apps = config.apps.iter().collect::<Vec<_>>();
+    //let dependencies = Vec::from_iter(config.dependencies.into_iter());
+    backends::execute_command(&task, config)
 }
 
 enum CommandResult<'a> {

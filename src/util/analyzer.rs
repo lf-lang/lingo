@@ -18,7 +18,6 @@ const DEFAULT_TARGET: TargetLanguage = TargetLanguage::C;
 
 /// this functions searches inside the file for a main reactor declaration
 fn search_inside_file(path: &Path) -> io::Result<Option<MainReactorSpec>> {
-    println!("Searching File {:?}", path);
     let content = std::fs::read_to_string(path)?;
 
     let mut target: TargetLanguage = DEFAULT_TARGET;

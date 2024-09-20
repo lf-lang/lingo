@@ -1,55 +1,137 @@
-use crate::args::{BuildSystem, InitArgs, Platform, TargetLanguage};
-use crate::util::{analyzer, copy_recursively};
+pub mod lock;
+pub mod management;
+pub mod tree;
 
+pub mod target_properties;
+
+use git2::Repository;
+use serde::de::{Error, Visitor};
+use serde::{Deserializer, Serializer};
 use serde_derive::{Deserialize, Serialize};
-
 use std::collections::HashMap;
+use tempfile::tempdir;
+use versions::Versioning;
+use which::which;
 
 use std::fs::{read_to_string, remove_dir_all, remove_file, write};
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
-use std::{env, io};
+use std::str::FromStr;
+use std::{env, fmt, io};
 
-use crate::args::BuildSystem::{CMake, LFC};
-use crate::util::errors::{BuildResult, LingoError};
-use git2::Repository;
-use tempfile::tempdir;
-use which::which;
+use crate::args::{
+    BuildSystem,
+    BuildSystem::{CMake, LFC},
+    InitArgs, Platform, TargetLanguage,
+};
+use crate::package::{
+    target_properties::{
+        AppTargetProperties, AppTargetPropertiesFile, LibraryTargetProperties,
+        LibraryTargetPropertiesFile,
+    },
+    tree::PackageDetails,
+};
+use crate::util::{
+    analyzer, copy_recursively,
+    errors::{BuildResult, LingoError},
+};
+
+/// place where are the build artifacts will be dropped
+pub const OUTPUT_DIRECTORY: &str = "build";
+/// name of the folder inside the `OUTPUT_DIRECTORY` where libraries
+/// will be loaded (cloned, extracted, copied) into for further processing.
+pub const LIBRARY_DIRECTORY: &str = "libraries";
+
+/// default folder for lf executable files
+const DEFAULT_EXECUTABLE_FOLDER: &str = "src";
+
+/// default folder for lf library files
+const DEFAULT_LIBRARY_FOLDER: &str = "lib";
 
 fn is_valid_location_for_project(path: &std::path::Path) -> bool {
-    !path.join("src").exists() && !path.join(".git").exists() && !path.join("application").exists()
+    !path.join(DEFAULT_EXECUTABLE_FOLDER).exists()
+        && !path.join(".git").exists()
+        && !path.join(DEFAULT_LIBRARY_FOLDER).exists()
 }
 
+/// list of apps inside a toml file
 #[derive(Deserialize, Serialize, Clone)]
 pub struct AppVec {
     pub app: Vec<AppFile>,
 }
 
-/// the Lingo.toml format is defined by this struct
+/// The Lingo.toml format is defined by this struct
 #[derive(Clone, Deserialize, Serialize)]
 pub struct ConfigFile {
     /// top level package description
     pub package: PackageDescription,
 
-    /// high level properties that are set for every app inside the package
-    pub properties: HashMap<String, serde_json::Value>,
-
     /// list of apps defined inside this package
     #[serde(rename = "app")]
-    pub apps: Vec<AppFile>,
+    pub apps: Option<Vec<AppFile>>,
+
+    /// library exported by this Lingo Toml
+    #[serde(rename = "lib")]
+    pub library: Option<LibraryFile>,
+
+    /// Dependencies for required to build this Lingua-Franca Project
+    pub dependencies: HashMap<String, PackageDetails>,
 }
 
-#[derive(Clone, Deserialize, Serialize)]
+/// This struct is used after filling in all the defaults
+#[derive(Clone)]
 pub struct Config {
     /// top level package description
     pub package: PackageDescription,
 
-    /// high level properties that are set for every app inside the package
-    pub properties: HashMap<String, serde_json::Value>,
-
     /// list of apps defined inside this package
-    #[serde(rename = "app")]
     pub apps: Vec<App>,
+
+    /// library exported by this package
+    pub library: Option<Library>,
+
+    /// Dependencies for required to build this Lingua-Franca Project
+    pub dependencies: HashMap<String, PackageDetails>,
+}
+
+/// The Format inside the Lingo.toml under [lib]
+#[derive(Clone, Deserialize, Serialize)]
+pub struct LibraryFile {
+    /// if not specified will default to value specified in the package description
+    pub name: Option<String>,
+
+    /// if not specified will default to ./lib
+    pub location: Option<PathBuf>,
+
+    /// target language of the library
+    pub target: TargetLanguage,
+
+    /// platform of this project
+    pub platform: Option<Platform>,
+
+    /// target properties of that lingua-franca app
+    pub properties: LibraryTargetPropertiesFile,
+}
+
+#[derive(Clone)]
+pub struct Library {
+    /// if not specified will default to value specified in the package description
+    pub name: String,
+
+    /// if not specified will default to ./src
+    pub location: PathBuf,
+
+    /// target of the app
+    pub target: TargetLanguage,
+
+    /// platform of this project
+    pub platform: Platform,
+
+    /// target properties of that lingua-franca app
+    pub properties: LibraryTargetProperties,
+
+    /// Root directory where to place src-gen and other compilation-specifics stuff.
+    pub output_root: PathBuf,
 }
 
 /// Schema of the configuration parsed from the Lingo.toml
@@ -64,14 +146,14 @@ pub struct AppFile {
     /// target of the app
     pub target: TargetLanguage,
 
+    /// platform of this project
     pub platform: Option<Platform>,
 
-    pub dependencies: HashMap<String, DetailedDependency>,
-
-    pub properties: HashMap<String, serde_json::Value>,
+    /// target properties of that lingua-franca app
+    pub properties: AppTargetPropertiesFile,
 }
 
-#[derive(Clone, Deserialize, Serialize)]
+#[derive(Clone)]
 pub struct App {
     /// Absolute path to the directory where the Lingo.toml file is located.
     pub root_path: PathBuf,
@@ -81,19 +163,92 @@ pub struct App {
     pub output_root: PathBuf,
     /// Absolute path to the main reactor file.
     pub main_reactor: PathBuf,
+    /// main reactor name
+    pub main_reactor_name: String,
     /// target language of this lf program
     pub target: TargetLanguage,
     /// platform for which this program should be compiled
     pub platform: Platform,
+    /// target properties of that lingua-franca app
+    pub properties: AppTargetProperties,
+}
 
-    pub dependencies: HashMap<String, DetailedDependency>,
-    pub properties: HashMap<String, serde_json::Value>,
+impl AppFile {
+    const DEFAULT_MAIN_REACTOR_RELPATH: &'static str = "src/Main.lf";
+    pub fn convert(self, package_name: &str, path: &Path) -> App {
+        let file_name: Option<String> = match self.main.clone() {
+            Some(path) => path
+                .file_stem()
+                .to_owned()
+                .and_then(|x| x.to_str())
+                .map(|x| x.to_string()),
+            None => None,
+        };
+        let name = self
+            .name
+            .unwrap_or(file_name.unwrap_or(package_name.to_string()).to_string());
+
+        let mut abs = path.to_path_buf();
+        abs.push(
+            self.main
+                .unwrap_or(Self::DEFAULT_MAIN_REACTOR_RELPATH.into()),
+        );
+
+        let temp = abs
+            .clone()
+            .file_name()
+            .expect("cannot extract file name")
+            .to_str()
+            .expect("cannot convert path to string")
+            .to_string();
+        let main_reactor_name = &temp[..temp.len() - 3];
+
+        App {
+            root_path: path.to_path_buf(),
+            name,
+            output_root: path.join(OUTPUT_DIRECTORY),
+            main_reactor: abs,
+            main_reactor_name: main_reactor_name.to_string(),
+            target: self.target,
+            platform: self.platform.unwrap_or(Platform::Native),
+            properties: self.properties.from(path),
+        }
+    }
+}
+
+impl LibraryFile {
+    pub fn convert(self, package_name: &str, path: &Path) -> Library {
+        let file_name: Option<String> = match self.location.clone() {
+            Some(path) => path
+                .file_stem()
+                .to_owned()
+                .and_then(|x| x.to_str())
+                .map(|x| x.to_string()),
+            None => None,
+        };
+        let name = self
+            .name
+            .unwrap_or(file_name.unwrap_or(package_name.to_string()).to_string());
+
+        Library {
+            name,
+            location: {
+                let mut abs = path.to_path_buf();
+                abs.push(self.location.unwrap_or(DEFAULT_LIBRARY_FOLDER.into()));
+                abs
+            },
+            target: self.target,
+            platform: self.platform.unwrap_or(Platform::Native),
+            properties: self.properties.from(path),
+            output_root: path.join(OUTPUT_DIRECTORY),
+        }
+    }
 }
 
 impl App {
     pub fn build_system(&self) -> BuildSystem {
         match self.target {
-            TargetLanguage::C => LFC,
+            TargetLanguage::C => CMake,
             TargetLanguage::Cpp => CMake,
             TargetLanguage::TypeScript => {
                 if which("pnpm").is_ok() {
@@ -128,41 +283,54 @@ impl App {
     }
 }
 
-/// Simple or DetailedDependency
-#[derive(Clone, Deserialize, Serialize)]
-pub enum FileDependency {
-    // the version string
-    Simple(String),
-    /// version string and source
-    Advanced(DetailedDependency),
+fn serialize_version<S>(version: &Versioning, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    serializer.serialize_str(&version.to_string())
 }
 
-/// Dependency with source and version
-#[derive(Clone, Deserialize, Serialize)]
-pub struct DetailedDependency {
-    version: String,
-    git: Option<String>,
-    tarball: Option<String>,
-    zip: Option<String>,
+struct VersioningVisitor;
+
+impl<'de> Visitor<'de> for VersioningVisitor {
+    type Value = Versioning;
+
+    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("an valid semantic version")
+    }
+
+    fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+    where
+        E: Error,
+    {
+        Versioning::from_str(v).map_err(|_| E::custom("not a valid version"))
+    }
+}
+
+fn deserialize_version<'de, D>(deserializer: D) -> Result<Versioning, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    deserializer.deserialize_str(VersioningVisitor)
 }
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct PackageDescription {
     pub name: String,
-    pub version: String,
+    #[serde(
+        serialize_with = "serialize_version",
+        deserialize_with = "deserialize_version"
+    )]
+    pub version: Versioning,
     pub authors: Option<Vec<String>>,
     pub website: Option<String>,
     pub license: Option<String>,
     pub description: Option<String>,
-    pub homepage: Option<String>,
 }
 
 impl ConfigFile {
-    // FIXME: The default should be that it searches the `src` directory for a main reactor
-    const DEFAULT_MAIN_REACTOR_RELPATH: &'static str = "src/Main.lf";
-
-    pub fn new_for_init_task(init_args: InitArgs) -> io::Result<ConfigFile> {
-        let src_path = Path::new("./src");
+    pub fn new_for_init_task(init_args: &InitArgs) -> io::Result<ConfigFile> {
+        let src_path = Path::new(DEFAULT_EXECUTABLE_FOLDER);
         let main_reactors = if src_path.exists() {
             analyzer::find_main_reactors(src_path)?
         } else {
@@ -179,8 +347,7 @@ impl ConfigFile {
                 main: Some(spec.path),
                 target: spec.target,
                 platform: Some(init_args.platform),
-                dependencies: HashMap::new(),
-                properties: HashMap::new(),
+                properties: Default::default(),
             })
             .collect::<Vec<_>>();
 
@@ -193,21 +360,21 @@ impl ConfigFile {
                     .expect("cannot get file name")
                     .to_string_lossy()
                     .to_string(),
-                version: "0.1.0".to_string(),
+                version: Versioning::from_str("0.1.0").unwrap(),
                 authors: None,
                 website: None,
                 license: None,
                 description: None,
-                homepage: None,
             },
-            properties: HashMap::new(),
-            apps: app_specs,
+            dependencies: HashMap::default(),
+            apps: Some(app_specs),
+            library: Option::default(),
         };
         Ok(result)
     }
 
     pub fn write(&self, path: &Path) -> io::Result<()> {
-        let toml_string = toml::to_string(&self).unwrap();
+        let toml_string = toml::to_string(&self).expect("cannot serialize toml");
         write(path, toml_string)
     }
 
@@ -219,9 +386,9 @@ impl ConfigFile {
     }
 
     // Sets up a standard LF project for "native" development and deployment
-    pub fn setup_native(&self) -> BuildResult {
+    pub fn setup_native(&self, target_language: TargetLanguage) -> BuildResult {
         std::fs::create_dir_all("./src")?;
-        let hello_world_code: &'static str = match self.apps[0].target {
+        let hello_world_code: &'static str = match target_language {
             TargetLanguage::Cpp => include_str!("../../defaults/HelloCpp.lf"),
             TargetLanguage::C => include_str!("../../defaults/HelloC.lf"),
             TargetLanguage::Python => include_str!("../../defaults/HelloPy.lf"),
@@ -262,17 +429,20 @@ impl ConfigFile {
         Ok(())
     }
 
-    pub fn setup_example(&self) -> BuildResult {
+    pub fn setup_example(
+        &self,
+        platform: Platform,
+        target_language: TargetLanguage,
+    ) -> BuildResult {
         if is_valid_location_for_project(Path::new(".")) {
-            match self.apps[0].platform {
-                Some(Platform::Native) => self.setup_native(),
-                Some(Platform::Zephyr) => self.setup_zephyr(),
-                Some(Platform::RP2040) => self.setup_rp2040(),
-                _ => Ok(()),
+            match platform {
+                Platform::Native => self.setup_native(target_language),
+                Platform::Zephyr => self.setup_zephyr(),
+                Platform::RP2040 => self.setup_rp2040(),
             }
         } else {
             Err(Box::new(LingoError::InvalidProjectLocation(
-                env::current_dir().unwrap(),
+                env::current_dir().expect("cannot fetch current working directory"),
             )))
         }
     }
@@ -280,43 +450,18 @@ impl ConfigFile {
     /// The `path` is the path to the directory containing the Lingo.toml file.
     pub fn to_config(self, path: &Path) -> Config {
         let package_name = &self.package.name;
+
         Config {
-            properties: self.properties,
+            //properties: self.properties,
             apps: self
                 .apps
+                .unwrap_or_default()
                 .into_iter()
-                .map(|app| {
-                    let file_name: Option<String> = match app.main.clone() {
-                        Some(path) => path
-                            .file_stem()
-                            .to_owned()
-                            .and_then(|x| x.to_str())
-                            .map(|x| x.to_string()),
-                        None => None,
-                    };
-                    let name = app
-                        .name
-                        .unwrap_or(file_name.unwrap_or(package_name.clone()).to_string());
-                    App {
-                        root_path: path.to_path_buf(),
-                        name,
-                        output_root: path.join("target"),
-                        main_reactor: {
-                            let mut abs = path.to_path_buf();
-                            abs.push(
-                                app.main
-                                    .unwrap_or(Self::DEFAULT_MAIN_REACTOR_RELPATH.into()),
-                            );
-                            abs
-                        },
-                        target: app.target,
-                        platform: app.platform.unwrap_or(Platform::Native),
-                        dependencies: app.dependencies,
-                        properties: app.properties,
-                    }
-                })
+                .map(|app_file| app_file.convert(package_name, path))
                 .collect(),
-            package: self.package,
+            package: self.package.clone(),
+            library: self.library.map(|lib| lib.convert(package_name, path)),
+            dependencies: self.dependencies,
         }
     }
 }
