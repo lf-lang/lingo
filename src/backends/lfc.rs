@@ -67,17 +67,20 @@ pub struct LfcJsonArgs<'a> {
     /// the src-gen and bin directory are generated.
     pub out: &'a Path,
     /// Other properties, mapped to CLI args by LFC.
-    pub properties: &'a HashMap<String, serde_json::Value>,
+    pub properties: HashMap<&'static str, serde_json::Value>,
     #[serde(skip)]
     no_compile: bool,
 }
 
 impl<'a> LfcJsonArgs<'a> {
     pub fn new(app: &'a App, compile_target_code: bool) -> Self {
+        let hash_map: HashMap<&str, serde_json::Value> = HashMap::new();
+        //hash_map.insert("fast", serde_json::Value::Bool(app.properties.fast));
+
         Self {
             src: &app.main_reactor,
             out: &app.output_root,
-            properties: &app.properties,
+            properties: hash_map,
             no_compile: !compile_target_code,
         }
     }

@@ -1,18 +1,18 @@
+use liblingo::args::TargetLanguage;
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::{env, io};
 
 use clap::Parser;
-
 use git2::Repository;
+
 use liblingo::args::InitArgs;
 use liblingo::args::{BuildArgs, Command as ConsoleCommand, CommandLineArgs};
-
 use liblingo::backends::{BatchBuildResults, BuildCommandOptions, CommandSpec};
 use liblingo::package::{Config, ConfigFile};
 use liblingo::util::errors::{BuildResult, LingoError};
-use liblingo::{GitCloneError, GitUrl, WhichError};
+use liblingo::{GitCloneCapability, GitCloneError, GitUrl, WhichCapability, WhichError};
 
 fn do_repo_clone(url: GitUrl, into: &std::path::Path) -> Result<(), GitCloneError> {
     Repository::clone(url.into(), into).map_or_else(
@@ -57,7 +57,7 @@ fn main() {
         print_res(result)
     }
 
-    let result = execute_command(wrapped_config.as_ref(), args.command);
+    let result = execute_command(&mut wrapped_config, args.command, Box::new(do_which), Box::new(do_repo_clone));
 
     match result {
         CommandResult::Batch(res) => res.print_results(),
@@ -97,15 +97,14 @@ fn validate(config: &mut Option<Config>, command: &ConsoleCommand) -> BuildResul
     }
 }
 
-fn execute_command(config: Option<&Config>, command: ConsoleCommand) -> CommandResult {
+fn execute_command<'a>(config: &'a mut Option<Config>, command: ConsoleCommand, which_capability: WhichCapability, git_clone_capability: GitCloneCapability) -> CommandResult<'a> {
     match (config, command) {
-        (_, ConsoleCommand::Init(init_config)) => CommandResult::Single(do_init(init_config)),
+        (_, ConsoleCommand::Init(init_config)) => CommandResult::Single(do_init(init_config, &git_clone_capability)),
         (None, _) => CommandResult::Single(Err(Box::new(io::Error::new(
             ErrorKind::NotFound,
             "Error: Missing Lingo.toml file",
         )))),
         (Some(config), ConsoleCommand::Build(build_command_args)) => {
-            log::info!("Building ...");
             CommandResult::Batch(build(&build_command_args, config))
         }
         (Some(config), ConsoleCommand::Run(build_command_args)) => {
@@ -124,13 +123,17 @@ fn execute_command(config: Option<&Config>, command: ConsoleCommand) -> CommandR
     }
 }
 
-fn do_init(init_config: InitArgs) -> BuildResult {
-    let initial_config = ConfigFile::new_for_init_task(init_config)?;
+fn do_init(init_config: InitArgs, git_clone_capability: &GitCloneCapability) -> BuildResult {
+    let initial_config = ConfigFile::new_for_init_task(&init_config)?;
     initial_config.write(Path::new("./Lingo.toml"))?;
-    initial_config.setup_example(Box::new(do_repo_clone))
+    initial_config.setup_example(
+        init_config.platform,
+        init_config.language.unwrap_or(TargetLanguage::Cpp),
+        git_clone_capability
+    )
 }
 
-fn build<'a>(args: &BuildArgs, config: &'a Config) -> BatchBuildResults<'a> {
+fn build<'a>(args: &BuildArgs, config: &'a mut Config) -> BatchBuildResults<'a> {
     run_command(
         CommandSpec::Build(BuildCommandOptions {
             profile: args.build_profile(),
@@ -145,9 +148,9 @@ fn build<'a>(args: &BuildArgs, config: &'a Config) -> BatchBuildResults<'a> {
     )
 }
 
-fn run_command(task: CommandSpec, config: &Config, _fail_at_end: bool) -> BatchBuildResults {
+fn run_command(task: CommandSpec, config: &mut Config, _fail_at_end: bool) -> BatchBuildResults {
     let apps = config.apps.iter().collect::<Vec<_>>();
-    liblingo::backends::execute_command(&task, &apps, Box::new(do_which))
+    liblingo::backends::execute_command(&task, config, Box::new(do_which), Box::new(do_repo_clone))
 }
 
 enum CommandResult<'a> {

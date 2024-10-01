@@ -1,35 +1,65 @@
-use std::collections::HashMap;
-use std::path::PathBuf;
-
-use std::sync::Arc;
-
+use log::error;
 use rayon::prelude::*;
 
-use crate::args::{BuildSystem, Platform};
-use crate::package::App;
-use crate::util::errors::{AnyError, BuildResult, LingoError};
-use crate::WhichCapability;
+use std::collections::HashMap;
+use std::path::PathBuf;
+use std::sync::Arc;
 
-pub mod cmake;
+use crate::args::{BuildSystem, Platform, TargetLanguage};
+use crate::package::{
+    management::DependencyManager, target_properties::MergeTargetProperties, App, Config,
+    OUTPUT_DIRECTORY,
+};
+use crate::util::errors::{AnyError, BuildResult, LingoError};
+use crate::{GitCloneCapability, WhichCapability};
+
+pub mod cmake_c;
+pub mod cmake_cpp;
 pub mod lfc;
 pub mod npm;
 pub mod pnpm;
 
-pub fn execute_command<'a>(
-    command: &CommandSpec,
-    apps: &[&'a App],
-    which: WhichCapability,
-) -> BatchBuildResults<'a> {
+#[allow(clippy::single_match)] // there more options will be added to this match block
+pub fn execute_command<'a>(command: &CommandSpec, config: &'a mut Config, which: WhichCapability, clone: GitCloneCapability) -> BatchBuildResults<'a> {
+    let mut result = BatchBuildResults::new();
+    let dependencies = Vec::from_iter(config.dependencies.clone());
+
+    match command {
+        CommandSpec::Build(_build) => {
+            let manager = match DependencyManager::from_dependencies(
+                dependencies.clone(),
+                &PathBuf::from(OUTPUT_DIRECTORY),
+            ) {
+                Ok(value) => value,
+                Err(e) => {
+                    error!("failed to create dependency manager because of {e}");
+                    return result;
+                }
+            };
+
+            // enriching the apps with the target properties from the libraries
+            let library_properties = manager.get_target_properties().expect("lib properties");
+
+            // merging app with library target properties
+            for app in &mut config.apps {
+                if let Err(e) = app.properties.merge(&library_properties) {
+                    error!("cannot merge properties from the libraries with the app. error: {e}");
+                    return result;
+                }
+            }
+        }
+        _ => {}
+    }
+
     // Group apps by build system
-    let mut by_build_system = HashMap::<BuildSystem, Vec<&App>>::new();
-    for &app in apps {
+    let mut by_build_system = HashMap::<(BuildSystem, TargetLanguage), Vec<&App>>::new();
+    for app in &config.apps {
         by_build_system
-            .entry(app.build_system(&which))
+            .entry((app.build_system(&which), app.target))
             .or_default()
             .push(app);
     }
 
-    let mut result = BatchBuildResults::new();
     for (build_system, apps) in by_build_system {
         let mut sub_res = BatchBuildResults::for_apps(&apps);
 
@@ -43,11 +73,24 @@ pub fn execute_command<'a>(
         });
 
         match build_system {
-            BuildSystem::LFC => lfc::LFC.execute_command(command, &mut sub_res),
-            BuildSystem::CMake => cmake::Cmake.execute_command(command, &mut sub_res),
-            BuildSystem::Npm => npm::Npm.execute_command(command, &mut sub_res),
-            BuildSystem::Pnpm => pnpm::Pnpm.execute_command(command, &mut sub_res),
-            BuildSystem::Cargo => todo!(),
+            (BuildSystem::CMake, TargetLanguage::Cpp) => {
+                cmake_cpp::CmakeCpp.execute_command(command, &mut sub_res)
+            }
+            (BuildSystem::CMake, TargetLanguage::C) => {
+                cmake_c::CmakeC.execute_command(command, &mut sub_res)
+            }
+            (BuildSystem::Npm, TargetLanguage::TypeScript) => {
+                npm::Npm.execute_command(command, &mut sub_res)
+            }
+            (BuildSystem::Pnpm, TargetLanguage::TypeScript) => {
+                pnpm::Pnpm.execute_command(command, &mut sub_res)
+            }
+            (BuildSystem::LFC, _) => lfc::LFC.execute_command(command, &mut sub_res),
+            (BuildSystem::Cargo, _) => todo!(),
+            _ => {
+                error!("invalid combination of target and platform!");
+                todo!()
+            }
         };
         result.append(sub_res);
     }

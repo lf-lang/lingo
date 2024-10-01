@@ -1,4 +1,5 @@
 use std::fs;
+use std::io::Write;
 
 use std::process::Command;
 
@@ -9,14 +10,37 @@ use crate::backends::{
     BatchBackend, BatchBuildResults, BuildCommandOptions, BuildProfile, BuildResult, CommandSpec,
 };
 
-pub struct Cmake;
+pub struct CmakeCpp;
 
 fn gen_cmake_files(app: &App, options: &BuildCommandOptions) -> BuildResult {
     let build_dir = app.output_root.join("build");
     fs::create_dir_all(&build_dir)?;
 
-    let mut cmake = Command::new("cmake");
+    // location of the cmake file
+    let app_build_folder = app.src_gen_dir().join(&app.main_reactor_name);
+    let cmake_file = app_build_folder.clone().join("CMakeLists.txt");
+
+    // create potential files that come from the target properties
+    app.properties.write_artifacts(&app_build_folder)?;
+
+    // we need to modify the cmake file here to include our generated cmake files
+    let src_gen_dir = app.src_gen_dir();
+
+    // read file and append cmake include to generated cmake file
+    let mut content = fs::read_to_string(&cmake_file)?;
+    let include_statement = format!(
+        "\ninclude({}/aggregated_cmake_include.cmake)",
+        app_build_folder.display()
+    );
+    content += &*include_statement;
+
+    // overwrite cmake file
+    let mut f = fs::OpenOptions::new().write(true).open(&cmake_file)?;
+    f.write_all(content.as_ref())?;
+    f.flush()?;
+
     // cmake args
+    let mut cmake = Command::new("cmake");
     cmake.arg(format!(
         "-DCMAKE_BUILD_TYPE={}",
         if options.profile == BuildProfile::Release {
@@ -39,7 +63,7 @@ fn gen_cmake_files(app: &App, options: &BuildCommandOptions) -> BuildResult {
             .expect("not a valid main reactor path")
             .display()
     ));
-    cmake.arg(app.src_gen_dir());
+    cmake.arg(src_gen_dir);
     cmake.arg(format!("-B {}", build_dir.display()));
     cmake.current_dir(&build_dir);
 
@@ -47,11 +71,17 @@ fn gen_cmake_files(app: &App, options: &BuildCommandOptions) -> BuildResult {
 }
 
 fn do_cmake_build(results: &mut BatchBuildResults, options: &BuildCommandOptions) {
+    // configure keep going parameter
     results.keep_going(options.keep_going);
-    super::lfc::LFC::do_parallel_lfc_codegen(options, results, true);
+
+    // start code-generation
+    super::lfc::LFC::do_parallel_lfc_codegen(options, results, false);
+
+    // stop process if the user request code-generation only
     if !options.compile_target_code {
         return;
     }
+
     results
         // generate all CMake files ahead of time
         .map(|app| gen_cmake_files(app, options))
@@ -89,7 +119,7 @@ fn do_cmake_build(results: &mut BatchBuildResults, options: &BuildCommandOptions
         });
 }
 
-impl BatchBackend for Cmake {
+impl BatchBackend for CmakeCpp {
     fn execute_command(&mut self, command: &CommandSpec, results: &mut BatchBuildResults) {
         match command {
             CommandSpec::Build(options) => do_cmake_build(results, options),

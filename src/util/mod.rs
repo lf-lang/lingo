@@ -1,3 +1,5 @@
+use which::which;
+
 use std::path::{Path, PathBuf};
 use std::{fs, io};
 

@@ -7,6 +7,9 @@ naersk.buildPackage {
   src = ./.;
 
   cargoSha256 = lib.fakeSha256;
+  preBuild = ''
+    export CARGO_BIN_NAME=cargo
+  '';
 
   nativeBuildInputs = [ pkg-config cmake zlib openssl glibc];
   buildInputs = [  ];

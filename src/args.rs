@@ -3,8 +3,8 @@ use clap::{Args, Parser, Subcommand};
 use serde_derive::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-#[derive(clap::ValueEnum, Clone, Copy, Debug, Deserialize, Serialize, PartialEq)]
-#[clap(rename_all = "lowercase")]
+#[derive(clap::ValueEnum, Clone, Copy, Debug, Deserialize, Serialize, Eq, PartialEq, Hash)]
+#[value(rename_all = "lowercase")]
 pub enum TargetLanguage {
     C,
     CCpp,
@@ -14,7 +14,7 @@ pub enum TargetLanguage {
     Python,
 }
 
-#[derive(clap::ValueEnum, Clone, Copy, Debug, Deserialize, Serialize, PartialEq)]
+#[derive(clap::ValueEnum, Clone, Copy, Debug, Deserialize, Serialize, Eq, PartialEq, Hash)]
 pub enum Platform {
     Native,
     Zephyr,
@@ -33,40 +33,39 @@ pub enum BuildSystem {
 #[derive(Args, Debug)]
 pub struct BuildArgs {
     /// Which build system to use
-    /// TODO: discuss this
-    #[clap(short, long)]
+    #[arg(short, long)]
     pub build_system: Option<BuildSystem>,
 
     /// Which target to build
-    #[clap(short, long)]
+    #[arg(short, long)]
     pub language: Option<TargetLanguage>,
 
     /// Overwrites any possible board definition in Lingo.toml
-    #[clap(long)]
+    #[arg(long)]
     pub platform: Option<Platform>,
 
     /// Tell lingo where the lfc toolchain can be found
-    #[clap(long)]
+    #[arg(long)]
     pub lfc: Option<PathBuf>,
 
     /// Skips building aka invoking the build system so it only generates code
-    #[clap(short, long, action)]
+    #[arg(short, long)]
     pub no_compile: bool,
 
     /// If one of the apps fails to build dont interrupt the build process
-    #[clap(short, long, action)]
+    #[arg(short, long)]
     pub keep_going: bool,
 
     /// Compiles the binaries with optimizations turned on and strips debug symbols
-    #[clap(short, long, action)]
+    #[arg(short, long)]
     pub release: bool,
 
     /// List of apps to build if left empty all apps are built
-    #[clap(short, long, value_delimiter = ',')]
+    #[arg(short, long, value_delimiter = ',')]
     pub apps: Vec<String>,
 
     /// Number of threads to use for parallel builds. Zero means it will be determined automatically.
-    #[clap(short, long, default_value_t = 0)]
+    #[arg(short, long, default_value_t = 0)]
     pub threads: usize,
 }
 
@@ -82,9 +81,9 @@ impl BuildArgs {
 
 #[derive(Args, Debug)]
 pub struct InitArgs {
-    #[clap(value_enum, short, long)]
+    #[arg(value_enum, short, long)]
     pub language: Option<TargetLanguage>,
-    #[clap(value_enum, short, long, default_value_t = Platform::Native)]
+    #[arg(value_enum, short, long, default_value_t = Platform::Native)]
     pub platform: Platform,
 }
 
@@ -121,20 +120,20 @@ pub enum Command {
 }
 
 #[derive(Parser)]
-#[clap(name = "Lingua Franca package manager and build tool")]
-#[clap(author = "tassilo.tanneberger@tu-dresden.de")]
-#[clap(version = env!("CARGO_PKG_VERSION"))]
-#[clap(about = "Build system for the Lingua Franca coordination language", long_about = None)]
+#[command(name = "Lingua Franca package manager and build tool")]
+#[command(author = "tassilo.tanneberger@tu-dresden.de")]
+#[command(version = env!("CARGO_PKG_VERSION"))]
+#[command(about = "Build system for the Lingua Franca coordination language", long_about = None)]
 pub struct CommandLineArgs {
     /// which command of lingo to use
     #[clap(subcommand)]
     pub command: Command,
 
     /// lingo wouldn't produce any output
-    #[clap(short, long, action)]
+    #[arg(short, long)]
     pub quiet: bool,
 
     /// lingo will give more detailed feedback
-    #[clap(short, long, action)]
+    #[arg(short, long)]
     pub verbose: bool,
 }
