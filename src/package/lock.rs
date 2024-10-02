@@ -24,7 +24,7 @@ use crate::util::errors::LingoError;
 pub struct ParseLockSourceError {}
 
 /// Different package sources types, available inside the lock file.
-#[derive(PartialEq)]
+#[derive(PartialEq, Debug)]
 pub enum PackageLockSourceType {
     REGISTRY,
     GIT,
@@ -33,6 +33,7 @@ pub enum PackageLockSourceType {
 }
 
 /// Struct that saves the source uri string
+#[derive(Debug)]
 pub struct PackageLockSource {
     pub source_type: PackageLockSourceType,
     pub uri: String,
@@ -111,7 +112,7 @@ impl FromStr for PackageLockSource {
     }
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct PackageLock {
     pub name: String,
     #[serde(
@@ -178,7 +179,7 @@ impl Serialize for PackageLockSource {
     }
 }
 
-#[derive(Deserialize, Serialize, Default)]
+#[derive(Deserialize, Serialize, Default, Debug)]
 pub struct DependencyLock {
     /// mapping from package name to location
     #[serde(flatten)]

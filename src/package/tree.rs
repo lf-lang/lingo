@@ -18,7 +18,7 @@ pub enum ProjectSource {
     //Empty,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum GitLock {
     #[serde(rename = "tag")]
     Tag(String),
@@ -31,7 +31,7 @@ pub enum GitLock {
 }
 
 /// Dependency with source and version
-#[derive(Clone, Deserialize, Serialize)]
+#[derive(Clone, Deserialize, Serialize, Debug)]
 pub struct PackageDetails {
     #[serde(
         deserialize_with = "Requirement::deserialize",
@@ -46,7 +46,7 @@ pub struct PackageDetails {
     pub(crate) git_rev: Option<String>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DependencyTreeNode {
     /// Name of this Package
     pub(crate) name: String,

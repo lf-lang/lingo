@@ -2,6 +2,7 @@ use colored::Colorize;
 use log::error;
 use versions::{Requirement, Versioning};
 
+use git2::ErrorCode;
 use std::collections::HashMap;
 use std::fs;
 use std::fs::File;
@@ -75,30 +76,35 @@ impl PackageDetails {
             }
             ProjectSource::Git(git_url) => {
                 let repo = git2::Repository::clone(git_url.as_str(), library_path)?;
+                let git_lock = self.git_tag.clone().unwrap_or({
+                    GitLock::Branch(
+                        repo.head()
+                            .expect("no head in branch")
+                            .name()
+                            .ok_or(ErrorCode::Ambiguous)
+                            .expect("head doesn't have a name")
+                            .to_string(),
+                    )
+                });
+                let name = match git_lock {
+                    GitLock::Tag(tag) => tag,
+                    GitLock::Branch(branch) => branch,
+                    GitLock::Rev(rev) => rev,
+                };
 
-                if let Some(git_lock) = &self.git_tag {
-                    let name = match git_lock {
-                        GitLock::Tag(tag) => tag,
-                        GitLock::Branch(branch) => branch,
-                        GitLock::Rev(rev) => rev,
-                    };
+                // TODO: this produces hard to debug output
+                let (object, reference) = repo.revparse_ext(&name)?;
+                repo.checkout_tree(&object, None)?;
 
-                    // TODO: this produces hard to debug output
-                    let (object, reference) = repo.revparse_ext(name)?;
-                    repo.checkout_tree(&object, None)?;
-
-                    match reference {
-                        // gref is an actual reference like branches or tags
-                        Some(gref) => {
-                            self.git_rev = gref.target().map(|v| v.to_string());
-                            repo.set_head(gref.name().unwrap())
-                        }
-                        // this is a commit, not a reference
-                        None => repo.set_head_detached(object.id()),
-                    }?
-                }
-
-                Ok(())
+                Ok(match reference {
+                    // gref is an actual reference like branches or tags
+                    Some(gref) => {
+                        self.git_rev = gref.target().map(|v| v.to_string());
+                        repo.set_head(gref.name().unwrap())?
+                    }
+                    // this is a commit, not a reference
+                    None => repo.set_head_detached(object.id())?,
+                })
             }
             _ => Ok(()),
         }
@@ -148,6 +154,8 @@ impl DependencyManager {
 
         // writes the lock file down
         let mut lock_file = File::create(target_path.join("../Lingo.lock"))?;
+
+        println!("{:?}", lock.dependencies);
         let serialized_toml = toml::to_string(&lock).expect("cannot generate toml");
 
         lock_file.write_all(serialized_toml.as_ref())?;
