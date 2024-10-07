@@ -17,16 +17,16 @@ Build system for the Lingua Franca coordination language
 Usage: lingo [OPTIONS] <COMMAND>
 
 Commands:
-  init    initializing a lingua-franca project
-  build   compiling one or multiple binaries in a lingua-franca package
-  update  Updates the dependencies and potentially build tools
-  run     builds and runs binaries
-  clean   removes build artifacts
+  init    Initialize a Lingua Franca package
+  build   Compile one or multiple binaries in a Lingua Franca package
+  update  Update the dependencies and potentially build tools
+  run     Build and run binaries
+  clean   Remove build artifacts
   help    Print this message or the help of the given subcommand(s)
 
 Options:
-  -q, --quiet    lingo wouldn't produce any output
-  -v, --verbose  lingo will give more detailed feedback
+  -q, --quiet    Do not produce any output
+  -v, --verbose  Provide more detailed feedback
   -h, --help     Print help
   -V, --version  Print version
 ```
