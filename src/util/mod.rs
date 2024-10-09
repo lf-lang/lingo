@@ -1,7 +1,7 @@
+use which::which;
+
 use std::path::{Path, PathBuf};
 use std::{fs, io};
-
-use which::which;
 
 pub mod analyzer;
 mod command_line;

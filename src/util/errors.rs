@@ -16,6 +16,8 @@ pub enum LingoError {
     InvalidProjectLocation(PathBuf),
     UseWestBuildToBuildApp,
     InvalidMainReactor,
+    NoLibraryInLingoToml(String),
+    LingoVersionMismatch(String),
 }
 
 impl Display for LingoError {
@@ -40,6 +42,18 @@ impl Display for LingoError {
                 write!(
                     f,
                     "Not a valid path path to a file that contains a main reactor"
+                )
+            }
+            LingoError::NoLibraryInLingoToml(path) => {
+                write!(
+                    f,
+                    "A dependency was specified that doesn't export a library see {path}"
+                )
+            }
+            LingoError::LingoVersionMismatch(message) => {
+                write!(
+                    f,
+                    "Version specified in Lingo.toml doesn't match the version in the location {message}"
                 )
             }
         }
