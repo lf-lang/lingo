@@ -1,4 +1,5 @@
 use std::io;
+use crate::package::tree::GitLock;
 
 pub mod args;
 pub mod backends;
@@ -57,3 +58,5 @@ pub type WhichCapability<'a> = Box<dyn Fn(&str) -> Result<std::path::PathBuf, Wh
 pub type GitCloneCapability<'a> =
     Box<dyn Fn(GitUrl, &std::path::Path) -> Result<(), GitCloneError> + 'a>;
 pub type FsReadCapability<'a> = Box<dyn Fn(&std::path::Path) -> io::Result<String> + 'a>;
+pub type GitCloneAndCheckoutCap<'a> =
+    Box<dyn Fn(GitUrl, &std::path::Path, Option<GitLock>) -> Result<Option<String>, GitCloneError> + 'a>;

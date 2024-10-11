@@ -1,6 +1,7 @@
 use colored::Colorize;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use versions::Versioning;
+use sha1dir;
 
 use log::error;
 use serde::de::Error as DeserializationError;
@@ -11,6 +12,8 @@ use std::fmt::Display;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
+
+use crate::{GitCloneAndCheckoutCap, GitCloneCapability};
 
 use crate::package::management::copy_dir_all;
 use crate::package::{
@@ -204,14 +207,14 @@ impl DependencyLock {
         }
     }
 
-    pub fn init(&mut self, lfc_include_folder: &Path) -> anyhow::Result<()> {
+    pub fn init(&mut self, lfc_include_folder: &Path, git_clone_and_checkout_cap: &GitCloneAndCheckoutCap) -> anyhow::Result<()> {
         for (_, lock) in self.dependencies.iter() {
             let temp = lfc_include_folder.join(&lock.name);
             // the Lingo.toml for this dependency doesnt exists, hence we need to fetch this package
             if !temp.join("Lingo.toml").exists() {
                 let mut details = PackageDetails::try_from(&lock.source)?;
 
-                details.fetch(&temp).expect("cannot pull package");
+                details.fetch(&temp, git_clone_and_checkout_cap).expect("cannot pull package");
             }
 
             let hash = sha1dir::checksum_current_dir(&temp, false);

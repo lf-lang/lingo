@@ -1,13 +1,11 @@
-use which::which;
-
-use std::path::{Path, PathBuf};
-use std::{fs, io};
 
 pub mod analyzer;
 mod command_line;
 pub mod errors;
 
 pub use command_line::*;
+use std::path::{Path, PathBuf};
+use std::{fs, io};
 
 use crate::WhichCapability;
 

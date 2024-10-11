@@ -4,14 +4,12 @@ pub mod tree;
 
 pub mod target_properties;
 
-use git2::Repository;
 use serde::de::{Error, Visitor};
 use serde::{Deserializer, Serializer};
 use serde_derive::{Deserialize, Serialize};
 use std::collections::HashMap;
 use tempfile::tempdir;
 use versions::Versioning;
-use which::which;
 
 use std::fs::{remove_dir_all, remove_file, write};
 use std::io::ErrorKind;

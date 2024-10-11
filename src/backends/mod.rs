@@ -11,7 +11,7 @@ use crate::package::{
     OUTPUT_DIRECTORY,
 };
 use crate::util::errors::{AnyError, BuildResult, LingoError};
-use crate::{GitCloneCapability, WhichCapability};
+use crate::{GitCloneAndCheckoutCap, GitCloneCapability, WhichCapability};
 
 pub mod cmake_c;
 pub mod cmake_cpp;
@@ -20,7 +20,7 @@ pub mod npm;
 pub mod pnpm;
 
 #[allow(clippy::single_match)] // there more options will be added to this match block
-pub fn execute_command<'a>(command: &CommandSpec, config: &'a mut Config, which: WhichCapability, clone: GitCloneCapability) -> BatchBuildResults<'a> {
+pub fn execute_command<'a>(command: &CommandSpec, config: &'a mut Config, which: WhichCapability, clone: GitCloneAndCheckoutCap) -> BatchBuildResults<'a> {
     let mut result = BatchBuildResults::new();
     let dependencies = Vec::from_iter(config.dependencies.clone());
 
@@ -29,6 +29,7 @@ pub fn execute_command<'a>(command: &CommandSpec, config: &'a mut Config, which:
             let manager = match DependencyManager::from_dependencies(
                 dependencies.clone(),
                 &PathBuf::from(OUTPUT_DIRECTORY),
+                &clone
             ) {
                 Ok(value) => value,
                 Err(e) => {

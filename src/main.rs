@@ -13,6 +13,7 @@ use liblingo::backends::{BatchBuildResults, BuildCommandOptions, CommandSpec};
 use liblingo::package::{Config, ConfigFile};
 use liblingo::util::errors::{BuildResult, LingoError};
 use liblingo::{GitCloneCapability, GitCloneError, GitUrl, WhichCapability, WhichError};
+use liblingo::package::tree::GitLock;
 
 fn do_repo_clone(url: GitUrl, into: &std::path::Path) -> Result<(), GitCloneError> {
     Repository::clone(url.into(), into).map_or_else(
@@ -29,6 +30,35 @@ fn do_which(cmd: &str) -> Result<PathBuf, WhichError> {
         }
         which::Error::CannotCanonicalize => WhichError::CannotCanonicalize,
     })
+}
+
+fn do_clone_and_checkout(git_url: GitUrl, outpath: &Path, git_tag: Option<GitLock>, git_rev: String) -> Result<Option<String>, GitCloneError> {
+    let repo = git2::Repository::clone(<&str>::from(git_url), outpath).map_err(GitCloneError("clone failed".to_string()))?;
+    let mut git_rev = None;
+
+    if let Some(git_lock) = git_tag {
+        let name = match git_lock {
+            GitLock::Tag(tag) => tag,
+            GitLock::Branch(branch) => branch,
+            GitLock::Rev(rev) => rev,
+        };
+
+        // TODO: this produces hard to debug output
+        let (object, reference) = repo.revparse_ext(name)?;
+        repo.checkout_tree(&object, None)?;
+
+        match reference {
+            // gref is an actual reference like branches or tags
+            Some(gref) => {
+                git_rev = Some(gref.target().map(|v| v.to_string()));
+                repo.set_head(gref.name().unwrap())
+            }
+            // this is a commit, not a reference
+            None => repo.set_head_detached(object.id()),
+        }?
+    }
+
+    Ok(git_rev)
 }
 
 fn do_read_to_string(p: &Path) -> io::Result<String> {
@@ -150,7 +180,7 @@ fn build<'a>(args: &BuildArgs, config: &'a mut Config) -> BatchBuildResults<'a> 
 
 fn run_command(task: CommandSpec, config: &mut Config, _fail_at_end: bool) -> BatchBuildResults {
     let apps = config.apps.iter().collect::<Vec<_>>();
-    liblingo::backends::execute_command(&task, config, Box::new(do_which), Box::new(do_repo_clone))
+    liblingo::backends::execute_command(&task, config, Box::new(do_which), Box::new(do_clone_and_checkout))
 }
 
 enum CommandResult<'a> {
