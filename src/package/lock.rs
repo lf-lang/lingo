@@ -13,7 +13,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
-use crate::{GitCloneAndCheckoutCap, GitCloneCapability};
+use crate::GitCloneAndCheckoutCap;
 
 use crate::package::management::copy_dir_all;
 use crate::package::{

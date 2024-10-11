@@ -32,8 +32,8 @@ fn do_which(cmd: &str) -> Result<PathBuf, WhichError> {
     })
 }
 
-fn do_clone_and_checkout(git_url: GitUrl, outpath: &Path, git_tag: Option<GitLock>, git_rev: String) -> Result<Option<String>, GitCloneError> {
-    let repo = git2::Repository::clone(<&str>::from(git_url), outpath).map_err(GitCloneError("clone failed".to_string()))?;
+fn do_clone_and_checkout(git_url: GitUrl, outpath: &Path, git_tag: Option<GitLock>) -> Result<Option<String>, GitCloneError> {
+    let repo = Repository::clone(<&str>::from(git_url), outpath).map_err(|_|GitCloneError("clone failed".to_string()))?;
     let mut git_rev = None;
 
     if let Some(git_lock) = git_tag {
@@ -44,18 +44,18 @@ fn do_clone_and_checkout(git_url: GitUrl, outpath: &Path, git_tag: Option<GitLoc
         };
 
         // TODO: this produces hard to debug output
-        let (object, reference) = repo.revparse_ext(name)?;
-        repo.checkout_tree(&object, None)?;
+        let (object, reference) = repo.revparse_ext(&name).map_err(|_|GitCloneError("cannot parse rev".to_string()))?;
+        repo.checkout_tree(&object, None).map_err(|_|GitCloneError("cannot checkout rev".to_string()))?;
 
         match reference {
             // gref is an actual reference like branches or tags
             Some(gref) => {
-                git_rev = Some(gref.target().map(|v| v.to_string()));
+                git_rev = gref.target().map(|v| v.to_string());
                 repo.set_head(gref.name().unwrap())
             }
             // this is a commit, not a reference
             None => repo.set_head_detached(object.id()),
-        }?
+        }.map_err(|_|GitCloneError("cannot checkout rev".to_string()))?;
     }
 
     Ok(git_rev)
@@ -127,7 +127,7 @@ fn validate(config: &mut Option<Config>, command: &ConsoleCommand) -> BuildResul
     }
 }
 
-fn execute_command<'a>(config: &'a mut Option<Config>, command: ConsoleCommand, which_capability: WhichCapability, git_clone_capability: GitCloneCapability) -> CommandResult<'a> {
+fn execute_command<'a>(config: &'a mut Option<Config>, command: ConsoleCommand, _which_capability: WhichCapability, git_clone_capability: GitCloneCapability) -> CommandResult<'a> {
     match (config, command) {
         (_, ConsoleCommand::Init(init_config)) => CommandResult::Single(do_init(init_config, &git_clone_capability)),
         (None, _) => CommandResult::Single(Err(Box::new(io::Error::new(
@@ -179,7 +179,7 @@ fn build<'a>(args: &BuildArgs, config: &'a mut Config) -> BatchBuildResults<'a> 
 }
 
 fn run_command(task: CommandSpec, config: &mut Config, _fail_at_end: bool) -> BatchBuildResults {
-    let apps = config.apps.iter().collect::<Vec<_>>();
+    let _apps = config.apps.iter().collect::<Vec<_>>();
     liblingo::backends::execute_command(&task, config, Box::new(do_which), Box::new(do_clone_and_checkout))
 }
 

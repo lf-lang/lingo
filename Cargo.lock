@@ -472,7 +472,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "lingo"
+name = "lingua-franca"
 version = "0.2.0"
 dependencies = [
  "anyhow",

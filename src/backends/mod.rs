@@ -11,7 +11,7 @@ use crate::package::{
     OUTPUT_DIRECTORY,
 };
 use crate::util::errors::{AnyError, BuildResult, LingoError};
-use crate::{GitCloneAndCheckoutCap, GitCloneCapability, WhichCapability};
+use crate::{GitCloneAndCheckoutCap, WhichCapability};
 
 pub mod cmake_c;
 pub mod cmake_cpp;
