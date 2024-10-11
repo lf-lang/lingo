@@ -78,6 +78,7 @@ impl PackageDetails {
             ProjectSource::Git(git_url) => {
                 self.git_rev = clone(GitUrl::from(git_url.as_str()), library_path, self.git_tag.clone())?;
                 Ok(())
+
             }
             _ => Ok(()),
         }
@@ -128,6 +129,8 @@ impl DependencyManager {
 
         // writes the lock file down
         let mut lock_file = File::create(target_path.join("../Lingo.lock"))?;
+
+        println!("{:?}", lock.dependencies);
         let serialized_toml = toml::to_string(&lock).expect("cannot generate toml");
 
         lock_file.write_all(serialized_toml.as_ref())?;

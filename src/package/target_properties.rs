@@ -35,7 +35,7 @@ pub enum GenericTargetProperties {
     App(AppTargetProperties),
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Default, Debug)]
 pub struct AutoCmakeLoad(String);
 
 impl MergeTargetProperty for AutoCmakeLoad {
@@ -60,7 +60,7 @@ pub struct LibraryTargetPropertiesFile {
     artifacts: Vec<PathBuf>,
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Default, Debug)]
 pub struct LibraryTargetProperties {
     /// cmake include only available for C and CPP
     pub cmake_include: AutoCmakeLoad,
