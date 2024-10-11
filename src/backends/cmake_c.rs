@@ -5,9 +5,9 @@ use std::process::Command;
 use crate::backends::{
     BatchBackend, BatchBuildResults, BuildCommandOptions, BuildProfile, BuildResult, CommandSpec,
 };
+use crate::package::App;
 use crate::util::errors::LingoError;
 use crate::util::execute_command_to_build_result;
-use crate::package::App;
 
 pub struct CmakeC;
 

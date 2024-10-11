@@ -2,6 +2,8 @@ use colored::Colorize;
 use log::error;
 use versions::{Requirement, Versioning};
 
+use crate::{GitCloneAndCheckoutCap, GitUrl};
+use sha1dir;
 use std::collections::HashMap;
 use std::fs;
 use std::fs::File;
@@ -9,8 +11,6 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 use url::{ParseError, Url};
-use crate::{GitCloneAndCheckoutCap, GitUrl};
-use sha1dir;
 
 use crate::package::lock::{PackageLockSource, PackageLockSourceType};
 use crate::package::{
@@ -68,7 +68,11 @@ impl TryFrom<&PackageLockSource> for PackageDetails {
 
 impl PackageDetails {
     /// this function fetches the specified location and places it at the given location
-    pub fn fetch(&mut self, library_path: &PathBuf, clone: &GitCloneAndCheckoutCap) -> anyhow::Result<()> {
+    pub fn fetch(
+        &mut self,
+        library_path: &PathBuf,
+        clone: &GitCloneAndCheckoutCap,
+    ) -> anyhow::Result<()> {
         match &self.mutual_exclusive {
             ProjectSource::Path(path_buf) => {
                 let src = fs::canonicalize(path_buf)?;
@@ -76,9 +80,12 @@ impl PackageDetails {
                 Ok(copy_dir_all(src, dst)?)
             }
             ProjectSource::Git(git_url) => {
-                self.git_rev = clone(GitUrl::from(git_url.as_str()), library_path, self.git_tag.clone())?;
+                self.git_rev = clone(
+                    GitUrl::from(git_url.as_str()),
+                    library_path,
+                    self.git_tag.clone(),
+                )?;
                 Ok(())
-
             }
             _ => Ok(()),
         }
@@ -89,7 +96,7 @@ impl DependencyManager {
     pub fn from_dependencies(
         dependencies: Vec<(String, PackageDetails)>,
         target_path: &Path,
-        git_clone_and_checkout_cap: &GitCloneAndCheckoutCap
+        git_clone_and_checkout_cap: &GitCloneAndCheckoutCap,
     ) -> anyhow::Result<DependencyManager> {
         // create library folder
         let library_path = target_path.join(LIBRARY_DIRECTORY);
@@ -107,7 +114,8 @@ impl DependencyManager {
 
             // if a lock file is present it will load the dependencies from it and checks
             // integrity of the build directory
-            if let Ok(()) = lock.init(&target_path.join("lfc_include"), git_clone_and_checkout_cap) {
+            if let Ok(()) = lock.init(&target_path.join("lfc_include"), git_clone_and_checkout_cap)
+            {
                 return Ok(DependencyManager {
                     pulling_queue: vec![],
                     lock,
@@ -119,7 +127,11 @@ impl DependencyManager {
         manager = DependencyManager::default();
 
         // starts recursively pulling dependencies
-        let root_nodes = manager.pull(dependencies.clone(), target_path, git_clone_and_checkout_cap)?;
+        let root_nodes = manager.pull(
+            dependencies.clone(),
+            target_path,
+            git_clone_and_checkout_cap,
+        )?;
 
         // flattens the dependency tree and makes the package selection
         let selection = DependencyManager::flatten(root_nodes.clone())?;
@@ -150,7 +162,7 @@ impl DependencyManager {
         &mut self,
         mut dependencies: Vec<(String, PackageDetails)>,
         root_path: &Path,
-        git_clone_and_checkout_cap: &GitCloneAndCheckoutCap
+        git_clone_and_checkout_cap: &GitCloneAndCheckoutCap,
     ) -> anyhow::Result<Vec<DependencyTreeNode>> {
         let mut sub_dependencies = vec![];
         self.pulling_queue.append(&mut dependencies);
@@ -165,7 +177,7 @@ impl DependencyManager {
                     &package_name,
                     package_details,
                     &sub_dependency_path,
-                    git_clone_and_checkout_cap
+                    git_clone_and_checkout_cap,
                 ) {
                     Ok(value) => value,
                     Err(e) => {
@@ -188,7 +200,7 @@ impl DependencyManager {
         name: &str,
         mut package: PackageDetails,
         base_path: &Path,
-        git_clone_and_checkout_cap: &GitCloneAndCheckoutCap
+        git_clone_and_checkout_cap: &GitCloneAndCheckoutCap,
     ) -> anyhow::Result<DependencyTreeNode> {
         // creating the directory where the library will be housed
         let library_path = base_path; //.join("libs");

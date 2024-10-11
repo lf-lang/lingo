@@ -20,7 +20,12 @@ pub mod npm;
 pub mod pnpm;
 
 #[allow(clippy::single_match)] // there more options will be added to this match block
-pub fn execute_command<'a>(command: &CommandSpec, config: &'a mut Config, which: WhichCapability, clone: GitCloneAndCheckoutCap) -> BatchBuildResults<'a> {
+pub fn execute_command<'a>(
+    command: &CommandSpec,
+    config: &'a mut Config,
+    which: WhichCapability,
+    clone: GitCloneAndCheckoutCap,
+) -> BatchBuildResults<'a> {
     let mut result = BatchBuildResults::new();
     let dependencies = Vec::from_iter(config.dependencies.clone());
 
@@ -29,7 +34,7 @@ pub fn execute_command<'a>(command: &CommandSpec, config: &'a mut Config, which:
             let manager = match DependencyManager::from_dependencies(
                 dependencies.clone(),
                 &PathBuf::from(OUTPUT_DIRECTORY),
-                &clone
+                &clone,
             ) {
                 Ok(value) => value,
                 Err(e) => {

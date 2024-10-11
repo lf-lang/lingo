@@ -437,7 +437,7 @@ impl ConfigFile {
         &self,
         platform: Platform,
         target_language: TargetLanguage,
-        git_clone_capability: &GitCloneCapability
+        git_clone_capability: &GitCloneCapability,
     ) -> BuildResult {
         if is_valid_location_for_project(Path::new(".")) {
             match platform {
