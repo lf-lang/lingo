@@ -11,6 +11,7 @@ use crate::package::{
     OUTPUT_DIRECTORY,
 };
 use crate::util::errors::{AnyError, BuildResult, LingoError};
+use crate::{GitCloneAndCheckoutCap, WhichCapability};
 
 pub mod cmake_c;
 pub mod cmake_cpp;
@@ -19,7 +20,12 @@ pub mod npm;
 pub mod pnpm;
 
 #[allow(clippy::single_match)] // there more options will be added to this match block
-pub fn execute_command<'a>(command: &CommandSpec, config: &'a mut Config) -> BatchBuildResults<'a> {
+pub fn execute_command<'a>(
+    command: &CommandSpec,
+    config: &'a mut Config,
+    which: WhichCapability,
+    clone: GitCloneAndCheckoutCap,
+) -> BatchBuildResults<'a> {
     let mut result = BatchBuildResults::new();
     let dependencies = Vec::from_iter(config.dependencies.clone());
 
@@ -28,6 +34,7 @@ pub fn execute_command<'a>(command: &CommandSpec, config: &'a mut Config) -> Bat
             let manager = match DependencyManager::from_dependencies(
                 dependencies.clone(),
                 &PathBuf::from(OUTPUT_DIRECTORY),
+                &clone,
             ) {
                 Ok(value) => value,
                 Err(e) => {
@@ -54,7 +61,7 @@ pub fn execute_command<'a>(command: &CommandSpec, config: &'a mut Config) -> Bat
     let mut by_build_system = HashMap::<(BuildSystem, TargetLanguage), Vec<&App>>::new();
     for app in &config.apps {
         by_build_system
-            .entry((app.build_system(), app.target))
+            .entry((app.build_system(&which), app.target))
             .or_default()
             .push(app);
     }
@@ -168,10 +175,10 @@ impl<'a> BatchBuildResults<'a> {
         for (app, b) in &self.results {
             match b {
                 Ok(()) => {
-                    println!("- {}: Success", &app.name);
+                    log::info!("- {}: Success", &app.name);
                 }
                 Err(e) => {
-                    println!("- {}: Error: {}", &app.name, e);
+                    log::error!("- {}: Error: {}", &app.name, e);
                 }
             }
         }

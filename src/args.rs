@@ -7,6 +7,7 @@ use std::path::PathBuf;
 #[value(rename_all = "lowercase")]
 pub enum TargetLanguage {
     C,
+    CCpp,
     Cpp,
     Rust,
     TypeScript,

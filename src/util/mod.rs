@@ -1,13 +1,12 @@
-use which::which;
-
-use std::path::{Path, PathBuf};
-use std::{fs, io};
-
 pub mod analyzer;
 mod command_line;
 pub mod errors;
 
 pub use command_line::*;
+use std::path::{Path, PathBuf};
+use std::{fs, io};
+
+use crate::WhichCapability;
 
 /// finds toml file recurisvely
 pub fn find_toml(input_path: &Path) -> Option<PathBuf> {
@@ -57,14 +56,17 @@ pub fn delete_subdirs(path_root: &Path, subdirs: &[&str]) -> io::Result<()> {
 }
 
 pub fn default_build_clean(out_dir: &Path) -> io::Result<()> {
-    println!("removing build artifacts in {:?}", out_dir);
+    log::info!("removing build artifacts in {:?}", out_dir);
     delete_subdirs(
         out_dir,
         &["bin", "include", "src-gen", "lib64", "share", "build"],
     )
 }
 
-pub fn find_lfc_exec(args: &crate::BuildArgs) -> Result<PathBuf, io::Error> {
+pub fn find_lfc_exec(
+    args: &crate::args::BuildArgs,
+    which: WhichCapability,
+) -> Result<PathBuf, io::Error> {
     if let Some(lfc) = &args.lfc {
         if lfc.exists() {
             return Ok(lfc.clone());
