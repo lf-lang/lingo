@@ -17,11 +17,13 @@ use std::path::{Path, PathBuf};
 use std::str::FromStr;
 use std::{env, fmt, io};
 
+use crate::args::TargetLanguage::UC;
 use crate::args::{
     BuildSystem,
     BuildSystem::{CMake, LFC},
     InitArgs, Platform, TargetLanguage,
 };
+use crate::package::tree::GitLock;
 use crate::package::{
     target_properties::{
         AppTargetProperties, AppTargetPropertiesFile, LibraryTargetProperties,
@@ -33,7 +35,7 @@ use crate::util::{
     analyzer, copy_recursively,
     errors::{BuildResult, LingoError},
 };
-use crate::{FsReadCapability, GitCloneCapability, GitUrl, WhichCapability};
+use crate::{FsReadCapability, GitCloneAndCheckoutCap, GitUrl, WhichCapability};
 
 /// place where are the build artifacts will be dropped
 pub const OUTPUT_DIRECTORY: &str = "build";
@@ -404,10 +406,23 @@ impl ConfigFile {
         Ok(())
     }
 
-    fn setup_template_repo(&self, url: &str, clone: &GitCloneCapability) -> BuildResult {
+    fn setup_template_repo(
+        &self,
+        url: &str,
+        target_language: TargetLanguage,
+        clone: &GitCloneAndCheckoutCap,
+    ) -> BuildResult {
         let dir = tempdir()?;
         let tmp_path = dir.path();
-        clone(GitUrl::from(url), tmp_path)?;
+
+        let git_rev = if target_language == UC {
+            Some(GitLock::Branch("origin/reactor-uc".to_string()))
+        } else {
+            None
+        };
+
+        clone(GitUrl::from(url), tmp_path, git_rev)?;
+
         // Copy the cloned template repo into the project directory
         copy_recursively(tmp_path, Path::new("."))?;
         // Remove temporary folder
@@ -416,20 +431,15 @@ impl ConfigFile {
     }
 
     // Sets up a LF project with Zephyr as the target platform.
-    fn setup_zephyr(&self, clone: &GitCloneCapability) -> BuildResult {
-        let url = "https://github.com/lf-lang/lf-west-template";
-        self.setup_template_repo(url, clone)?;
+    fn clone_and_clean(
+        &self,
+        url: &str,
+        target_language: TargetLanguage,
+        clone: &GitCloneAndCheckoutCap,
+    ) -> BuildResult {
+        self.setup_template_repo(url, target_language, clone)?;
         remove_file(".gitignore")?;
         remove_dir_all(Path::new(".git"))?;
-        Ok(())
-    }
-
-    // Sets up a LF project with RP2040 MCU as the target platform.
-    // Initializes a repo using the lf-pico-template
-    fn setup_rp2040(&self, clone: &GitCloneCapability) -> BuildResult {
-        let url = "https://github.com/lf-lang/lf-pico-template";
-        // leave git artifacts
-        self.setup_template_repo(url, clone)?;
         Ok(())
     }
 
@@ -437,13 +447,41 @@ impl ConfigFile {
         &self,
         platform: Platform,
         target_language: TargetLanguage,
-        git_clone_capability: &GitCloneCapability,
+        git_clone_capability: &GitCloneAndCheckoutCap,
     ) -> BuildResult {
         if is_valid_location_for_project(Path::new(".")) {
             match platform {
                 Platform::Native => self.setup_native(target_language),
-                Platform::Zephyr => self.setup_zephyr(git_clone_capability),
-                Platform::RP2040 => self.setup_rp2040(git_clone_capability),
+                Platform::Zephyr => self.clone_and_clean(
+                    "https://github.com/lf-lang/lf-west-template",
+                    target_language,
+                    git_clone_capability,
+                ),
+                Platform::RP2040 => self.clone_and_clean(
+                    "https://github.com/lf-lang/lf-pico-template",
+                    target_language,
+                    git_clone_capability,
+                ),
+                Platform::LF3PI => self.clone_and_clean(
+                    "https://github.com/lf-lang/lf-3pi-template",
+                    target_language,
+                    git_clone_capability,
+                ),
+                Platform::FlexPRET => self.clone_and_clean(
+                    "https://github.com/lf-lang/lf-flexpret-template",
+                    target_language,
+                    git_clone_capability,
+                ),
+                Platform::Patmos => self.clone_and_clean(
+                    "https://github.com/lf-lang/lf-patmos-template",
+                    target_language,
+                    git_clone_capability,
+                ),
+                Platform::RIOT => self.clone_and_clean(
+                    "https://github.com/lf-lang/lf-riot-template",
+                    target_language,
+                    git_clone_capability,
+                ),
             }
         } else {
             Err(Box::new(LingoError::InvalidProjectLocation(
