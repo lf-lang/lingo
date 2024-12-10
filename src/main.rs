@@ -5,7 +5,7 @@ use std::process::Command;
 use std::{env, io};
 
 use clap::Parser;
-use git2::Repository;
+use git2::{BranchType, ObjectType, Repository};
 
 use liblingo::args::InitArgs;
 use liblingo::args::{BuildArgs, Command as ConsoleCommand, CommandLineArgs};
@@ -13,14 +13,7 @@ use liblingo::backends::{BatchBuildResults, BuildCommandOptions, CommandSpec};
 use liblingo::package::tree::GitLock;
 use liblingo::package::{Config, ConfigFile};
 use liblingo::util::errors::{BuildResult, LingoError};
-use liblingo::{GitCloneCapability, GitCloneError, GitUrl, WhichCapability, WhichError};
-
-fn do_repo_clone(url: GitUrl, into: &std::path::Path) -> Result<(), GitCloneError> {
-    Repository::clone(url.into(), into).map_or_else(
-        |err: git2::Error| Err(GitCloneError(format!("{}", err))),
-        |_| Ok(()),
-    )
-}
+use liblingo::{GitCloneAndCheckoutCap, GitCloneError, GitUrl, WhichCapability, WhichError};
 
 fn do_which(cmd: &str) -> Result<PathBuf, WhichError> {
     which::which(cmd).map_err(|err| match err {
@@ -42,18 +35,30 @@ fn do_clone_and_checkout(
     let mut git_rev = None;
 
     if let Some(git_lock) = git_tag {
-        let name = match git_lock {
-            GitLock::Tag(tag) => tag,
-            GitLock::Branch(branch) => branch,
-            GitLock::Rev(rev) => rev,
+        let (object, reference) = match git_lock {
+            GitLock::Tag(tag) => repo
+                .revparse_ext(&tag)
+                .map_err(|e| GitCloneError(format!("cannot parse rev {e}")))?,
+            GitLock::Branch(branch) => {
+                let reference = repo
+                    .find_branch(&branch, BranchType::Remote)
+                    .map_err(|_| GitCloneError("cannot find branch".to_string()))?
+                    .into_reference();
+                (
+                    reference
+                        .peel(ObjectType::Any)
+                        .map_err(|_| GitCloneError("cannot peel object".to_string()))?,
+                    Some(reference),
+                )
+            }
+            GitLock::Rev(rev) => repo
+                .revparse_ext(&rev)
+                .map_err(|e| GitCloneError(format!("cannot parse rev {e}")))?,
         };
+        repo.checkout_tree(&object, None)
+            .map_err(|e| GitCloneError(format!("cannot checkout rev {e}")))?;
 
         // TODO: this produces hard to debug output
-        let (object, reference) = repo
-            .revparse_ext(&name)
-            .map_err(|_| GitCloneError("cannot parse rev".to_string()))?;
-        repo.checkout_tree(&object, None)
-            .map_err(|_| GitCloneError("cannot checkout rev".to_string()))?;
 
         match reference {
             // gref is an actual reference like branches or tags
@@ -100,7 +105,7 @@ fn main() {
         &mut wrapped_config,
         args.command,
         Box::new(do_which),
-        Box::new(do_repo_clone),
+        Box::new(do_clone_and_checkout),
     );
 
     match result {
@@ -145,7 +150,7 @@ fn execute_command<'a>(
     config: &'a mut Option<Config>,
     command: ConsoleCommand,
     _which_capability: WhichCapability,
-    git_clone_capability: GitCloneCapability,
+    git_clone_capability: GitCloneAndCheckoutCap,
 ) -> CommandResult<'a> {
     match (config, command) {
         (_, ConsoleCommand::Init(init_config)) => {
@@ -174,7 +179,7 @@ fn execute_command<'a>(
     }
 }
 
-fn do_init(init_config: InitArgs, git_clone_capability: &GitCloneCapability) -> BuildResult {
+fn do_init(init_config: InitArgs, git_clone_capability: &GitCloneAndCheckoutCap) -> BuildResult {
     let initial_config = ConfigFile::new_for_init_task(&init_config)?;
     initial_config.write(Path::new("./Lingo.toml"))?;
     initial_config.setup_example(

@@ -7,6 +7,7 @@ use std::path::PathBuf;
 #[value(rename_all = "lowercase")]
 pub enum TargetLanguage {
     C,
+    UC,
     CCpp,
     Cpp,
     Rust,
@@ -19,6 +20,10 @@ pub enum Platform {
     Native,
     Zephyr,
     RP2040,
+    LF3PI,
+    FlexPRET,
+    Patmos,
+    RIOT,
 }
 
 #[derive(clap::ValueEnum, Clone, Copy, Debug, Deserialize, Serialize, Eq, PartialEq, Hash)]
