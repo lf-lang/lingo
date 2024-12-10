@@ -2,8 +2,8 @@ use colored::Colorize;
 use log::error;
 use versions::{Requirement, Versioning};
 
+use crate::util::sha1dir;
 use crate::{GitCloneAndCheckoutCap, GitUrl};
-use sha1dir;
 use std::collections::HashMap;
 use std::fs;
 use std::fs::File;

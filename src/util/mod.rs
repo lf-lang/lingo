@@ -1,6 +1,7 @@
 pub mod analyzer;
 mod command_line;
 pub mod errors;
+pub mod sha1dir;
 
 pub use command_line::*;
 use std::path::{Path, PathBuf};
