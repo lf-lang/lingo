@@ -30,7 +30,7 @@ fn do_clone_and_checkout(
     outpath: &Path,
     git_tag: Option<GitLock>,
 ) -> Result<Option<String>, GitCloneError> {
-    let repo = Repository::clone(<&str>::from(git_url), outpath)
+    let repo = Repository::clone_recurse(<&str>::from(git_url), outpath)
         .map_err(|_| GitCloneError("clone failed".to_string()))?;
     let mut git_rev = None;
 
