@@ -1,6 +1,6 @@
+use crate::util::sha1dir;
 use colored::Colorize;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use sha1dir;
 use versions::Versioning;
 
 use log::error;
