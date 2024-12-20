@@ -5,8 +5,8 @@ use std::process::Command;
 use std::{env, io};
 
 use clap::Parser;
-use git2::{BranchType, ObjectType, Repository};
-
+use git2::BranchType::{Local, Remote};
+use git2::{BranchType, Object, ObjectType, Reference, Repository};
 use liblingo::args::InitArgs;
 use liblingo::args::{BuildArgs, Command as ConsoleCommand, CommandLineArgs};
 use liblingo::backends::{BatchBuildResults, BuildCommandOptions, CommandSpec};
@@ -25,6 +25,23 @@ fn do_which(cmd: &str) -> Result<PathBuf, WhichError> {
     })
 }
 
+fn get_branch<'a>(
+    repo: &'a git2::Repository,
+    branch: &str,
+    branch_type: BranchType,
+) -> Result<(Object<'a>, Option<Reference<'a>>), GitCloneError> {
+    let reference = repo
+        .find_branch(branch, branch_type)
+        .map_err(|_| GitCloneError("cannot find branch".to_string()))?
+        .into_reference();
+    Ok((
+        reference
+            .peel(ObjectType::Any)
+            .map_err(|_| GitCloneError("cannot peel object".to_string()))?,
+        Some(reference),
+    ))
+}
+
 fn do_clone_and_checkout(
     git_url: GitUrl,
     outpath: &Path,
@@ -40,16 +57,11 @@ fn do_clone_and_checkout(
                 .revparse_ext(&tag)
                 .map_err(|e| GitCloneError(format!("cannot parse rev {e}")))?,
             GitLock::Branch(branch) => {
-                let reference = repo
-                    .find_branch(&branch, BranchType::Remote)
-                    .map_err(|_| GitCloneError("cannot find branch".to_string()))?
-                    .into_reference();
-                (
-                    reference
-                        .peel(ObjectType::Any)
-                        .map_err(|_| GitCloneError("cannot peel object".to_string()))?,
-                    Some(reference),
-                )
+                if let Ok(val) = get_branch(&repo, &branch, Local) {
+                    val
+                } else {
+                    get_branch(&repo, &branch, Remote)?
+                }
             }
             GitLock::Rev(rev) => repo
                 .revparse_ext(&rev)
