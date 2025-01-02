@@ -6,8 +6,14 @@ Lingo will manage your dependencies, configure build scripts and will potentiall
 
 
 ## Getting started
-Lingo is a Rust project and is built with cargo. To install it simply run
-`cargo install --path .`
+Lingo is a Rust project and is built with cargo. To install it, clone this repo and run `cargo install`:
+
+```
+git clone clone git@github.com:lf-lang/lingo.git
+cargo install --path lingo
+```
+
+You will need at least version 1.83.0 of cargo. You can update it with `rustup update`.
 
 ## The command line interface
 
