@@ -2,7 +2,7 @@ use liblingo::args::TargetLanguage;
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
 use std::process::Command;
-use std::{env, io};
+use std::{env, fs, io};
 
 use clap::Parser;
 use git2::BranchType::{Local, Remote};
@@ -13,7 +13,9 @@ use liblingo::backends::{BatchBuildResults, BuildCommandOptions, CommandSpec};
 use liblingo::package::tree::GitLock;
 use liblingo::package::{Config, ConfigFile};
 use liblingo::util::errors::{BuildResult, LingoError};
-use liblingo::{GitCloneAndCheckoutCap, GitCloneError, GitUrl, WhichCapability, WhichError};
+use liblingo::{
+    GitCloneAndCheckoutCap, GitCloneError, GitUrl, RemoveFolderError, WhichCapability, WhichError,
+};
 
 fn do_which(cmd: &str) -> Result<PathBuf, WhichError> {
     which::which(cmd).map_err(|err| match err {
@@ -85,6 +87,15 @@ fn do_clone_and_checkout(
     }
 
     Ok(git_rev)
+}
+
+fn do_remove_folder(path: &str) -> Result<(), RemoveFolderError> {
+    if fs::metadata(path).is_ok() {
+        fs::remove_dir_all(path)
+            .map_err(|_| RemoveFolderError(format!("Could not delete folder: {}", path)))
+    } else {
+        Ok(())
+    }
 }
 
 fn do_read_to_string(p: &Path) -> io::Result<String> {
@@ -223,6 +234,7 @@ fn run_command(task: CommandSpec, config: &mut Config, _fail_at_end: bool) -> Ba
         config,
         Box::new(do_which),
         Box::new(do_clone_and_checkout),
+        Box::new(do_remove_folder),
     )
 }
 

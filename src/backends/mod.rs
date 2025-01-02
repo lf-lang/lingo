@@ -11,7 +11,7 @@ use crate::package::{
     OUTPUT_DIRECTORY,
 };
 use crate::util::errors::{AnyError, BuildResult, LingoError};
-use crate::{GitCloneAndCheckoutCap, WhichCapability};
+use crate::{GitCloneAndCheckoutCap, RemoveFolderCap, WhichCapability};
 
 pub mod cmake_c;
 pub mod cmake_cpp;
@@ -25,6 +25,7 @@ pub fn execute_command<'a>(
     config: &'a mut Config,
     which: WhichCapability,
     clone: GitCloneAndCheckoutCap,
+    remove_dir_all: RemoveFolderCap,
 ) -> BatchBuildResults<'a> {
     let mut result = BatchBuildResults::new();
     let dependencies = Vec::from_iter(config.dependencies.clone());
@@ -52,6 +53,12 @@ pub fn execute_command<'a>(
                     error!("cannot merge properties from the libraries with the app. error: {e}");
                     return result;
                 }
+            }
+        }
+        CommandSpec::Clean => {
+            let output_root = &config.apps[0].output_root;
+            if let Err(e) = remove_dir_all(&output_root.display().to_string()) {
+                error!("lingo was unable to delete build folder! {e}");
             }
         }
         _ => {}
