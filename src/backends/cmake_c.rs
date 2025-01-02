@@ -53,6 +53,7 @@ fn gen_cmake_files(app: &App, options: &BuildCommandOptions) -> BuildResult {
         app.output_root.display()
     ));
 
+    cmake.arg("-DCMAKE_INSTALL_BINDIR=bin");
     cmake.arg(format!(
         "-DLF_SOURCE_DIRECTORY=\"{}\"",
         app.src_dir_path().unwrap().display()
