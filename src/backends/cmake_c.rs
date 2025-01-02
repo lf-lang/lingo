@@ -59,6 +59,11 @@ fn gen_cmake_files(app: &App, options: &BuildCommandOptions) -> BuildResult {
     ));
 
     cmake.arg(format!(
+        "-DLF_PACKAGE_DIRECTORY=\"{}\"",
+        app.root_path.display()
+    ));
+
+    cmake.arg(format!(
         "-DLF_SOURCE_GEN_DIRECTORY=\"{}\"",
         app.src_gen_dir().display()
     ));
