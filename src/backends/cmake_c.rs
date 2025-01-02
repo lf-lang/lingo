@@ -64,8 +64,12 @@ fn gen_cmake_files(app: &App, options: &BuildCommandOptions) -> BuildResult {
     ));
 
     cmake.arg(format!(
-        "-DLF_PACKAGE_DIRECTORY=\"{}\"",
-        app.root_path.display()
+        "-DLF_FILE_SEPARATOR=\"{}\"",
+        if cfg!(target_os = "windows") {
+            "\\"
+        } else {
+            "/"
+        }
     ));
 
     cmake.arg(&app_build_folder);
