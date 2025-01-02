@@ -90,8 +90,12 @@ fn do_clone_and_checkout(
 }
 
 fn do_remove_folder(path: &str) -> Result<(), RemoveFolderError> {
-    fs::remove_dir_all(path)
-        .map_err(|_| RemoveFolderError(format!("Could not delete folder: {}", path)))
+    if fs::metadata(path).is_ok() {
+        fs::remove_dir_all(path)
+            .map_err(|_| RemoveFolderError(format!("Could not delete folder: {}", path)))
+    } else {
+        Ok(())
+    }
 }
 
 fn do_read_to_string(p: &Path) -> io::Result<String> {
