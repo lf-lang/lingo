@@ -65,9 +65,9 @@ fn gen_cmake_files(app: &App, options: &BuildCommandOptions) -> BuildResult {
 
     cmake.arg(format!(
         "-DLF_PACKAGE_DIRECTORY=\"{}\"",
-        app.root_path.display() 
+        app.root_path.display()
     ));
-    
+
     cmake.arg(&app_build_folder);
     cmake.arg(format!("-B {}", app_build_folder.display()));
     cmake.current_dir(&build_dir);
