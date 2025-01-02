@@ -52,11 +52,27 @@ fn gen_cmake_files(app: &App, options: &BuildCommandOptions) -> BuildResult {
         "-DCMAKE_INSTALL_PREFIX={}",
         app.output_root.display()
     ));
-    cmake.arg("-DCMAKE_INSTALL_BINDIR=bin");
+
+    cmake.arg(format!(
+        "-DLF_SOURCE_DIRECTORY=\"{}\"",
+        app.src_dir_path().unwrap().display()
+    ));
+
+    cmake.arg(format!(
+        "-DLF_SOURCE_GEN_DIRECTORY=\"{}\"",
+        app.src_gen_dir().display()
+    ));
+
+    cmake.arg(format!(
+        "-DLF_PACKAGE_DIRECTORY=\"{}\"",
+        app.root_path.display() 
+    ));
+    
     cmake.arg(&app_build_folder);
     cmake.arg(format!("-B {}", app_build_folder.display()));
     cmake.current_dir(&build_dir);
 
+    println!("Running cmake command `{:?}`", cmake);
     execute_command_to_build_result(cmake)
 }
 
