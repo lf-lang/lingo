@@ -66,7 +66,7 @@ fn gen_cmake_files(app: &App, options: &BuildCommandOptions) -> BuildResult {
 
     cmake.arg(format!(
         "-DLF_SOURCE_GEN_DIRECTORY=\"{}\"",
-        app.src_gen_dir().display()
+        app.src_gen_dir().join(app.main_reactor_name.clone()).display()
     ));
 
     cmake.arg(format!(
