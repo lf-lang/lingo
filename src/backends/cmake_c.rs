@@ -55,17 +55,17 @@ fn gen_cmake_files(app: &App, options: &BuildCommandOptions) -> BuildResult {
 
     cmake.arg("-DCMAKE_INSTALL_BINDIR=bin");
     cmake.arg(format!(
-        "-DLF_SOURCE_DIRECTORY=\"{}\"",
+        "-DLF_SOURCE_DIRECTORY={}",
         app.src_dir_path().unwrap().display()
     ));
 
     cmake.arg(format!(
-        "-DLF_PACKAGE_DIRECTORY=\"{}\"",
+        "-DLF_PACKAGE_DIRECTORY={}",
         app.root_path.display()
     ));
 
     cmake.arg(format!(
-        "-DLF_SOURCE_GEN_DIRECTORY=\"{}\"",
+        "-DLF_SOURCE_GEN_DIRECTORY={}",
         app.src_gen_dir()
             .join(app.main_reactor_name.clone())
             .display()
@@ -81,7 +81,7 @@ fn gen_cmake_files(app: &App, options: &BuildCommandOptions) -> BuildResult {
     ));
 
     cmake.arg(&app_build_folder);
-    cmake.arg(format!("-B {}", app_build_folder.display()));
+    cmake.arg(format!("-B{}", app_build_folder.display()));
     cmake.current_dir(&build_dir);
 
     println!("Running cmake command `{:?}`", cmake);

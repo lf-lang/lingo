@@ -64,7 +64,7 @@ fn gen_cmake_files(app: &App, options: &BuildCommandOptions) -> BuildResult {
             .display()
     ));
     cmake.arg(src_gen_dir);
-    cmake.arg(format!("-B {}", build_dir.display()));
+    cmake.arg(format!("-B{}", build_dir.display()));
     cmake.current_dir(&build_dir);
 
     execute_command_to_build_result(cmake)
