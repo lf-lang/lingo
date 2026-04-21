@@ -22,7 +22,7 @@ Commands:
   update   Update the dependencies and potentially build tools
   run      Build and run binaries
   clean    Remove build artifacts
-  cleanall Remove build artifacts and dependencies
+  cleanall Remove build artifacts, dependencies, and lock file
   help     Print this message or the help of the given subcommand(s)
 
 Options:
