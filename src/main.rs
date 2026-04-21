@@ -93,11 +93,21 @@ fn do_read_to_string(p: &Path) -> io::Result<String> {
 
 fn remove_if_exists(path: &Path) -> io::Result<()> {
     if path.is_dir() {
-        println!("Deleted {}", path.display());
-        fs::remove_dir_all(path)?;
+        match fs::remove_dir_all(path) {
+            Ok(()) => println!("Deleted {}", path.display()),
+            Err(err) => {
+                eprintln!("Failed to delete {}: {}", path.display(), err);
+                return Err(err);
+            }
+        }
     } else if path.is_file() {
-        println!("Deleted {}", path.display());
-        fs::remove_file(path)?;
+        match fs::remove_file(path) {
+            Ok(()) => println!("Deleted {}", path.display()),
+            Err(err) => {
+                eprintln!("Failed to delete {}: {}", path.display(), err);
+                return Err(err);
+            }
+        }
     }
     Ok(())
 }
