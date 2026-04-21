@@ -47,8 +47,10 @@ pub fn delete_subdirs(path_root: &Path, subdirs: &[&str]) -> io::Result<()> {
     for &sub_dir in subdirs {
         buf.push(sub_dir);
         if buf.is_dir() {
-            // ignore errors
-            let _ = fs::remove_dir_all(&buf);
+            match fs::remove_dir_all(&buf) {
+                Ok(_) => println!("Deleted {}", buf.display()),
+                Err(err) => eprintln!("Failed to delete {}: {}", buf.display(), err),
+            }
         }
         buf.pop();
     }

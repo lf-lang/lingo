@@ -2,7 +2,7 @@ use liblingo::args::TargetLanguage;
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
 use std::process::Command;
-use std::{env, io};
+use std::{env, fs, io};
 
 use clap::Parser;
 use git2::BranchType::{Local, Remote};
@@ -89,6 +89,27 @@ fn do_clone_and_checkout(
 
 fn do_read_to_string(p: &Path) -> io::Result<String> {
     std::fs::read_to_string(p)
+}
+
+fn remove_if_exists(path: &Path) -> io::Result<()> {
+    if path.is_dir() {
+        println!("Deleted {}", path.display());
+        fs::remove_dir_all(path)?;
+    } else if path.is_file() {
+        println!("Deleted {}", path.display());
+        fs::remove_file(path)?;
+    }
+    Ok(())
+}
+
+fn clean_all(project_root: &Path) -> BuildResult {
+    remove_if_exists(&project_root.join("build"))?;
+    remove_if_exists(&project_root.join("Lingo.lock"))?;
+    remove_if_exists(&project_root.join("src-gen"))?;
+    remove_if_exists(&project_root.join("bin"))?;
+    remove_if_exists(&project_root.join("fed-gen"))?;
+    remove_if_exists(&project_root.join("include"))?;
+    Ok(())
 }
 
 fn main() {
@@ -187,6 +208,11 @@ fn execute_command<'a>(
         (Some(config), ConsoleCommand::Clean) => {
             CommandResult::Batch(run_command(CommandSpec::Clean, config, true))
         }
+        (_, ConsoleCommand::Cleanall) => {
+            let cwd = env::current_dir()
+                .map_err(|e| -> Box<dyn std::error::Error + Send + Sync> { Box::new(e) });
+            CommandResult::Single(cwd.and_then(|path| clean_all(&path)))
+        }
         _ => todo!(),
     }
 }
@@ -216,7 +242,11 @@ fn build<'a>(args: &BuildArgs, config: &'a mut Config) -> BatchBuildResults<'a> 
     )
 }
 
-fn run_command(task: CommandSpec, config: &mut Config, _fail_at_end: bool) -> BatchBuildResults {
+fn run_command(
+    task: CommandSpec,
+    config: &mut Config,
+    _fail_at_end: bool,
+) -> BatchBuildResults<'_> {
     let _apps = config.apps.iter().collect::<Vec<_>>();
     liblingo::backends::execute_command(
         &task,

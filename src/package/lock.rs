@@ -12,6 +12,7 @@ use std::fmt::Display;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
+use std::time::Instant;
 
 use crate::GitCloneAndCheckoutCap;
 
@@ -213,18 +214,43 @@ impl DependencyLock {
         lfc_include_folder: &Path,
         git_clone_and_checkout_cap: &GitCloneAndCheckoutCap,
     ) -> anyhow::Result<()> {
+        println!(
+            "{} checking lock entries in {}",
+            "Build step:".green().bold(),
+            lfc_include_folder.display()
+        );
         for (_, lock) in self.dependencies.iter() {
             let temp = lfc_include_folder.join(&lock.name);
             // the Lingo.toml for this dependency doesnt exists, hence we need to fetch this package
             if !temp.join("Lingo.toml").exists() {
                 let mut details = PackageDetails::try_from(&lock.source)?;
+                println!(
+                    "{} {} from {}+{}",
+                    "Fetching".green().bold(),
+                    lock.name,
+                    lock.source.source_type,
+                    lock.source.uri
+                );
 
                 details
                     .fetch(&temp, git_clone_and_checkout_cap)
                     .expect("cannot pull package");
             }
 
+            println!(
+                "{} computing checksum for locked dependency {} at {}",
+                "Build step:".green().bold(),
+                lock.name,
+                temp.display()
+            );
+            let checksum_started_at = Instant::now();
             let hash = sha1dir::checksum_current_dir(&temp, false);
+            println!(
+                "{} checksum complete for {} in {:?}",
+                "Build step:".green().bold(),
+                lock.name,
+                checksum_started_at.elapsed()
+            );
 
             if hash.to_string() != lock.checksum {
                 error!("checksum does not match aborting!");
