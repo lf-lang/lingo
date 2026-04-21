@@ -1,6 +1,5 @@
 use anyhow::Context;
-use colored::Colorize;
-use log::error;
+use log::{error, info};
 use versions::{Requirement, Versioning};
 
 use crate::util::sha1dir;
@@ -104,9 +103,8 @@ impl DependencyManager {
         target_path: &Path,
         git_clone_and_checkout_cap: &GitCloneAndCheckoutCap,
     ) -> anyhow::Result<DependencyManager> {
-        println!(
-            "{} resolving dependencies in {}",
-            "Build step:".green().bold(),
+        info!(
+            "Build step: resolving dependencies in {}",
             target_path.display()
         );
         // create library folder
@@ -124,11 +122,7 @@ impl DependencyManager {
 
         // checks if a Lingo.lock file exists
         if lock_file.exists() {
-            println!(
-                "{} loading lock file {}",
-                "Build step:".green().bold(),
-                lock_file.display()
-            );
+            info!("Build step: loading lock file {}", lock_file.display());
             // reads and parses Lockfile
             lock =
                 toml::from_str::<DependencyLock>(&fs::read_to_string(&lock_file).with_context(
@@ -138,9 +132,8 @@ impl DependencyManager {
 
             // if a lock file is present it will load the dependencies from it and checks
             // integrity of the build directory
-            println!(
-                "{} validating lock dependencies in {}",
-                "Build step:".green().bold(),
+            info!(
+                "Build step: validating lock dependencies in {}",
                 target_path.join("lfc_include").display()
             );
             if let Ok(()) = lock.init(&target_path.join("lfc_include"), git_clone_and_checkout_cap)
@@ -173,7 +166,10 @@ impl DependencyManager {
         let mut lock_file = File::create(&lock_file_path)
             .with_context(|| format!("failed to create lock file: {}", lock_file_path.display()))?;
 
-        println!("{:?}", lock.dependencies);
+        info!(
+            "Build step: selected lock dependencies: {:?}",
+            lock.dependencies
+        );
         let serialized_toml = toml::to_string(&lock).expect("cannot generate toml");
 
         lock_file.write_all(serialized_toml.as_ref())?;
@@ -208,7 +204,7 @@ impl DependencyManager {
 
         while !self.pulling_queue.is_empty() {
             if let Some((package_name, package_details)) = self.pulling_queue.pop() {
-                print!("{} {} ...", "Cloning".green().bold(), package_name);
+                info!("Cloning {} ...", package_name);
                 let node = match self.non_recursive_fetching(
                     &package_name,
                     package_details,
@@ -252,24 +248,21 @@ impl DependencyManager {
         fs::create_dir_all(&temporary_path)?;
 
         // cloning the specified package
-        println!(
-            "{} fetching dependency {} into {}",
-            "Build step:".green().bold(),
+        info!(
+            "Build step: fetching dependency {} into {}",
             name,
             temporary_path.display()
         );
         package.fetch(&temporary_path, git_clone_and_checkout_cap)?;
 
-        println!(
-            "{} computing checksum for {}",
-            "Build step:".green().bold(),
+        info!(
+            "Build step: computing checksum for {}",
             temporary_path.display()
         );
         let checksum_started_at = Instant::now();
         let hash = sha1dir::checksum_current_dir(&temporary_path, false);
-        println!(
-            "{} checksum complete for {} in {:?}",
-            "Build step:".green().bold(),
+        info!(
+            "Build step: checksum complete for {} in {:?}",
             temporary_path.display(),
             checksum_started_at.elapsed()
         );
@@ -280,7 +273,7 @@ impl DependencyManager {
             .with_context(|| format!("failed to read {}", lingo_toml_path.display()))?;
         let read_toml = toml::from_str::<ConfigFile>(&lingo_toml_text)?.to_config(&temporary_path);
 
-        println!(" {}", read_toml.package.version);
+        info!("Resolved dependency version {}", read_toml.package.version);
 
         let config = match read_toml.library {
             Some(value) => value,

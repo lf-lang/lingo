@@ -42,14 +42,16 @@ pub fn copy_recursively(source: impl AsRef<Path>, destination: impl AsRef<Path>)
     Ok(())
 }
 
+/// Delete subdirectories of a given path recursively.
+// Errors are reported but this function always returns Ok.
 pub fn delete_subdirs(path_root: &Path, subdirs: &[&str]) -> io::Result<()> {
     let mut buf = path_root.to_owned();
     for &sub_dir in subdirs {
         buf.push(sub_dir);
         if buf.is_dir() {
             match fs::remove_dir_all(&buf) {
-                Ok(_) => println!("Deleted {}", buf.display()),
-                Err(err) => eprintln!("Failed to delete {}: {}", buf.display(), err),
+                Ok(_) => log::info!("Deleted {}", buf.display()),
+                Err(err) => log::error!("Failed to delete {}: {}", buf.display(), err),
             }
         }
         buf.pop();

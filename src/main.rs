@@ -94,17 +94,17 @@ fn do_read_to_string(p: &Path) -> io::Result<String> {
 fn remove_if_exists(path: &Path) -> io::Result<()> {
     if path.is_dir() {
         match fs::remove_dir_all(path) {
-            Ok(()) => println!("Deleted {}", path.display()),
+            Ok(()) => log::info!("Deleted {}", path.display()),
             Err(err) => {
-                eprintln!("Failed to delete {}: {}", path.display(), err);
+                log::error!("Failed to delete {}: {}", path.display(), err);
                 return Err(err);
             }
         }
     } else if path.is_file() {
         match fs::remove_file(path) {
-            Ok(()) => println!("Deleted {}", path.display()),
+            Ok(()) => log::info!("Deleted {}", path.display()),
             Err(err) => {
-                eprintln!("Failed to delete {}: {}", path.display(), err);
+                log::error!("Failed to delete {}: {}", path.display(), err);
                 return Err(err);
             }
         }
@@ -119,9 +119,19 @@ fn clean_all(project_root: &Path) -> BuildResult {
 }
 
 fn main() {
-    print_logger::new().init().unwrap();
     // parses command line arguments
     let args = CommandLineArgs::parse();
+    let level_filter = if args.quiet {
+        print_logger::LevelFilter::Error
+    } else if args.verbose {
+        print_logger::LevelFilter::Debug
+    } else {
+        print_logger::LevelFilter::Info
+    };
+    print_logger::new()
+        .level_filter(level_filter)
+        .init()
+        .unwrap();
 
     // Finds Lingo.toml recursively inside the parent directories.
     // If it exists the returned path is absolute.
@@ -143,6 +153,7 @@ fn main() {
     let result = execute_command(
         &mut wrapped_config,
         args.command,
+        lingo_path.as_deref(),
         Box::new(do_which),
         Box::new(do_clone_and_checkout),
     );
@@ -188,6 +199,7 @@ fn validate(config: &mut Option<Config>, command: &ConsoleCommand) -> BuildResul
 fn execute_command<'a>(
     config: &'a mut Option<Config>,
     command: ConsoleCommand,
+    lingo_path: Option<&Path>,
     _which_capability: WhichCapability,
     git_clone_capability: GitCloneAndCheckoutCap,
 ) -> CommandResult<'a> {
@@ -215,9 +227,16 @@ fn execute_command<'a>(
             CommandResult::Batch(run_command(CommandSpec::Clean, config, true))
         }
         (_, ConsoleCommand::Cleanall) => {
-            let cwd = env::current_dir()
-                .map_err(|e| -> Box<dyn std::error::Error + Send + Sync> { Box::new(e) });
-            CommandResult::Single(cwd.and_then(|path| clean_all(&path)))
+            let result = lingo_path
+                .and_then(Path::parent)
+                .ok_or_else(|| {
+                    Box::new(io::Error::new(
+                        ErrorKind::NotFound,
+                        "Error: Missing Lingo.toml file",
+                    )) as Box<dyn std::error::Error + Send + Sync>
+                })
+                .and_then(clean_all);
+            CommandResult::Single(result)
         }
         _ => todo!(),
     }
