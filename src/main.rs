@@ -115,10 +115,6 @@ fn remove_if_exists(path: &Path) -> io::Result<()> {
 fn clean_all(project_root: &Path) -> BuildResult {
     remove_if_exists(&project_root.join("build"))?;
     remove_if_exists(&project_root.join("Lingo.lock"))?;
-    remove_if_exists(&project_root.join("src-gen"))?;
-    remove_if_exists(&project_root.join("bin"))?;
-    remove_if_exists(&project_root.join("fed-gen"))?;
-    remove_if_exists(&project_root.join("include"))?;
     Ok(())
 }
 
