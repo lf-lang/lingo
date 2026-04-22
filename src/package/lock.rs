@@ -237,12 +237,10 @@ impl DependencyLock {
                 lock.name,
                 temp.display()
             );
-            let checksum_started_at = Instant::now();
             let hash = sha1dir::checksum_current_dir(&temp, false);
             info!(
-                "Build step: checksum complete for {} in {:?}",
-                lock.name,
-                checksum_started_at.elapsed()
+                "Build step: checksum complete for {}",
+                lock.name
             );
 
             if hash.to_string() != lock.checksum {
