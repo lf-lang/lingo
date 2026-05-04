@@ -262,7 +262,6 @@ fn execute_command<'a>(
                 }
             }
         }
-        _ => todo!(),
     }
 }
 
