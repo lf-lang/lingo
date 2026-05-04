@@ -112,9 +112,17 @@ fn remove_if_exists(path: &Path) -> io::Result<()> {
     Ok(())
 }
 
-fn clean_all(project_root: &Path) -> BuildResult {
+fn update(project_root: &Path) -> BuildResult {
     remove_if_exists(&project_root.join("build"))?;
-    remove_if_exists(&project_root.join("Lingo.lock"))?;
+    let lock_path = project_root.join("Lingo.lock");
+    if lock_path.is_file() {
+        let backup_path = (0..)
+            .map(|n| project_root.join(format!("Lingo.lock.bak{}", n)))
+            .find(|p| !p.exists())
+            .unwrap();
+        fs::rename(&lock_path, &backup_path)?;
+        log::info!("Backed up Lingo.lock to {}", backup_path.display());
+    }
     Ok(())
 }
 
@@ -226,8 +234,8 @@ fn execute_command<'a>(
         (Some(config), ConsoleCommand::Clean) => {
             CommandResult::Batch(run_command(CommandSpec::Clean, config, true))
         }
-        (_, ConsoleCommand::Cleanall) => {
-            let result = lingo_path
+        (Some(config), ConsoleCommand::Update) => {
+            let update_result = lingo_path
                 .and_then(Path::parent)
                 .ok_or_else(|| {
                     Box::new(io::Error::new(
@@ -235,8 +243,24 @@ fn execute_command<'a>(
                         "Error: Missing Lingo.toml file",
                     )) as Box<dyn std::error::Error + Send + Sync>
                 })
-                .and_then(clean_all);
-            CommandResult::Single(result)
+                .and_then(update);
+            match update_result {
+                Err(e) => CommandResult::Single(Err(e)),
+                Ok(()) => {
+                    let default_args = BuildArgs {
+                        build_system: None,
+                        language: None,
+                        platform: None,
+                        lfc: None,
+                        no_compile: false,
+                        keep_going: false,
+                        release: false,
+                        apps: vec![],
+                        threads: 0,
+                    };
+                    CommandResult::Batch(build(&default_args, config))
+                }
+            }
         }
         _ => todo!(),
     }

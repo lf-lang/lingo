@@ -11,7 +11,6 @@ use std::fmt::Display;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
-use std::time::Instant;
 
 use crate::GitCloneAndCheckoutCap;
 

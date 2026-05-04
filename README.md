@@ -19,10 +19,9 @@ Usage: lingo [OPTIONS] <COMMAND>
 Commands:
   init     Initialize a Lingua Franca package
   build    Compile one or multiple binaries in a Lingua Franca package
-  update   Update the dependencies and potentially build tools
+  update   Remove build artifacts, update the dependencies, and build
   run      Build and run binaries
   clean    Remove build artifacts
-  cleanall Remove build artifacts, dependencies, and lock file
   help     Print this message or the help of the given subcommand(s)
 
 Options:

@@ -121,10 +121,7 @@ pub enum Command {
     Run(BuildArgs),
 
     /// removes build artifacts
-    Clean,
-
-    /// removes build artifacts, installed dependencies, lock file, and lfc build artifacts
-    Cleanall,
+    Clean
 }
 
 #[derive(Parser)]
