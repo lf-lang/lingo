@@ -237,10 +237,7 @@ impl DependencyLock {
                 temp.display()
             );
             let hash = sha1dir::checksum_current_dir(&temp, false);
-            info!(
-                "Build step: checksum complete for {}",
-                lock.name
-            );
+            info!("Build step: checksum complete for {}", lock.name);
 
             if hash.to_string() != lock.checksum {
                 error!("checksum does not match aborting!");

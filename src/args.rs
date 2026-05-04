@@ -121,7 +121,7 @@ pub enum Command {
     Run(BuildArgs),
 
     /// removes build artifacts
-    Clean
+    Clean,
 }
 
 #[derive(Parser)]
