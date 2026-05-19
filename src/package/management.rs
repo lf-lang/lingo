@@ -1,5 +1,5 @@
-use colored::Colorize;
-use log::error;
+use anyhow::Context;
+use log::{error, info};
 use versions::{Requirement, Versioning};
 
 use crate::util::sha1dir;
@@ -10,6 +10,7 @@ use std::fs::File;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
+use std::time::Instant;
 use url::{ParseError, Url};
 
 use crate::package::lock::{PackageLockSource, PackageLockSourceType};
@@ -75,8 +76,12 @@ impl PackageDetails {
     ) -> anyhow::Result<()> {
         match &self.mutual_exclusive {
             ProjectSource::Path(path_buf) => {
-                let src = fs::canonicalize(path_buf)?;
-                let dst = fs::canonicalize(library_path)?;
+                let src = fs::canonicalize(path_buf).with_context(|| {
+                    format!("dependency path not found: {}", path_buf.display())
+                })?;
+                let dst = fs::canonicalize(library_path).with_context(|| {
+                    format!("library path not found: {}", library_path.display())
+                })?;
                 Ok(copy_dir_all(src, dst)?)
             }
             ProjectSource::Git(git_url) => {
@@ -98,9 +103,18 @@ impl DependencyManager {
         target_path: &Path,
         git_clone_and_checkout_cap: &GitCloneAndCheckoutCap,
     ) -> anyhow::Result<DependencyManager> {
+        info!(
+            "Build step: resolving dependencies in {}",
+            target_path.display()
+        );
         // create library folder
         let library_path = target_path.join(LIBRARY_DIRECTORY);
-        fs::create_dir_all(&library_path)?;
+        fs::create_dir_all(&library_path).with_context(|| {
+            format!(
+                "failed to create library directory: {}",
+                library_path.display()
+            )
+        })?;
 
         let mut manager;
         let mut lock: DependencyLock;
@@ -108,12 +122,20 @@ impl DependencyManager {
 
         // checks if a Lingo.lock file exists
         if lock_file.exists() {
+            info!("Build step: loading lock file {}", lock_file.display());
             // reads and parses Lockfile
-            lock = toml::from_str::<DependencyLock>(&fs::read_to_string(lock_file)?)
+            lock =
+                toml::from_str::<DependencyLock>(&fs::read_to_string(&lock_file).with_context(
+                    || format!("failed to read lock file: {}", lock_file.display()),
+                )?)
                 .expect("cannot parse lock");
 
             // if a lock file is present it will load the dependencies from it and checks
             // integrity of the build directory
+            info!(
+                "Build step: validating lock dependencies in {}",
+                target_path.join("lfc_include").display()
+            );
             if let Ok(()) = lock.init(&target_path.join("lfc_include"), git_clone_and_checkout_cap)
             {
                 return Ok(DependencyManager {
@@ -140,9 +162,14 @@ impl DependencyManager {
         lock = DependencyLock::create(selection);
 
         // writes the lock file down
-        let mut lock_file = File::create(target_path.join("../Lingo.lock"))?;
+        let lock_file_path = target_path.join("../Lingo.lock");
+        let mut lock_file = File::create(&lock_file_path)
+            .with_context(|| format!("failed to create lock file: {}", lock_file_path.display()))?;
 
-        println!("{:?}", lock.dependencies);
+        info!(
+            "Build step: selected lock dependencies: {:?}",
+            lock.dependencies
+        );
         let serialized_toml = toml::to_string(&lock).expect("cannot generate toml");
 
         lock_file.write_all(serialized_toml.as_ref())?;
@@ -168,11 +195,16 @@ impl DependencyManager {
         self.pulling_queue.append(&mut dependencies);
         let sub_dependency_path = root_path.join("libraries");
         //fs::remove_dir_all(&sub_dependency_path)?;
-        fs::create_dir_all(&sub_dependency_path)?;
+        fs::create_dir_all(&sub_dependency_path).with_context(|| {
+            format!(
+                "failed to create directory: {}",
+                sub_dependency_path.display()
+            )
+        })?;
 
         while !self.pulling_queue.is_empty() {
             if let Some((package_name, package_details)) = self.pulling_queue.pop() {
-                print!("{} {} ...", "Cloning".green().bold(), package_name);
+                info!("Cloning {} ...", package_name);
                 let node = match self.non_recursive_fetching(
                     &package_name,
                     package_details,
@@ -216,15 +248,32 @@ impl DependencyManager {
         fs::create_dir_all(&temporary_path)?;
 
         // cloning the specified package
+        info!(
+            "Build step: fetching dependency {} into {}",
+            name,
+            temporary_path.display()
+        );
         package.fetch(&temporary_path, git_clone_and_checkout_cap)?;
 
+        info!(
+            "Build step: computing checksum for {}",
+            temporary_path.display()
+        );
+        let checksum_started_at = Instant::now();
         let hash = sha1dir::checksum_current_dir(&temporary_path, false);
+        info!(
+            "Build step: checksum complete for {} in {:?}",
+            temporary_path.display(),
+            checksum_started_at.elapsed()
+        );
         let include_path = library_path.join(hash.to_string());
 
-        let lingo_toml_text = fs::read_to_string(temporary_path.clone().join("Lingo.toml"))?;
+        let lingo_toml_path = temporary_path.join("Lingo.toml");
+        let lingo_toml_text = fs::read_to_string(&lingo_toml_path)
+            .with_context(|| format!("failed to read {}", lingo_toml_path.display()))?;
         let read_toml = toml::from_str::<ConfigFile>(&lingo_toml_text)?.to_config(&temporary_path);
 
-        println!(" {}", read_toml.package.version);
+        info!("Resolved dependency version {}", read_toml.package.version);
 
         let config = match read_toml.library {
             Some(value) => value,

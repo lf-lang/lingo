@@ -1,9 +1,8 @@
 use crate::util::sha1dir;
-use colored::Colorize;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use versions::Versioning;
 
-use log::error;
+use log::{error, info};
 use serde::de::Error as DeserializationError;
 use serde::ser::Error as SerializationError;
 use std::cmp::PartialEq;
@@ -213,18 +212,32 @@ impl DependencyLock {
         lfc_include_folder: &Path,
         git_clone_and_checkout_cap: &GitCloneAndCheckoutCap,
     ) -> anyhow::Result<()> {
+        info!(
+            "Build step: checking lock entries in {}",
+            lfc_include_folder.display()
+        );
         for (_, lock) in self.dependencies.iter() {
             let temp = lfc_include_folder.join(&lock.name);
             // the Lingo.toml for this dependency doesnt exists, hence we need to fetch this package
             if !temp.join("Lingo.toml").exists() {
                 let mut details = PackageDetails::try_from(&lock.source)?;
+                info!(
+                    "Fetching {} from {}+{}",
+                    lock.name, lock.source.source_type, lock.source.uri
+                );
 
                 details
                     .fetch(&temp, git_clone_and_checkout_cap)
                     .expect("cannot pull package");
             }
 
+            info!(
+                "Build step: computing checksum for locked dependency {} at {}",
+                lock.name,
+                temp.display()
+            );
             let hash = sha1dir::checksum_current_dir(&temp, false);
+            info!("Build step: checksum complete for {}", lock.name);
 
             if hash.to_string() != lock.checksum {
                 error!("checksum does not match aborting!");
@@ -233,12 +246,7 @@ impl DependencyLock {
             let lingo_toml_text = fs::read_to_string(temp.join("Lingo.toml"))?;
             let read_toml = toml::from_str::<ConfigFile>(&lingo_toml_text)?.to_config(&temp);
 
-            println!(
-                "{} {} ... {}",
-                "Reading".green().bold(),
-                lock.name,
-                read_toml.package.version
-            );
+            info!("Reading {} ... {}", lock.name, read_toml.package.version);
 
             let lib = match read_toml.library {
                 Some(value) => value,

@@ -2,7 +2,7 @@ use liblingo::args::TargetLanguage;
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
 use std::process::Command;
-use std::{env, io};
+use std::{env, fs, io};
 
 use clap::Parser;
 use git2::BranchType::{Local, Remote};
@@ -91,10 +91,55 @@ fn do_read_to_string(p: &Path) -> io::Result<String> {
     std::fs::read_to_string(p)
 }
 
+fn remove_if_exists(path: &Path) -> io::Result<()> {
+    if path.is_dir() {
+        match fs::remove_dir_all(path) {
+            Ok(()) => log::info!("Deleted {}", path.display()),
+            Err(err) => {
+                log::error!("Failed to delete {}: {}", path.display(), err);
+                return Err(err);
+            }
+        }
+    } else if path.is_file() {
+        match fs::remove_file(path) {
+            Ok(()) => log::info!("Deleted {}", path.display()),
+            Err(err) => {
+                log::error!("Failed to delete {}: {}", path.display(), err);
+                return Err(err);
+            }
+        }
+    }
+    Ok(())
+}
+
+fn update(project_root: &Path) -> BuildResult {
+    remove_if_exists(&project_root.join("build"))?;
+    let lock_path = project_root.join("Lingo.lock");
+    if lock_path.is_file() {
+        let backup_path = (0..)
+            .map(|n| project_root.join(format!("Lingo.lock.bak{}", n)))
+            .find(|p| !p.exists())
+            .unwrap();
+        fs::rename(&lock_path, &backup_path)?;
+        log::info!("Backed up Lingo.lock to {}", backup_path.display());
+    }
+    Ok(())
+}
+
 fn main() {
-    print_logger::new().init().unwrap();
     // parses command line arguments
     let args = CommandLineArgs::parse();
+    let level_filter = if args.quiet {
+        print_logger::LevelFilter::Error
+    } else if args.verbose {
+        print_logger::LevelFilter::Debug
+    } else {
+        print_logger::LevelFilter::Info
+    };
+    print_logger::new()
+        .level_filter(level_filter)
+        .init()
+        .unwrap();
 
     // Finds Lingo.toml recursively inside the parent directories.
     // If it exists the returned path is absolute.
@@ -116,6 +161,7 @@ fn main() {
     let result = execute_command(
         &mut wrapped_config,
         args.command,
+        lingo_path.as_deref(),
         Box::new(do_which),
         Box::new(do_clone_and_checkout),
     );
@@ -161,6 +207,7 @@ fn validate(config: &mut Option<Config>, command: &ConsoleCommand) -> BuildResul
 fn execute_command<'a>(
     config: &'a mut Option<Config>,
     command: ConsoleCommand,
+    lingo_path: Option<&Path>,
     _which_capability: WhichCapability,
     git_clone_capability: GitCloneAndCheckoutCap,
 ) -> CommandResult<'a> {
@@ -187,7 +234,34 @@ fn execute_command<'a>(
         (Some(config), ConsoleCommand::Clean) => {
             CommandResult::Batch(run_command(CommandSpec::Clean, config, true))
         }
-        _ => todo!(),
+        (Some(config), ConsoleCommand::Update) => {
+            let update_result = lingo_path
+                .and_then(Path::parent)
+                .ok_or_else(|| {
+                    Box::new(io::Error::new(
+                        ErrorKind::NotFound,
+                        "Error: Missing Lingo.toml file",
+                    )) as Box<dyn std::error::Error + Send + Sync>
+                })
+                .and_then(update);
+            match update_result {
+                Err(e) => CommandResult::Single(Err(e)),
+                Ok(()) => {
+                    let default_args = BuildArgs {
+                        build_system: None,
+                        language: None,
+                        platform: None,
+                        lfc: None,
+                        no_compile: false,
+                        keep_going: false,
+                        release: false,
+                        apps: vec![],
+                        threads: 0,
+                    };
+                    CommandResult::Batch(build(&default_args, config))
+                }
+            }
+        }
     }
 }
 
@@ -216,7 +290,11 @@ fn build<'a>(args: &BuildArgs, config: &'a mut Config) -> BatchBuildResults<'a> 
     )
 }
 
-fn run_command(task: CommandSpec, config: &mut Config, _fail_at_end: bool) -> BatchBuildResults {
+fn run_command(
+    task: CommandSpec,
+    config: &mut Config,
+    _fail_at_end: bool,
+) -> BatchBuildResults<'_> {
     let _apps = config.apps.iter().collect::<Vec<_>>();
     liblingo::backends::execute_command(
         &task,

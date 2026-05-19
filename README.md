@@ -17,12 +17,12 @@ Build system for the Lingua Franca coordination language
 Usage: lingo [OPTIONS] <COMMAND>
 
 Commands:
-  init    Initialize a Lingua Franca package
-  build   Compile one or multiple binaries in a Lingua Franca package
-  update  Update the dependencies and potentially build tools
-  run     Build and run binaries
-  clean   Remove build artifacts
-  help    Print this message or the help of the given subcommand(s)
+  init     Initialize a Lingua Franca package
+  build    Compile one or multiple binaries in a Lingua Franca package
+  update   Remove build artifacts, update the dependencies, and build
+  run      Build and run binaries
+  clean    Remove build artifacts
+  help     Print this message or the help of the given subcommand(s)
 
 Options:
   -q, --quiet    Do not produce any output

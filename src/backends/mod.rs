@@ -31,6 +31,11 @@ pub fn execute_command<'a>(
 
     match command {
         CommandSpec::Build(_build) => {
+            log::info!(
+                "{} starting dependency resolution ({} declared dependencies)",
+                "Build step:",
+                dependencies.len()
+            );
             let manager = match DependencyManager::from_dependencies(
                 dependencies.clone(),
                 &PathBuf::from(OUTPUT_DIRECTORY),
@@ -44,6 +49,7 @@ pub fn execute_command<'a>(
             };
 
             // enriching the apps with the target properties from the libraries
+            log::info!("Build step: merging dependency target properties");
             let library_properties = manager.get_target_properties().expect("lib properties");
 
             // merging app with library target properties
@@ -67,6 +73,12 @@ pub fn execute_command<'a>(
     }
 
     for (build_system, apps) in by_build_system {
+        log::info!(
+            "Build step: dispatching {} app(s) to {:?}/{:?}",
+            apps.len(),
+            build_system.0,
+            build_system.1
+        );
         let mut sub_res = BatchBuildResults::for_apps(&apps);
 
         sub_res.map(|app| {

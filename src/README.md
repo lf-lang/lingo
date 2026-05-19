@@ -6,7 +6,7 @@ General workflow that is happening.
 
 ```mermaid
 graph TD
-    A[Start] --> B(Handeling User Input)
+    A[Start] --> B(Handling User Input)
     B --> C(Parsing Lingo.toml)
     C --> D(Configuring LFC)
     D --> E(Invoking LFC)

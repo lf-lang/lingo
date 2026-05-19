@@ -56,7 +56,7 @@ pub struct LibraryTargetPropertiesFile {
     sources: Vec<PathBuf>,
 
     /// list of files that should be made available to the user
-    #[serde(rename = "sources", default)]
+    #[serde(rename = "artifacts", default)]
     artifacts: Vec<PathBuf>,
 }
 
