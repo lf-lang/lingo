@@ -18,6 +18,9 @@ pub enum WhichError {
 #[derive(Debug)]
 pub struct GitCloneError(pub String); // TODO: create a more domain-specific error time like the actual git2::Error
 
+#[derive(Debug)]
+pub struct RemoveFolderError(pub String);
+
 impl std::fmt::Display for WhichError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -36,9 +39,17 @@ impl std::fmt::Display for GitCloneError {
     }
 }
 
+impl std::fmt::Display for RemoveFolderError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
 impl std::error::Error for WhichError {}
 
 impl std::error::Error for GitCloneError {}
+
+impl std::error::Error for RemoveFolderError {}
 
 pub struct GitUrl<'a>(&'a str);
 
@@ -61,3 +72,4 @@ pub type FsReadCapability<'a> = Box<dyn Fn(&std::path::Path) -> io::Result<Strin
 pub type GitCloneAndCheckoutCap<'a> = Box<
     dyn Fn(GitUrl, &std::path::Path, Option<GitLock>) -> Result<Option<String>, GitCloneError> + 'a,
 >;
+pub type RemoveFolderCap<'a> = Box<dyn Fn(&str) -> Result<(), RemoveFolderError> + 'a>;
